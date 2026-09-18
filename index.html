@@ -11,11 +11,28 @@
     -->
     <meta name="robots" content="noindex, nofollow" />
 
+    <!--
+      NAMNFORM: "Delens Bistro". Ingen apostrof, ingen accent, samma
+      sträng överallt. Genitiv bildas på svenska med bara -s, och
+      apostrofvarianten går sönder i praktiken — flera register bär
+      redan akut accent (´) i stället för apostrof, vilket är en av
+      orsakerna till att namnet finns i åtta stavningar på nätet.
+    -->
     <title>Delens Bistro — smashade burgare i Upplands Väsby</title>
     <meta
       name="description"
-      content="Handlagda, smashade burgare, kebab och bowls på Centralvägen 3 i Upplands Väsby. Beställ online."
+      content="Delens Bistro på Centralvägen 3 i Upplands Väsby. Handlagda, smashade burgare, kebab och bowls. Beställ online."
     />
+
+    <meta property="og:site_name" content="Delens Bistro" />
+    <meta property="og:title" content="Delens Bistro — smashade burgare i Upplands Väsby" />
+    <meta
+      property="og:description"
+      content="Delens Bistro på Centralvägen 3 i Upplands Väsby. Handlagda, smashade burgare, kebab och bowls. Beställ online."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="sv_SE" />
+
     <link rel="icon" href="data:," />
 
     <!-- Låsta typsnitt. Titan One är accent, Barlow bär sajten.
@@ -48,7 +65,7 @@
     <header class="nav" id="nav">
       <a class="nav__logo" href="#top">
         <span class="ph ph--inline" style="--ar: 885 / 951" data-id="F4" data-spec="SVG"></span>
-        <span class="nav__wordmark">Delens</span>
+        <span class="nav__wordmark">Delens Bistro</span>
       </a>
       <nav class="nav__links" aria-label="Huvudmeny">
         <a href="#meny">Meny</a>
@@ -67,9 +84,14 @@
               <picture>
                 <!-- B2 är renderad i 700 px för mobilen, B1 i 1100 för desktop. -->
                 <source media="(max-width: 900px)" srcset="/bilder/hero/B2.webp" />
+                <!-- Tom alt med flit. Bilden ligger inuti h1 mellan orden
+                     DELENS och BISTRO. En beskrivande alt hade lästs mitt
+                     i namnet och gjort rubrikens tillgängliga namn till
+                     "Delens ... Bistro" med en meningslång bildtext emellan.
+                     Namnet står redan i texten; bilden illustrerar det. -->
                 <img
                   src="/bilder/hero/B1.webp"
-                  alt="Delens smashburgare med logotypen bränd i bullen"
+                  alt=""
                   width="1100"
                   height="1009"
                   fetchpriority="high"
@@ -123,7 +145,7 @@
           <h2 class="rubrik rubrik--stor" data-reveal>
             <span class="rubrik__rad">Från</span>
             <span class="rubrik__rad">Brutal Burgers</span>
-            <span class="rubrik__rad">till Delen&rsquo;s Bistro</span>
+            <span class="rubrik__rad">till Delens Bistro</span>
           </h2>
           <div class="rebrand__grid">
             <div class="rebrand__text">

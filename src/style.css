@@ -525,6 +525,12 @@ input:focus-visible {
     font-size: 0.7rem;
     white-space: nowrap;
   }
+
+  /* Hela namnet på en rad, annars blir navigationen dubbelt så hög. */
+  .nav__wordmark {
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
 }
 
 /* ═══ 2 · ÖPPET NU ════════════════════════════════════════════ */
