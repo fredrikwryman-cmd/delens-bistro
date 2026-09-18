@@ -292,8 +292,8 @@ function riggaAvslojning() {
 /* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
 
 const scenLage = {
-  maxVrid: 18, // grader
-  sep: 0.7 // multiplikator på lagrens fart
+  maxVrid: 33, // grader
+  sep: 1.0 // multiplikator på lagrens fart
 };
 
 function riggaScroll() {

@@ -29,6 +29,22 @@ const KVALITET = 82;
  */
 const AVFRANSA = { A4: 140 };
 
+/**
+ * Beskärning nedtill, angivet som sista rad att behålla i originalet.
+ *
+ * A1 överbulle innehöll brödets snittyta — den jämnt ljusa undersidan
+ * under den mörka skorpkanten. I en staplad burgare är den ytan dold
+ * av osten, men vid separation låg den överst och läste som fel sida
+ * av bullen.
+ *
+ * Radanalys av originalet: ljusstyrkan faller från 145 vid y=580 till
+ * ett minimum på 53 vid y=652 — det är skorpkanten där rundningen
+ * slutar. Därefter stiger den igen till en jämn platå kring 107 utan
+ * några specularer, vilket är snittytan. Vi behåller till och med
+ * skorpkanten och klipper allt under den.
+ */
+const BESKAR = { A1: 656 };
+
 async function avfransa(rawBuffer, info, troskel) {
   const { width, height, channels } = info;
   const p = rawBuffer;
@@ -65,6 +81,14 @@ async function kor() {
     let bild = sharp(kalla).ensureAlpha();
     const meta = await bild.metadata();
 
+    let beskuren = '';
+    if (BESKAR[id] && BESKAR[id] < meta.height) {
+      bild = bild.extract({ left: 0, top: 0, width: meta.width, height: BESKAR[id] });
+      beskuren = `−${meta.height - BESKAR[id]} px`;
+      // Efter extract måste bufferten materialiseras innan raw-passet.
+      bild = sharp(await bild.png().toBuffer());
+    }
+
     let dampade = 0;
     if (AVFRANSA[id]) {
       const { data, info } = await bild.raw().toBuffer({ resolveWithObject: true });
@@ -90,6 +114,7 @@ async function kor() {
       foreKB: Math.round(fore / 1024),
       efterKB: Math.round(efter / 1024),
       minskning: Math.round((1 - efter / fore) * 100) + ' %',
+      beskuren: beskuren || '—',
       alfa: ny.hasAlpha ? 'ja' : 'NEJ',
       dampade
     });
