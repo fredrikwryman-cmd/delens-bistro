@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!--
+      SPÄRR — får inte tas bort utan uttrycklig order från Fredrik.
+      Sajten ska inte indexeras under bygget och inte konkurrera med
+      delensbistro.se. Se PLAN.md avsnitt 12.
+    -->
+    <meta name="robots" content="noindex, nofollow" />
+
+    <title>Delens Bistro — smashade burgare i Upplands Väsby</title>
+    <meta
+      name="description"
+      content="Handlagda, smashade burgare, kebab och bowls på Centralvägen 3 i Upplands Väsby. Beställ online."
+    />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+
+  <body>
+    <!-- ═══ 0 · LADDSKÄRM — djuprött ═══════════════════════════════ -->
+    <div class="loader" id="loader" role="status" aria-live="polite">
+      <div class="loader__stack" aria-hidden="true">
+        <span class="loader__part" data-part="1"></span>
+        <span class="loader__part" data-part="2"></span>
+        <span class="loader__part" data-part="3"></span>
+        <span class="loader__part" data-part="4"></span>
+        <span class="loader__part" data-part="5"></span>
+      </div>
+      <p class="loader__text" id="loader-text">Värmer plåten …</p>
+      <div class="loader__bar"><span id="loader-fill"></span></div>
+    </div>
+
+    <!-- ═══ FAST TOPPNAV ═══════════════════════════════════════════ -->
+    <header class="nav" id="nav">
+      <a class="nav__logo" href="#top">
+        <span class="ph ph--inline" style="--ar: 885 / 951" data-id="F4" data-spec="SVG"></span>
+        <span class="nav__wordmark">Delens</span>
+      </a>
+      <nav class="nav__links" aria-label="Huvudmeny">
+        <a href="#meny">Meny</a>
+        <a href="#signatur">Signaturer</a>
+        <a href="#hitta">Hitta hit</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <!-- ═══ 1 · HERO — svart ═════════════════════════════════════ -->
+      <section class="sec sec--svart hero" id="hero">
+        <div class="hero__inner">
+          <h1 class="hero__title">
+            <span class="hero__outline" data-reveal>Delens</span>
+            <span class="hero__burger">
+              <span class="ph" style="--ar: 1 / 1" data-id="B1" data-spec="2048 × 2048 · PNG α"></span>
+            </span>
+            <span class="hero__fill" data-reveal>Bistro</span>
+          </h1>
+
+          <span class="sticker sticker--a">Smashad</span>
+          <span class="sticker sticker--b">Sedan 2017</span>
+
+          <div class="hero__copy hero__copy--v">
+            <p>
+              Smashad hårt mot plåten. Krispiga kanter, hemmagjord smet på
+              hundra procent nötkött.
+            </p>
+          </div>
+          <div class="hero__copy hero__copy--h">
+            <p>
+              Centralvägen 3, Upplands Väsby. Tidigare Brutal Burgers —
+              samma ägare, ny meny.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 2 · ÖPPET NU — kol ═══════════════════════════════════ -->
+      <section class="sec sec--kol status" id="status" style="--wave-fill: var(--kol)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,48 C240,8 480,84 720,52 C960,20 1200,76 1440,36 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,48 C240,8 480,84 720,52 C960,20 1200,76 1440,36" />
+        </svg>
+        <div class="status__inner">
+          <p class="status__now" id="status-now">
+            <span class="status__dot" id="status-dot"></span>
+            <span id="status-label">Kontrollerar öppettider …</span>
+          </p>
+          <a class="status__tel" id="status-tel" href="#">Ring oss</a>
+        </div>
+      </section>
+
+      <!-- ═══ 3 · REBRANDEN — djuprött ═════════════════════════════ -->
+      <section class="sec sec--rod rebrand" id="rebrand" style="--wave-fill: var(--rod)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,40 C300,84 560,8 780,44 C1000,80 1220,24 1440,56 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,40 C300,84 560,8 780,44 C1000,80 1220,24 1440,56" />
+        </svg>
+        <div class="wrap rebrand__inner">
+          <h2 class="rubrik rubrik--stor" data-reveal>Från Brutal till Delens</h2>
+          <div class="rebrand__grid">
+            <div class="rebrand__text">
+              <p>
+                Sedan 2017 har stället varit en självklar del av Väsby. När vi
+                klev in i 2026 gjorde vi det med samma ägare kvar och ny energi
+                från en aktör med lång erfarenhet av branschen.
+              </p>
+              <p>
+                Menyn utvecklades med omtanke. Burgarna är numera smashade,
+                krispiga i kanterna, gjorda på vår egen köttfärssmet av hundra
+                procent nötkött — ett tydligt avsteg från de tidigare tjocka
+                puckarna.
+              </p>
+              <p class="rebrand__kicker">
+                Samma hjärta. Bredare uttryck. Bättre smak.
+              </p>
+            </div>
+            <div class="rebrand__bilder">
+              <div class="kort kort--lut-a">
+                <span class="ph" style="--ar: 3 / 2" data-id="E2" data-spec="1800 × 1200 · JPG"></span>
+                <span class="kort__etikett">Smashmomentet</span>
+              </div>
+              <div class="kort kort--lut-b">
+                <span class="ph" style="--ar: 3 / 4" data-id="E3" data-spec="1200 × 1600 · JPG"></span>
+                <span class="kort__etikett">Personal i arbete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 4 · LAGERSEKTIONEN — svart ═══════════════════════════ -->
+      <section class="sec sec--svart lager" id="lager" style="--wave-fill: var(--svart)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,52 C260,12 520,80 760,40 C1000,0 1220,68 1440,32 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,52 C260,12 520,80 760,40 C1000,0 1220,68 1440,32" />
+        </svg>
+
+        <div class="lager__spar" id="lager-spar">
+          <div class="lager__sticky">
+            <!-- Rubriken i fyra rader. Lagren vävs in mellan raderna. -->
+            <h2 class="lager__rubrik" aria-label="Varje lager handlagt">
+              <span class="lager__rad" data-z="1">Varje</span>
+              <span class="lager__rad" data-z="3">lager</span>
+              <span class="lager__rad" data-z="5">hand&shy;lagt</span>
+              <span class="lager__rad" data-z="7">på plats</span>
+            </h2>
+
+            <!--
+              Fem lager, samma kvadratiska duk, staplade i sin monterade
+              position. Parallaxen driver dem isär.
+              data-fart = px förflyttning per scrollad pixel.
+            -->
+            <div class="lager__scen" id="lager-scen">
+              <span class="lager__bit" data-lager="overbulle" data-fart="-0.20" style="--z: 10; --y: -16%">
+                <span class="ph ph--lager" style="--ar: 1 / 1" data-id="A1" data-spec="2048² · PNG α"></span>
+              </span>
+              <span class="lager__bit" data-lager="ost" data-fart="-0.10" style="--z: 8; --y: -6%">
+                <span class="ph ph--lager" style="--ar: 1 / 1" data-id="A2" data-spec="2048² · PNG α"></span>
+              </span>
+              <span class="lager__bit" data-lager="kottpuck" data-fart="0" style="--z: 6; --y: 0%">
+                <span class="ph ph--lager" style="--ar: 1 / 1" data-id="A3" data-spec="2048² · PNG α"></span>
+              </span>
+              <span class="lager__bit" data-lager="sallad" data-fart="0.10" style="--z: 4; --y: 6%">
+                <span class="ph ph--lager" style="--ar: 1 / 1" data-id="A4" data-spec="2048² · PNG α"></span>
+              </span>
+              <span class="lager__bit" data-lager="underbulle" data-fart="0.20" style="--z: 2; --y: 16%">
+                <span class="ph ph--lager" style="--ar: 1 / 1" data-id="A5" data-spec="2048² · PNG α"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avstämningspanel. Tas bort när rörelsen är låst. -->
+        <aside class="matpanel" id="matpanel" hidden>
+          <h3>Lagersektionen</h3>
+          <dl>
+            <div><dt>Scrollprogress</dt><dd id="m-progress">0 %</dd></div>
+            <div><dt>Vridning</dt><dd id="m-vrid">0°</dd></div>
+            <div><dt>Separation</dt><dd id="m-sep">0 px</dd></div>
+          </dl>
+          <label>Max vridning <output id="m-vrid-ut">18°</output>
+            <input type="range" id="m-vrid-reg" min="0" max="40" step="1" value="18" />
+          </label>
+          <label>Separation <output id="m-sep-ut">0,7×</output>
+            <input type="range" id="m-sep-reg" min="0" max="25" step="1" value="7" />
+          </label>
+        </aside>
+      </section>
+
+      <!-- ═══ 5 · SIGNATURBURGARNA — kol ═══════════════════════════ -->
+      <section class="sec sec--kol signatur" id="signatur" style="--wave-fill: var(--kol)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,36 C280,76 520,4 760,44 C1000,84 1230,16 1440,52 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,36 C280,76 520,4 760,44 C1000,84 1230,16 1440,52" />
+        </svg>
+        <div class="wrap">
+          <h2 class="rubrik" data-reveal>Fem som får stå för sig själva</h2>
+          <p class="ingress">
+            Hela menyn finns längre ned. De här fem är de vi skulle beställa.
+          </p>
+          <ul class="signatur__lista" id="signatur-lista"></ul>
+        </div>
+      </section>
+
+      <!-- ═══ 6 · HELA MENYN — off-white ═══════════════════════════ -->
+      <section class="sec sec--ljus meny" id="meny" style="--wave-fill: var(--offwhite)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,56 C240,16 500,88 740,48 C980,8 1210,72 1440,40 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,56 C240,16 500,88 740,48 C980,8 1210,72 1440,40" />
+        </svg>
+        <div class="wrap">
+          <h2 class="rubrik rubrik--mork" data-reveal>Hela menyn</h2>
+          <p class="ingress ingress--mork">Priser i kronor. Singel / dubbel där två priser anges.</p>
+
+          <div class="meny__flikar" id="meny-flikar" role="tablist" aria-label="Menykategorier"></div>
+          <div class="meny__paneler" id="meny-paneler"></div>
+        </div>
+      </section>
+
+      <!-- ═══ 7 · HITTA HIT — djuprött ═════════════════════════════ -->
+      <section class="sec sec--rod hitta" id="hitta" style="--wave-fill: var(--rod)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,44 C300,4 540,76 780,36 C1020,-4 1230,64 1440,28 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,44 C300,4 540,76 780,36 C1020,-4 1230,64 1440,28" />
+        </svg>
+        <div class="wrap">
+          <h2 class="rubrik" data-reveal>Hitta hit</h2>
+
+          <div class="hitta__rutt" aria-hidden="true">
+            <svg viewBox="0 0 1200 180" preserveAspectRatio="xMidYMid meet">
+              <path
+                id="rutt-linje"
+                d="M40,140 C220,140 260,40 440,40 C620,40 660,140 840,140 C1000,140 1080,70 1160,52"
+                fill="none"
+              />
+            </svg>
+            <span class="hitta__punkt hitta__punkt--start">Upplands Väsby station</span>
+            <span class="hitta__punkt hitta__punkt--slut">Centralvägen 3</span>
+          </div>
+
+          <div class="hitta__grid">
+            <div class="hitta__block">
+              <h3>Adress</h3>
+              <p id="hitta-adress"></p>
+              <a class="lank" id="hitta-karta" href="#" target="_blank" rel="noopener">Visa på karta</a>
+            </div>
+            <div class="hitta__block">
+              <h3>Öppettider</h3>
+              <ul class="tider" id="hitta-tider"></ul>
+            </div>
+            <div class="hitta__block">
+              <h3>Kontakt</h3>
+              <p><a class="lank" id="hitta-tel" href="#"></a></p>
+              <p><a class="lank" id="hitta-epost" href="#"></a></p>
+              <p><a class="lank" id="hitta-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
+            </div>
+            <div class="hitta__block hitta__block--bild">
+              <span class="ph" style="--ar: 16 / 9" data-id="E4" data-spec="2400 × 1350 · JPG"></span>
+              <span class="kort__etikett">Fasaden</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 8 · BESTÄLL — svart ══════════════════════════════════ -->
+      <section class="sec sec--svart bestall" id="bestall" style="--wave-fill: var(--svart)">
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,32 C260,72 520,8 760,48 C1000,88 1220,20 1440,56 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,32 C260,72 520,8 760,48 C1000,88 1220,20 1440,56" />
+        </svg>
+        <div class="wrap bestall__inner">
+          <h2 class="rubrik rubrik--stor" data-reveal>Beställ online</h2>
+          <p class="ingress">Hämta själv eller få det levererat. Betalning sker hos Qopla.</p>
+          <a class="knapp knapp--stor" id="bestall-lank" href="#" target="_blank" rel="noopener">
+            Beställ nu
+          </a>
+          <span class="ph ph--bred" style="--ar: 16 / 9" data-id="E1" data-spec="2400 × 1350 · JPG"></span>
+        </div>
+      </section>
+    </main>
+
+    <!-- ═══ 9 · FOOTER — kol ═══════════════════════════════════════ -->
+    <footer class="sec sec--kol foot" id="foot" style="--wave-fill: var(--kol)">
+      <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+        <path class="wave__body" d="M0,48 C240,88 500,16 740,52 C980,88 1210,24 1440,48 L1440,0 L0,0 Z" />
+        <path class="wave__edge" d="M0,48 C240,88 500,16 740,52 C980,88 1210,24 1440,48" />
+      </svg>
+
+      <!-- Utspridda ingrediensurklipp, som CRAV:s footer. -->
+      <span class="foot__strossel" style="--x: 8%; --r: -12deg">
+        <span class="ph" style="--ar: 1 / 1" data-id="A4" data-spec="sallad"></span>
+      </span>
+      <span class="foot__strossel" style="--x: 78%; --r: 14deg">
+        <span class="ph" style="--ar: 1 / 1" data-id="A2" data-spec="ost"></span>
+      </span>
+
+      <div class="wrap foot__inner">
+        <div>
+          <p class="foot__namn">Delens Bistro</p>
+          <p id="foot-adress"></p>
+          <p><a class="lank" id="foot-tel" href="#"></a></p>
+        </div>
+        <ul class="tider tider--foot" id="foot-tider"></ul>
+        <div>
+          <p><a class="lank" id="foot-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
+          <p><a class="lank" id="foot-epost" href="#"></a></p>
+        </div>
+      </div>
+      <p class="foot__not">
+        Visningsprojekt under uppbyggnad. Inte den officiella sajten.
+      </p>
+    </footer>
+
+    <!-- ═══ FAST BESTÄLLNINGSFÄLT ══════════════════════════════════ -->
+    <div class="orderbar" id="orderbar">
+      <span class="orderbar__text" id="orderbar-status">Öppet till 20:00</span>
+      <a class="knapp orderbar__knapp" id="orderbar-lank" href="#" target="_blank" rel="noopener">
+        Beställ online
+      </a>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

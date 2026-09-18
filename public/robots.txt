@@ -1,0 +1,4 @@
+# Sajten är under uppbyggnad och ska inte indexeras.
+# Spärren släpps först på uttrycklig order. Se PLAN.md avsnitt 12.
+User-agent: *
+Disallow: /
