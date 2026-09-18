@@ -1,8 +1,13 @@
 # Delens Bistro — byggplan
 
 Premium-sajt för Delens Bistro, Centralvägen 3, Upplands Väsby.
-Parallellbygge. Ersätter inte delensbistro.se och kopierar den inte.
+Parallellbygge på **delens.aimstudios.se**. Ersätter inte
+delensbistro.se och kopierar den inte.
 Visningsprojekt — ingen kund godkänner urval eller form.
+
+> **Sajten är `noindex` under hela bygget.** Se avsnitt 12. Spärren
+> släpps först på uttrycklig order från Fredrik — aldrig som en del av
+> en deploy, aldrig i förbigående.
 
 Rörelsespråket är hämtat från cravburgers.shop. Koden, strukturen och
 formen är egna.
@@ -293,3 +298,75 @@ amber-fältet löser det på en gång.
 - Rebrand-berättelsen
 - Loggan
 - Positioneringen: **smashade** burgare, inte tjocka puckar
+
+---
+
+## 11. Domän och publicering
+
+**delens.aimstudios.se** — subdomän under Fredriks egen aimstudios.se,
+samma upplägg som tidigare showcases.
+
+**delensbistro.se rörs inte.** Ingen omdirigering, ingen DNS-ändring,
+ingen canonical som pekar dit. De två sajterna lever parallellt och vet
+inte om varandra.
+
+### Konsekvenser att hantera vid bygget
+
+| Fråga | Läge |
+|---|---|
+| Värd | aimstudios.se ligger på GitHub Pages. En subdomän kräver CNAME och egen Pages-källa |
+| HTTP-headers | **GitHub Pages tillåter inga egna headers.** `X-Robots-Tag` går alltså inte att sätta där — se avsnitt 12 |
+| Bassökväg | Egen subdomän betyder rot-sökväg (`/`), inte underkatalog. Vite behöver ingen `base`-justering |
+| Certifikat | GitHub Pages utfärdar automatiskt för subdomänen när CNAME är på plats |
+
+Om headers visar sig nödvändiga är Netlify eller Vercel alternativen —
+men det är ett beslut som tas om och när det behövs, inte nu.
+
+---
+
+## 12. noindex — gäller hela bygget
+
+Sajten får inte hamna i Google och konkurrera med delensbistro.se om
+sökningar på "Delens Bistro". Två sajter för samma restaurang som båda
+indexeras skadar bådas synlighet.
+
+### Var spärren sätts
+
+**Tre lager. Alla tre ska finnas, från första deployen.**
+
+| # | Lager | Var | Innehåll |
+|---|---|---|---|
+| 1 | Metatagg | `<head>` i **varje** HTML-ingång — inte bara startsidan | `<meta name="robots" content="noindex, nofollow">` |
+| 2 | robots.txt | `public/robots.txt` | `User-agent: *` + `Disallow: /` |
+| 3 | HTTP-header | endast om värden tillåter det | `X-Robots-Tag: noindex, nofollow` |
+
+Lager 3 går **inte** att sätta på GitHub Pages. Där är lager 1 och 2 det
+som gäller, och lager 1 är det som faktiskt håller — `robots.txt` hindrar
+crawlning men garanterar inte att en känd URL hålls ur indexet.
+**Metataggen är den som bär.**
+
+### Vad som samtidigt inte får finnas
+
+- Ingen `sitemap.xml`
+- Ingen registrering i Google Search Console
+- Inga inlänkar från aimstudios.se eller någon annan publik sajt
+- Ingen delning av URL:en i sociala flöden eller chattar som indexeras
+
+### Hur spärren släpps
+
+1. Fredrik säger uttryckligen till. Inget annat utlöser det.
+2. Metataggen tas bort ur samtliga HTML-ingångar.
+3. `robots.txt` öppnas.
+4. `sitemap.xml` läggs till.
+5. Sajten registreras i Search Console först därefter.
+6. Släppet görs som en **egen commit** med bara den ändringen, så det
+   syns i historiken när det skedde.
+
+**Spärren släpps aldrig som sidoeffekt av en deploy och aldrig i
+förbigående.** Vid minsta tvekan: låt den ligga kvar och fråga.
+
+### Kontroll före varje deploy
+
+Verifiera att metataggen finns i alla byggda HTML-filer i `dist/`, inte
+bara i källfilerna. En ingång som glömts bort är exakt den som hamnar i
+indexet.
