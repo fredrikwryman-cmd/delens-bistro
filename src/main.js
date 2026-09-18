@@ -347,115 +347,6 @@ function riggaScroll() {
   requestAnimationFrame(varv);
 }
 
-/* ═══ TYPSNITTSVÄXLARE ═══════════════════════════════════════════
-   Tre par att bläddra mellan live. CRAV kör Modak (fet, uppblåst,
-   bara som accent) plus Mouse Memoirs (smal grotesk, gör allt
-   annat). Förslagen nedan följer samma uppdelning.
-
-   Google Fonts css2 levererar woff2 per unicode-intervall — bara
-   latin-intervallet hämtas, och åäö ligger i det. Vid skarp
-   lansering självhostas de och delmängdas på riktigt.             */
-
-const typsnittPar = [
-  {
-    id: 'system',
-    namn: 'Systemstack',
-    beskrivning: 'Utgångsläge, inga webbtypsnitt',
-    display: null,
-    brod: null,
-    vikt: 800,
-    url: null
-  },
-  {
-    id: 'titan',
-    namn: 'Titan One + Barlow',
-    beskrivning: 'Närmast CRAV — uppblåst rubrik, smal brödtext',
-    display: "'Titan One'",
-    brod: "'Barlow'",
-    vikt: 400,
-    url: 'https://fonts.googleapis.com/css2?family=Titan+One&family=Barlow:wght@400;600;800&display=swap'
-  },
-  {
-    id: 'baloo',
-    namn: 'Baloo 2 + Inter',
-    beskrivning: 'Rundare och varmare, Inter håller ihop 68 prisrader',
-    display: "'Baloo 2'",
-    brod: "'Inter'",
-    vikt: 800,
-    url: 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;600;800&display=swap'
-  },
-  {
-    id: 'lilita',
-    namn: 'Lilita One + Figtree',
-    beskrivning: 'Kompakt bistroskylt, närmare loggans tonläge',
-    display: "'Lilita One'",
-    brod: "'Figtree'",
-    vikt: 400,
-    url: 'https://fonts.googleapis.com/css2?family=Lilita+One&family=Figtree:wght@400;600;800&display=swap'
-  }
-];
-
-const SYSTEM_STACK =
-  'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
-
-/** Hämtar parets Google Fonts-css en gång, aldrig fler. */
-function laddaTypsnitt(par) {
-  if (!par.url || document.getElementById('typsnitt-' + par.id)) return;
-  const l = document.createElement('link');
-  l.id = 'typsnitt-' + par.id;
-  l.rel = 'stylesheet';
-  l.href = par.url;
-  document.head.append(l);
-}
-
-function valjTypsnitt(id) {
-  const par = typsnittPar.find((p) => p.id === id) || typsnittPar[0];
-  laddaTypsnitt(par);
-
-  const rot = document.documentElement.style;
-  rot.setProperty('--font', par.brod ? `${par.brod}, ${SYSTEM_STACK}` : SYSTEM_STACK);
-  rot.setProperty(
-    '--font-display',
-    par.display ? `${par.display}, ${SYSTEM_STACK}` : SYSTEM_STACK
-  );
-  rot.setProperty('--font-display-vikt', String(par.vikt));
-
-  localStorage.setItem('delens-typsnitt', par.id);
-
-  $$('.typval').forEach((b) =>
-    b.setAttribute('aria-checked', String(b.dataset.par === par.id))
-  );
-
-  const not = $('#typsnitt-not');
-  if (not) {
-    not.textContent = par.url
-      ? `${par.namn}. Google Fonts, latin-intervallet med åäö.`
-      : 'Inga webbtypsnitt hämtas.';
-  }
-}
-
-function riggaTypsnitt() {
-  const box = $('#typsnitt-val');
-  if (!box) return;
-
-  box.innerHTML = typsnittPar
-    .map(
-      (p) => `
-      <button class="typval" type="button" role="radio"
-              aria-checked="false" data-par="${p.id}">
-        <b>${p.namn}</b><span>${p.beskrivning}</span>
-      </button>`
-    )
-    .join('');
-
-  box.addEventListener('click', (e) => {
-    const b = e.target.closest('.typval');
-    if (b) valjTypsnitt(b.dataset.par);
-  });
-
-  valjTypsnitt(localStorage.getItem('delens-typsnitt') || 'system');
-}
-
 /* ═══ AVSTÄMNINGSPANEL ═══════════════════════════════════════════
    Byggverktyg. Tas bort när rörelsen är låst.                     */
 
@@ -485,8 +376,6 @@ function riggaMatpanel() {
     scenLage.sep = +sepReg.value / 10;
     $('#m-sep-ut').textContent = scenLage.sep.toFixed(1).replace('.', ',') + '×';
   });
-
-  riggaTypsnitt();
 }
 
 function matUppdatera(p) {

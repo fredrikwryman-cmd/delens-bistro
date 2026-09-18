@@ -370,3 +370,51 @@ förbigående.** Vid minsta tvekan: låt den ligga kvar och fråga.
 Verifiera att metataggen finns i alla byggda HTML-filer i `dist/`, inte
 bara i källfilerna. En ingång som glömts bort är exakt den som hamnar i
 indexet.
+
+---
+
+## 13. Typsnitt
+
+Låsta: **Titan One** och **Barlow**, båda från Google Fonts.
+
+*(Placerad sist för att inte bryta hänvisningarna till avsnitt 8, 9 och
+12 som redan står i koden.)*
+
+### Regeln
+
+**Titan One används sparsamt — som accent på ett par ställen, inte på
+varje rubrik. Barlow bär sajten.**
+
+Det är samma fördelning som CRAV har. Mätt på deras sajt: Modak syns på
+exakt två ställen, wordmarket och den gula bubbelrubriken. Mouse
+Memoirs gör allt annat, inklusive brödtexten. Den feta typen är accent,
+inte arbetshäst — och det är därför CRAV inte blir tröttsam trots hur
+skrikig Modak är.
+
+### Var Titan One står
+
+| Plats | Varför |
+|---|---|
+| Hero-lockupen: "DELENS" i kontur + "BISTRO" fylld | Sajtens enda rena varumärkesutrop. Här ska typen skrika |
+| Lagersektionens rubrik, fyra rader | Typen **är** konstverket — lagren vävs igenom raderna, och utan en fet form läser inte z-index-växlingen som djup |
+
+**Ingen annanstans.** Varje ny rubrik utgår från Barlow. Vill man ge
+Titan One ett tredje ställe ska ett av de två ovan lämna ifrån sig
+sitt — antalet ligger fast på två.
+
+### Var Barlow står
+
+Allt annat: sektionsrubriker, signaturburgarnas namn, navigationens
+wordmark, footerns namn, brödtext, menyns sjuttio rader, priser,
+knappar och klistermärken. Vikt 800 för rubriker, 400–600 för löptext.
+
+### Tekniska noter
+
+- Titan One finns **bara i vikt 400**. `--font-display-vikt: 400`
+  förhindrar syntetisk fetstil, som gör formen smetig.
+- Konturvarianten är genomskinlig fyllning plus `-webkit-text-stroke`.
+  Aldrig ett eget konturtypsnitt.
+- Google Fonts css2 levererar woff2 per unicode-intervall — bara
+  latin-intervallet hämtas och åäö ligger i det.
+- Vid skarp lansering självhostas båda och delmängdas på riktigt.
+  Prestandabudgeten i avsnitt 8 säger två woff2-filer; det håller.

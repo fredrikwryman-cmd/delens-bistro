@@ -17,6 +17,16 @@
       content="Handlagda, smashade burgare, kebab och bowls på Centralvägen 3 i Upplands Väsby. Beställ online."
     />
     <link rel="icon" href="data:," />
+
+    <!-- Låsta typsnitt. Titan One är accent, Barlow bär sajten.
+         Se PLAN.md avsnitt 13. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Titan+One&family=Barlow:wght@400;500;600;800&display=swap"
+    />
+
     <link rel="stylesheet" href="/src/style.css" />
   </head>
 
@@ -187,12 +197,6 @@
           <label>Separation <output id="m-sep-ut">0,7×</output>
             <input type="range" id="m-sep-reg" min="0" max="25" step="1" value="7" />
           </label>
-
-          <div class="matpanel__typsnitt">
-            <h3>Typsnitt</h3>
-            <div class="matpanel__val" id="typsnitt-val" role="radiogroup" aria-label="Typsnittspar"></div>
-            <p class="matpanel__not" id="typsnitt-not"></p>
-          </div>
         </aside>
       </section>
 
