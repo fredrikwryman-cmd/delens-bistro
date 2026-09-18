@@ -776,53 +776,265 @@ input:focus-visible {
 
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
 
-.signatur__lista {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
-  gap: clamp(1.2rem, 3vw, 2.2rem);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* ── Dragspelsgalleri ──────────────────────────────────────────
+   Byggt efter React Bits AccordionGallery. Mekaniken är portad, inte
+   koden: React och GSAP är utbytta mot ett attribut och CSS-övergångar.
+
+   Referensvärden från förlagan: expandRatio 0.52, gap 10, radius 16,
+   tilt 8 grader, parallax 0.5, duration 0.6 s, ease power3.out,
+   stagger 0.06 s, standardöppet kort nummer 3.
+
+   Kärnan i effekten: korten är flex 1 1 0 och det aktiva får
+   flex-grow = r*(n-1)/(1-r), vilket ger det exakt andelen r av
+   bredden. Mediarutan inuti är BREDARE än kortet och centrerad, så
+   bilden beskärs av kortet i stället för att klämmas ihop.           */
+
+.dragspel {
+  --gap: 10px;
+  --radie: 16px;
+  --tilt: 8deg;
+  --tid: 0.6s;
+  --kurva: cubic-bezier(0.215, 0.61, 0.355, 1);
+  /* Sätts av JS: mediarutans bredd och aktivt korts flex-grow. */
+  --mediabredd: 480px;
+  --vaxt: 4.333;
+
+  display: flex;
+  gap: var(--gap);
+  width: 100%;
+  height: clamp(320px, 42vw, 460px);
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
 }
 
-.burgarkort {
+.dragspel__kort {
   position: relative;
-  padding: 1rem 1rem 1.4rem;
-  background: rgb(14 14 14 / 0.6);
-  border: 1px solid var(--linje);
-  border-radius: 0.8rem;
-  rotate: var(--lut, 0deg);
-  transition: transform 300ms var(--ut), border-color 300ms var(--ut);
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radie);
+  background: var(--svart);
+  box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.8);
+  cursor: pointer;
+  outline: none;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  /* flex-grow är en layoutegenskap och normalt förbjuden att animera.
+     Här är den själva effekten och det finns ingen transform-variant
+     som får syskonen att faktiskt ge plats. Begränsat till fem kort,
+     och contain håller omritningen inom kortet. */
+  contain: layout paint;
+  will-change: flex-grow, transform;
+  -webkit-tap-highlight-color: transparent;
+  transform: rotateY(calc(var(--vrid, 0) * var(--tilt)));
+  transition:
+    flex-grow var(--tid) var(--kurva),
+    transform var(--tid) var(--kurva);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .burgarkort:hover {
-    transform: translateY(-6px);
-    border-color: rgb(232 163 61 / 0.5);
+.dragspel__kort[data-aktiv='true'] {
+  flex-grow: var(--vaxt);
+}
+
+.dragspel__kort:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--amber),
+    0 10px 30px -18px rgb(0 0 0 / 0.8);
+}
+
+.dragspel__ram {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* Bredare än kortet och centrerad — det är den här detaljen som gör
+   att motivet beskärs i stället för att pressas ihop när kortet
+   krymper. --skift är parallaxen, satt av JS. */
+.dragspel__media {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  width: var(--mediabredd);
+  height: 100%;
+  translate: -50% -50%;
+  transform: translateX(var(--skift, 0px));
+  filter: grayscale(1);
+  will-change: transform, filter;
+  transition:
+    transform var(--tid) var(--kurva),
+    filter var(--tid) var(--kurva);
+}
+
+.dragspel__kort[data-aktiv='true'] .dragspel__media {
+  filter: grayscale(0);
+}
+
+.dragspel__media img,
+.dragspel__media .ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  aspect-ratio: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.dragspel__sloja {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 45%, rgb(14 14 14 / 0.82) 100%),
+    rgb(14 14 14 / 0.42);
+  transition: background var(--tid) var(--kurva);
+}
+
+.dragspel__kort[data-aktiv='true'] .dragspel__sloja {
+  background: linear-gradient(180deg, transparent 40%, rgb(14 14 14 / 0.88) 100%);
+}
+
+.dragspel__etikett {
+  position: absolute;
+  inset-inline: 20px;
+  inset-block-end: 20px;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dragspel__strec {
+  flex: 0 0 auto;
+  width: 3px;
+  min-height: 30px;
+  border-radius: 3px;
+  background: var(--amber);
+  box-shadow: 0 0 12px rgb(232 163 61 / 0.6);
+  opacity: 0;
+  translate: -14px 0;
+  transition: opacity calc(var(--tid) * 0.6) var(--kurva), translate var(--tid) var(--kurva);
+}
+
+.dragspel__text {
+  min-width: 0;
+  opacity: 0;
+  translate: -14px 0;
+  /* stagger 0.06 s från förlagan. */
+  transition:
+    opacity calc(var(--tid) * 0.6) var(--kurva) 0.06s,
+    translate var(--tid) var(--kurva) 0.06s;
+}
+
+.dragspel__kort[data-aktiv='true'] .dragspel__strec,
+.dragspel__kort[data-aktiv='true'] .dragspel__text {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.dragspel__namn {
+  display: block;
+  font-weight: 800;
+  font-size: clamp(1rem, 1.5vw, 1.35rem);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 0.55);
+}
+
+.dragspel__pris {
+  display: block;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+  font-size: 0.95rem;
+}
+
+.dragspel__pitch {
+  display: block;
+  margin-block-start: 0.2rem;
+  max-width: 34ch;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: rgb(242 235 224 / 0.8);
+}
+
+.dragspel__hjalp {
+  margin: 1rem 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dampad);
+}
+
+/* ── Finger i stället för pekare ───────────────────────────────
+   Utan fin pekare finns ingen hover. Då blir dragspelet lodrätt och
+   drivs av tryck: kortet man trycker på fäller ut sig nedåt.        */
+
+@media (hover: none), (pointer: coarse), (max-width: 620px) {
+  .dragspel {
+    flex-direction: column;
+    height: auto;
+    perspective: none;
+  }
+
+  .dragspel__kort {
+    flex: 0 0 auto;
+    height: 84px;
+    transform: none;
+    transition: height var(--tid) var(--kurva);
+  }
+
+  .dragspel__kort[data-aktiv='true'] {
+    height: clamp(260px, 62vw, 380px);
+  }
+
+  .dragspel__media {
+    width: 100%;
+    transform: none;
+  }
+
+  /* Namnet syns på alla kort, annars går de inte att välja mellan. */
+  .dragspel__strec,
+  .dragspel__text {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .dragspel__strec {
+    background: rgb(242 235 224 / 0.3);
+    box-shadow: none;
+    transition: background var(--tid) var(--kurva);
+  }
+
+  .dragspel__kort[data-aktiv='true'] .dragspel__strec {
+    background: var(--amber);
+  }
+
+  .dragspel__pitch {
+    display: none;
+  }
+
+  .dragspel__kort[data-aktiv='true'] .dragspel__pitch {
+    display: block;
   }
 }
 
-.burgarkort__namn {
-  margin: 0.9rem 0 0.15rem;
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: clamp(1.05rem, 2vw, 1.3rem);
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-}
-
-.burgarkort__pris {
-  margin: 0 0 0.5rem;
-  font-weight: 800;
-  font-size: 1.05rem;
-  color: var(--amber);
-  font-variant-numeric: tabular-nums;
-}
-
-.burgarkort__pitch {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--dampad);
+@media (prefers-reduced-motion: reduce) {
+  .dragspel__kort,
+  .dragspel__media,
+  .dragspel__strec,
+  .dragspel__text,
+  .dragspel__sloja {
+    transition-duration: 0.01ms !important;
+    will-change: auto;
+  }
+  .dragspel__kort { transform: none !important; }
 }
 
 /* ═══ 6 · HELA MENYN — enda ljusa blocket ═════════════════════ */

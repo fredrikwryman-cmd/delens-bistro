@@ -154,21 +154,136 @@ function fyllKontakt() {
   fyllTider($('#foot-tider'));
 }
 
-/* ═══ 5 · SIGNATURBURGARNA ═══════════════════════════════════════ */
+/* ═══ 5 · SIGNATURBURGARNA — DRAGSPELSGALLERI ════════════════════
+   Portat från React Bits AccordionGallery. Mekaniken är densamma,
+   implementationen är egen: inget React, ingen GSAP.
+
+   Förlagans referensvärden som behållits:
+     expandRatio 0.52   standardöppet kort 3 (index 2)
+     parallax 0.5       tilt 8 grader       mediafaktor 1.22
+
+   Kärnan: korten är flex 1 1 0 och det aktiva får
+   flex-grow = r*(n-1)/(1-r), vilket ger det exakt andelen r av
+   bredden. Mediarutan inuti är bredare än kortet, så motivet beskärs
+   i stället för att klämmas ihop när kortet krymper.
+
+   Rörelsen ligger i CSS-övergångar. JS gör tre saker: bygger
+   markupen, räknar ut flex-grow och mediarutans bredd, och håller
+   reda på vilket kort som är aktivt.                                */
+
+const DRAGSPEL = {
+  expandRatio: 0.52,
+  standardIndex: 2,
+  parallax: 0.5,
+  mediafaktor: 1.22,
+  gap: 10
+};
+
+/**
+ * Fingerläge. Måste vara ordagrant samma villkor som media-frågan i
+ * style.css, annars säger CSS och JS olika saker om samma vy: lodrätt
+ * dragspel som ändå styrs av hover, eller hjälptext som talar om att
+ * peka på en skärm utan pekare.
+ */
+const fingerlage = matchMedia('(hover: none), (pointer: coarse), (max-width: 620px)');
 
 function byggSignaturer() {
-  const lutningar = [-2.5, 3, -1.5, 2.5, -3];
-  $('#signatur-lista').innerHTML = signaturer
+  const galleri = $('#signatur-galleri');
+  if (!galleri) return;
+
+  galleri.innerHTML = signaturer
     .map(
       (b, i) => `
-      <li class="burgarkort" style="--lut: ${lutningar[i]}deg">
-        <span class="ph" style="--ar: 1 / 1" data-id="${b.id}" data-spec="1200 × 1200 · PNG α"></span>
-        <h3 class="burgarkort__namn">${b.namn}</h3>
-        <p class="burgarkort__pris">${b.pris} kr</p>
-        <p class="burgarkort__pitch">${b.pitch}</p>
-      </li>`
+      <div class="dragspel__kort" role="listitem" tabindex="0"
+           data-index="${i}" data-aktiv="false"
+           aria-label="${b.namn}, ${b.pris} kr">
+        <span class="dragspel__ram">
+          <span class="dragspel__media">
+            <span class="ph" data-id="${b.id}" data-spec="1200 × 1200 · PNG α"></span>
+          </span>
+          <span class="dragspel__sloja" aria-hidden="true"></span>
+        </span>
+        <span class="dragspel__etikett" aria-hidden="true">
+          <span class="dragspel__strec"></span>
+          <span class="dragspel__text">
+            <b class="dragspel__namn">${b.namn}</b>
+            <span class="dragspel__pris">${b.pris} kr</span>
+            <span class="dragspel__pitch">${b.pitch}</span>
+          </span>
+        </span>
+      </div>`
     )
     .join('');
+
+  const kort = $$('.dragspel__kort', galleri);
+  const antal = kort.length;
+  let aktiv = Math.min(Math.max(DRAGSPEL.standardIndex, 0), antal - 1);
+  let mediabredd = 480;
+
+  const r = Math.min(Math.max(DRAGSPEL.expandRatio, 0.2), 0.9);
+  galleri.style.setProperty(
+    '--vaxt',
+    String(antal > 1 ? (r * (antal - 1)) / (1 - r) : 1)
+  );
+
+  const rita = () => {
+    kort.forEach((k, i) => {
+      const arAktiv = i === aktiv;
+      k.dataset.aktiv = String(arAktiv);
+      k.setAttribute('aria-current', arAktiv ? 'true' : 'false');
+      // Korten före det aktiva lutar åt ena hållet, de efter åt andra.
+      k.style.setProperty('--vrid', arAktiv ? '0' : i < aktiv ? '1' : '-1');
+      const drift = Math.max(-1.5, Math.min(1.5, aktiv - i));
+      const skift = arAktiv ? 0 : drift * DRAGSPEL.parallax * mediabredd * 0.06;
+      k.style.setProperty('--skift', skift.toFixed(1) + 'px');
+    });
+  };
+
+  const satt = (i) => {
+    const n = (i + antal) % antal;
+    if (n === aktiv) return;
+    aktiv = n;
+    rita();
+  };
+
+  const mat = () => {
+    const total = galleri.getBoundingClientRect().width;
+    const brukbar = Math.max(total - DRAGSPEL.gap * (antal - 1), 120);
+    mediabredd = Math.max(140, brukbar * r * DRAGSPEL.mediafaktor);
+    galleri.style.setProperty('--mediabredd', Math.round(mediabredd) + 'px');
+    rita();
+  };
+
+  kort.forEach((k, i) => {
+    k.addEventListener('click', () => satt(i));
+    k.addEventListener('focus', () => satt(i));
+    k.addEventListener('mouseenter', () => {
+      // I fingerläge är dragspelet lodrätt och styrs av tryck.
+      if (!fingerlage.matches) satt(i);
+    });
+    k.addEventListener('keydown', (e) => {
+      const framat = e.key === 'ArrowRight' || e.key === 'ArrowDown';
+      const bakat = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
+      if (!framat && !bakat) return;
+      e.preventDefault();
+      const n = (i + (framat ? 1 : -1) + antal) % antal;
+      satt(n);
+      kort[n].focus();
+    });
+  });
+
+  new ResizeObserver(mat).observe(galleri);
+  mat();
+
+  const hjalp = $('#dragspel-hjalp');
+  const sattHjalp = () => {
+    if (!hjalp) return;
+    hjalp.textContent = fingerlage.matches
+      ? 'Tryck på ett kort för att fälla ut det'
+      : 'Peka på ett kort för att fälla ut det';
+  };
+  sattHjalp();
+  fingerlage.addEventListener('change', sattHjalp);
 }
 
 /* ═══ 6 · MENYN ══════════════════════════════════════════════════ */
