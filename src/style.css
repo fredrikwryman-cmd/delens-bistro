@@ -774,16 +774,6 @@ input:focus-visible {
 .matpanel output { float: inline-end; color: var(--offwhite); }
 .matpanel input[type='range'] { width: 100%; accent-color: var(--amber); }
 
-.matpanel__grupp {
-  margin-block-start: 0.9rem;
-  padding-block-start: 0.8rem;
-  border-block-start: 1px solid var(--linje);
-}
-
-.matpanel__grupp h3 {
-  margin: 0 0 0.4rem;
-}
-
 
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
 
@@ -804,13 +794,14 @@ input:focus-visible {
   --gap: 10px;
   --radie: 16px;
   --tilt: 8deg;
-  /* 0,6 s från förlagan läste som fördröjning på hover. Det här är en
-     tillståndsändring man utlöser tiotals gånger per besök, alltså
-     snabbt-och-subtilt-nivån: under 300 ms.
+  /* Låst efter avkänning i sidan. 0,6 s från förlagan läste som
+     fördröjning; 220 ms svarar direkt även när man sveper över hela
+     raden. Det här är en tillståndsändring man utlöser tiotals gånger
+     per besök, alltså snabbt-och-subtilt-nivån där taket är 300 ms.
      Kurvan är projektets egen --ut, en stark ease-out med startlutning
      6,25 — den tar fart direkt och bromsar in mot slutet. Ingen ny
      kurva införs när det redan finns en som gör rätt sak. */
-  --tid: 0.28s;
+  --tid: 0.22s;
   --kurva: var(--ut);
   --stagger: 0.04s;
   /* Sätts av JS: mediarutans bredd och aktivt korts flex-grow. */

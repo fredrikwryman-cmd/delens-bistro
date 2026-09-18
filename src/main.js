@@ -491,16 +491,6 @@ function riggaMatpanel() {
     scenLage.sep = +sepReg.value / 10;
     $('#m-sep-ut').textContent = scenLage.sep.toFixed(1).replace('.', ',') + '×';
   });
-
-  // Dragspelets övergångstid, för att känna efter direkt i sidan.
-  const tidReg = $('#m-tid-reg');
-  const galleri = $('#signatur-galleri');
-  if (tidReg && galleri) {
-    tidReg.addEventListener('input', () => {
-      galleri.style.setProperty('--tid', tidReg.value + 'ms');
-      $('#m-tid-ut').textContent = tidReg.value + ' ms';
-    });
-  }
 }
 
 function matUppdatera(p) {
