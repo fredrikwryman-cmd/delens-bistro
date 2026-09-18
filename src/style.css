@@ -454,7 +454,12 @@ input:focus-visible {
   color: var(--amber);
 }
 
+/* Elementet är ett span inuti h1. Utan display: block blir det inline
+   så fort position går tillbaka till static under brytpunkten, och då
+   ignoreras både width och margin: auto. Bilden inuti tog då 100 % av
+   rubrikens bredd i stället för sin egen. */
 .hero__burger {
+  display: block;
   position: absolute;
   inset-block-start: 46%;
   inset-inline-start: 50%;
@@ -463,7 +468,13 @@ input:focus-visible {
   width: min(62vw, 520px);
 }
 
-.hero__burger picture,
+/* height: auto måste stå kvar. Bilderna bär width- och height-attribut
+   för att reservera plats, och utan den här regeln ritas de i
+   attributens höjd — smala och utdragna. */
+.hero__burger picture {
+  display: block;
+}
+
 .hero__burger img {
   display: block;
   width: 100%;
