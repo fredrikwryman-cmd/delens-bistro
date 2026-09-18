@@ -670,7 +670,11 @@ input:focus-visible {
 
 .lager__scen {
   position: relative;
-  width: min(74vw, 560px);
+  /* Höjdledet måste vara med i taket. Vid full separation sträcker sig
+     stapeln ungefär 1,44 gånger scenens storlek, och på en låg vy
+     klipptes överbullen mot sticky-behållarens överkant. 62svh håller
+     hela stapeln innanför ned till omkring 700 px vyhöjd. */
+  width: min(74vw, 560px, 62svh);
   aspect-ratio: 1;
   transform-style: preserve-3d;
   will-change: transform;
