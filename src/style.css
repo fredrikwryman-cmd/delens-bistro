@@ -774,6 +774,17 @@ input:focus-visible {
 .matpanel output { float: inline-end; color: var(--offwhite); }
 .matpanel input[type='range'] { width: 100%; accent-color: var(--amber); }
 
+.matpanel__grupp {
+  margin-block-start: 0.9rem;
+  padding-block-start: 0.8rem;
+  border-block-start: 1px solid var(--linje);
+}
+
+.matpanel__grupp h3 {
+  margin: 0 0 0.4rem;
+}
+
+
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
 
 /* ── Dragspelsgalleri ──────────────────────────────────────────
@@ -793,8 +804,15 @@ input:focus-visible {
   --gap: 10px;
   --radie: 16px;
   --tilt: 8deg;
-  --tid: 0.6s;
-  --kurva: cubic-bezier(0.215, 0.61, 0.355, 1);
+  /* 0,6 s från förlagan läste som fördröjning på hover. Det här är en
+     tillståndsändring man utlöser tiotals gånger per besök, alltså
+     snabbt-och-subtilt-nivån: under 300 ms.
+     Kurvan är projektets egen --ut, en stark ease-out med startlutning
+     6,25 — den tar fart direkt och bromsar in mot slutet. Ingen ny
+     kurva införs när det redan finns en som gör rätt sak. */
+  --tid: 0.28s;
+  --kurva: var(--ut);
+  --stagger: 0.04s;
   /* Sätts av JS: mediarutans bredd och aktivt korts flex-grow. */
   --mediabredd: 480px;
   --vaxt: 4.333;
@@ -824,7 +842,9 @@ input:focus-visible {
      som får syskonen att faktiskt ge plats. Begränsat till fem kort,
      och contain håller omritningen inom kortet. */
   contain: layout paint;
-  will-change: flex-grow, transform;
+  /* will-change på en layoutegenskap ger ingen lagerpromovering och
+     bara kostnad. Bara transform hintas. */
+  will-change: transform;
   -webkit-tap-highlight-color: transparent;
   transform: rotateY(calc(var(--vrid, 0) * var(--tilt)));
   transition:
@@ -882,18 +902,28 @@ input:focus-visible {
   -webkit-user-drag: none;
 }
 
+/* Gradienten ligger stilla. Nedtoningen är ett eget lager som tonas
+   med opacity. Att övergå background-shorthand mellan två värden med
+   olika antal lager går inte — webbläsaren snäpper i stället för att
+   interpolera, så nedtoningen hoppade medan allt annat mjukade. */
 .dragspel__sloja {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, transparent 45%, rgb(14 14 14 / 0.82) 100%),
-    rgb(14 14 14 / 0.42);
-  transition: background var(--tid) var(--kurva);
+  background: linear-gradient(180deg, transparent 42%, rgb(14 14 14 / 0.85) 100%);
 }
 
-.dragspel__kort[data-aktiv='true'] .dragspel__sloja {
-  background: linear-gradient(180deg, transparent 40%, rgb(14 14 14 / 0.88) 100%);
+.dragspel__sloja::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(14 14 14 / 0.42);
+  opacity: 1;
+  transition: opacity var(--tid) var(--kurva);
+}
+
+.dragspel__kort[data-aktiv='true'] .dragspel__sloja::after {
+  opacity: 0;
 }
 
 .dragspel__etikett {
@@ -925,8 +955,8 @@ input:focus-visible {
   translate: -14px 0;
   /* stagger 0.06 s från förlagan. */
   transition:
-    opacity calc(var(--tid) * 0.6) var(--kurva) 0.06s,
-    translate var(--tid) var(--kurva) 0.06s;
+    opacity calc(var(--tid) * 0.6) var(--kurva) var(--stagger),
+    translate var(--tid) var(--kurva) var(--stagger);
 }
 
 .dragspel__kort[data-aktiv='true'] .dragspel__strec,
@@ -1025,16 +1055,34 @@ input:focus-visible {
   }
 }
 
+/* Mildare, inte noll. Rörelse och rotation tas bort, men intoningen
+   av etikett och gråskala är kvar — den bär informationen om vilket
+   kort som är öppet och hjälper förståelsen. */
 @media (prefers-reduced-motion: reduce) {
-  .dragspel__kort,
-  .dragspel__media,
-  .dragspel__strec,
-  .dragspel__text,
-  .dragspel__sloja {
-    transition-duration: 0.01ms !important;
+  .dragspel__kort {
+    transition-duration: 0.01ms;
+    transform: none !important;
     will-change: auto;
   }
-  .dragspel__kort { transform: none !important; }
+
+  /* !important behövs för att slå den globala regeln längre ned som
+     nollar alla övergångar. Utan den nollas även intoningen, och då
+     blir reducerad rörelse noll rörelse i stället för mildare. */
+  .dragspel__media {
+    transition: filter 0.15s linear !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
+  .dragspel__strec,
+  .dragspel__text {
+    translate: 0 0 !important;
+    transition: opacity 0.15s linear !important;
+  }
+
+  .dragspel__sloja::after {
+    transition: opacity 0.15s linear !important;
+  }
 }
 
 /* ═══ 6 · HELA MENYN — enda ljusa blocket ═════════════════════ */
