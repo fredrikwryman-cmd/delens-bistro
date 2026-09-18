@@ -23,9 +23,10 @@
   --gutter: clamp(1rem, 4vw, 3rem);
 
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* Display-typsnitten är inte valda än. Se PLAN.md avsnitt 8:
-     två woff2, delmängd med åäö. Tills dess system-stacken. */
+  /* Sätts av typsnittsväxlaren i avstämningspanelen. Systemstacken är
+     utgångsläget tills ett par är valt. Se PLAN.md avsnitt 8. */
   --font-display: var(--font);
+  --font-display-vikt: 800;
 
   --ut: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -172,7 +173,7 @@ a {
 .rubrik {
   margin: 0 0 1rem;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: var(--font-display-vikt);
   font-size: clamp(2rem, 6vw, 4.5rem);
   line-height: 0.95;
   letter-spacing: -0.02em;
@@ -383,7 +384,7 @@ input:focus-visible {
 
 .nav__wordmark {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: var(--font-display-vikt);
   font-size: 1.15rem;
   letter-spacing: 0.02em;
 }
@@ -436,7 +437,7 @@ input:focus-visible {
 .hero__outline {
   display: block;
   font-size: clamp(3.5rem, 19vw, 15rem);
-  font-weight: 900;
+  font-weight: var(--font-display-vikt);
   letter-spacing: -0.03em;
   color: transparent;
   -webkit-text-stroke: clamp(1px, 0.22vw, 3px) var(--offwhite);
@@ -448,7 +449,7 @@ input:focus-visible {
   z-index: 5;
   margin-block-start: -0.08em;
   font-size: clamp(2.6rem, 13vw, 10rem);
-  font-weight: 900;
+  font-weight: var(--font-display-vikt);
   letter-spacing: -0.02em;
   color: var(--amber);
 }
@@ -638,7 +639,7 @@ input:focus-visible {
   justify-content: center;
   gap: 0.02em;
   font-family: var(--font-display);
-  font-weight: 900;
+  font-weight: var(--font-display-vikt);
   font-size: clamp(2.2rem, 11vw, 9rem);
   line-height: 0.82;
   letter-spacing: -0.03em;
@@ -741,6 +742,54 @@ input:focus-visible {
 .matpanel output { float: inline-end; color: var(--offwhite); }
 .matpanel input[type='range'] { width: 100%; accent-color: var(--amber); }
 
+.matpanel__typsnitt {
+  margin-block-start: 0.9rem;
+  padding-block-start: 0.8rem;
+  border-block-start: 1px solid var(--linje);
+}
+
+.matpanel__val {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.typval {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  background: transparent;
+  border: 1px solid var(--linje);
+  border-radius: 0.35rem;
+  color: var(--offwhite);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 160ms var(--ut), background 160ms var(--ut);
+}
+
+.typval b {
+  display: block;
+  font-weight: 700;
+}
+
+.typval span {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--dampad);
+}
+
+.typval[aria-checked='true'] {
+  border-color: var(--amber);
+  background: rgb(232 163 61 / 0.12);
+}
+
+.matpanel__not {
+  margin: 0.55rem 0 0;
+  font-size: 0.66rem;
+  line-height: 1.35;
+  color: var(--dampad);
+}
+
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
 
 .signatur__lista {
@@ -772,7 +821,7 @@ input:focus-visible {
 .burgarkort__namn {
   margin: 0.9rem 0 0.15rem;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: var(--font-display-vikt);
   font-size: clamp(1.05rem, 2vw, 1.3rem);
   text-transform: uppercase;
   letter-spacing: 0.01em;
@@ -1005,7 +1054,7 @@ input:focus-visible {
 .foot__namn {
   margin: 0 0 0.4rem;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: var(--font-display-vikt);
   font-size: 1.3rem;
   text-transform: uppercase;
 }
