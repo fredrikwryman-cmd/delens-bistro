@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "bilder": "node verktyg/bilder.mjs"
+    "bilder": "node verktyg/bilder.mjs && node verktyg/hero.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.4",

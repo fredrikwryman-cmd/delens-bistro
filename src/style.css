@@ -463,6 +463,13 @@ input:focus-visible {
   width: min(62vw, 520px);
 }
 
+.hero__burger picture,
+.hero__burger img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .hero__copy {
   position: absolute;
   inset-block-end: -2.5rem;

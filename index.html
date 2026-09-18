@@ -64,7 +64,18 @@
           <h1 class="hero__title">
             <span class="hero__outline" data-reveal>Delens</span>
             <span class="hero__burger">
-              <span class="ph" style="--ar: 1 / 1" data-id="B1" data-spec="2048 × 2048 · PNG α"></span>
+              <picture>
+                <!-- B2 är renderad i 700 px för mobilen, B1 i 1100 för desktop. -->
+                <source media="(max-width: 900px)" srcset="/bilder/hero/B2.webp" />
+                <img
+                  src="/bilder/hero/B1.webp"
+                  alt="Delens smashburgare med logotypen bränd i bullen"
+                  width="1100"
+                  height="1009"
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              </picture>
             </span>
             <span class="hero__fill" data-reveal>Bistro</span>
           </h1>
