@@ -685,21 +685,31 @@ input:focus-visible {
   will-change: transform;
 }
 
-/* Banden motsvarar var lagret sitter på den kvadratiska duken.
-   --y är lagrets viloläge i den monterade burgaren. Parallaxen
-   adderas ovanpå det. */
-.ph--lager {
-  aspect-ratio: auto;
+/* Lagren är genererade var för sig och ligger inte i register: olika
+   dukstorlek, olika skala och olika mängd tom yta runt motivet.
+   Värdena nedan är uträknade ur varje fils faktiska innehållsruta,
+   så att delarna bildar en sammanhängande burgare i viloläget.
+
+     --b  bildens bredd i procent av scenen
+     --t  bildens överkant i procent av scenen
+
+   Negativ --t betyder att filens tomma yta ovanför motivet skjuts
+   utanför scenen. Parallaxen adderas ovanpå det här viloläget.      */
+
+.lager__bit img {
   position: absolute;
-  inset-block-start: calc(50% + var(--y, 0%));
-  translate: 0 -50%;
+  inset-block-start: var(--t);
+  inset-inline-start: 50%;
+  width: var(--b);
+  height: auto;
+  translate: -50% 0;
 }
 
-.lager__bit[data-lager='overbulle']  .ph--lager { width: 78%; height: 26%; border-radius: 46% 46% 12% 12%; }
-.lager__bit[data-lager='ost']        .ph--lager { width: 74%; height: 12%; }
-.lager__bit[data-lager='kottpuck']   .ph--lager { width: 84%; height: 18%; border-radius: 22%; }
-.lager__bit[data-lager='sallad']     .ph--lager { width: 88%; height: 12%; }
-.lager__bit[data-lager='underbulle'] .ph--lager { width: 72%; height: 20%; border-radius: 12% 12% 44% 44%; }
+.lager__bit[data-lager='overbulle']  img { --b: 72.4%; --t: -1.5%; }
+.lager__bit[data-lager='ost']        img { --b: 77.3%; --t: -1.0%; }
+.lager__bit[data-lager='kottpuck']   img { --b: 82.9%; --t: 1.9%; }
+.lager__bit[data-lager='sallad']     img { --b: 78.3%; --t: 19.5%; }
+.lager__bit[data-lager='underbulle'] img { --b: 74.4%; --t: 35.2%; }
 
 /* ── Avstämningspanel ─────────────────────────────────────────── */
 
