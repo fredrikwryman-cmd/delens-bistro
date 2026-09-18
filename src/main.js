@@ -369,10 +369,23 @@ function riggaAvslojning() {
   const mal = $$('[data-reveal]');
   if (!mal.length) return;
 
-  for (const el of mal) {
+  /**
+   * Delar upp i ord, men bara i noder som saknar elementbarn. Rubriker
+   * som är satta i flera rader behåller sin radstruktur — annars slås
+   * raderna ihop till en enda klump när innerHTML skrivs om.
+   * Ordningen bevaras, så förskjutningen löper obruten över raderna.
+   */
+  const delaUpp = (el) => {
+    const barn = [...el.children];
+    if (barn.length) {
+      barn.forEach(delaUpp);
+      return;
+    }
     const ord = el.textContent.trim().split(/\s+/);
     el.innerHTML = ord.map((o) => `<span class="ord">${o}</span>`).join(' ');
-  }
+  };
+
+  mal.forEach(delaUpp);
 
   const io = new IntersectionObserver(
     (poster) => {

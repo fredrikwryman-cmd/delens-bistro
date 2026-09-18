@@ -241,6 +241,12 @@ Samma vinkel, samma ljus, samma avstånd på alla fem. Frilagda.
 | E2 | Smashmomentet — köttet som pressas mot plåten |
 | E3 | Personal i arbete |
 | E4 | Fasaden på Centralvägen 3 |
+| E5 | Väggmålningarna av Petter Skagaard |
+
+E5 har redan sin bildtext skriven i rebrand-sektionen: målningarna är
+gjorda av Petter Skagaard och motiven hyllar Väsby och stammisarna.
+Bilden behöver visa motiven läsbart — en vid tagning av väggen, inte
+ett utsnitt.
 
 ### F. Vektor och grafik
 

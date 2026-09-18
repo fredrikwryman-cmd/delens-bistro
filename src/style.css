@@ -188,6 +188,12 @@ a {
   color: var(--mork-text);
 }
 
+/* Rubrik satt i flera rader. Avslöjningen delar upp ord per rad och
+   behåller radbrytningarna. */
+.rubrik__rad {
+  display: block;
+}
+
 .ingress {
   max-width: 46ch;
   margin: 0 0 clamp(2rem, 5vw, 3.5rem);
@@ -586,14 +592,6 @@ input:focus-visible {
   color: rgb(242 235 224 / 0.86);
 }
 
-.rebrand__kicker {
-  font-weight: 800;
-  font-size: clamp(1.05rem, 2vw, 1.4rem);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--amber) !important;
-}
-
 .rebrand__bilder {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -616,6 +614,21 @@ input:focus-visible {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--dampad);
+}
+
+.vaggmalning {
+  margin: clamp(2.5rem, 6vw, 4.5rem) 0 0;
+  max-width: 62rem;
+}
+
+.bildtext {
+  margin-block-start: 0.9rem;
+  max-width: 52ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgb(242 235 224 / 0.78);
+  border-inline-start: 2px solid var(--amber);
+  padding-inline-start: 0.9rem;
 }
 
 @media (max-width: 860px) {
