@@ -2617,7 +2617,16 @@ input:focus-visible {
    hela formen, så en ändring av färg eller vandring är en rad. */
 .byggd {
   --byggd-vandring: 6px;
-  --byggd-farg: var(--amber);
+  /* TVÅ FÄRGER, INTE EN. Vilofärgen är footerns dämpade off-white —
+     samma register som kolofonen den står under. Amber är sajtens
+     handlingsfärg: beställningsfältet, knappen, telefonnumret. En
+     kredit i handlingsfärg läser som en uppmaning oavsett var den
+     ligger, och det här är inte en uppmaning.
+
+     Amber är i stället BELÖNINGEN. Den som går och tittar får hela
+     mekaniken; den som bara scrollar förbi ser en dämpad rad. */
+  --byggd-farg: var(--dampad);
+  --byggd-farg-vaken: var(--amber);
 
   position: relative;
   z-index: 2;
@@ -2625,14 +2634,18 @@ input:focus-visible {
   place-items: center;
   justify-self: center;
   width: max-content;
-  margin: clamp(2rem, 5vw, 3rem) auto 0;
+  /* Sist av allt. Luften ovanför skiljer den från kolofonraden, och
+     under den tar sidan slut. */
+  margin: clamp(1.75rem, 4vw, 2.5rem) auto 0;
   padding: 0.7rem 1.6rem;
   color: var(--byggd-farg);
   font-size: var(--t-xs);
   line-height: var(--lh-xs);
   letter-spacing: var(--ls-xs);
   text-decoration: none;
-  transition: transform 160ms var(--ut);
+  transition:
+    transform 160ms var(--ut),
+    color 200ms ease;
 }
 
 /* VERSALER PÅ ETIKETTERNA, INTE PÅ NAMNET. "Byggd av", "Webbdesign"
@@ -2658,27 +2671,42 @@ input:focus-visible {
   place-items: center;
 }
 
+/* SUDDET ÄR INTE DEKOR, DET ÄR LIMMET. Utan det står två läsbara ord
+   ovanpå varandra mitt i växlingen — fryst vid halva vägen syntes
+   "WEBBDESIGN" och "AiM Studios" samtidigt, båda i 50 procents
+   opacitet. Ögat läser det som två objekt som byter plats, inte som
+   ett ord som blir ett annat.
+
+   Två pixlars sudd på det som är på väg ut och in suddar ut gränsen
+   mellan dem och gör mitten till en enda otydlig form i stället för
+   två tydliga. Förflyttningen på 0,35em räcker inte själv i den här
+   graden; orden är för nära varandra. */
 .byggd__vila,
 .byggd__aktiv {
   grid-area: 1 / 1;
   transition:
     opacity 180ms var(--ut),
-    transform 180ms var(--ut);
+    transform 180ms var(--ut),
+    filter 180ms var(--ut);
 }
 
 .byggd__aktiv {
   opacity: 0;
   transform: translateY(0.35em);
+  filter: blur(2px);
   letter-spacing: var(--ls-xs-gemen);
 }
 
 /* Lådorna ligger bakom knappen och glider ut. transform och opacity,
    inget annat — inset skulle ha kostat en omlayout per bildruta. */
+/* Lådorna är FYLLDA bara när de är utfällda. En fylld amber-låda i
+   vila var den enda fyllda ambern i footern utanför beställningsfältet
+   — den drog blicken dit sist av allt på sidan. */
 .byggd__lada {
   position: absolute;
   inset-inline: 0;
   padding: 0.25rem 0;
-  background: var(--byggd-farg);
+  background: var(--byggd-farg-vaken);
   color: var(--svart);
   font-size: var(--t-xs);
   line-height: var(--lh-xs);
@@ -2707,7 +2735,13 @@ input:focus-visible {
   width: 0.7rem;
   height: 0.7rem;
   border: 2px solid var(--byggd-farg);
-  transition: transform 200ms var(--ut);
+  /* border-color måste stå med. Hörnen ärver --byggd-farg, och en
+     anpassad egenskap går inte att tona — men border-color gör det,
+     och det är den som faktiskt ritar. Utan raden snäppte hörnen till
+     amber medan texten tonade dit. */
+  transition:
+    transform 200ms var(--ut),
+    border-color 200ms ease;
 }
 
 .byggd__horn--nv {
@@ -2740,8 +2774,14 @@ input:focus-visible {
   transform: scale(0.97);
 }
 
+/* Fokusfärgen ligger UTANFÖR hover-grinden. En surfplatta med
+   tangentbord har hover: none men fullgod tangentbordsnavigering, och
+   där hade den som tabbar sig fram fått en dämpad ram i stället för
+   samma kvittens som muspekaren får. Färgen är belöningen; den ska
+   utlösas av uppmärksamhet, inte av vilken sorts pekdon man råkar ha. */
 .byggd:focus-visible {
-  outline: 2px solid var(--byggd-farg);
+  --byggd-farg: var(--byggd-farg-vaken);
+  outline: 2px solid var(--byggd-farg-vaken);
   outline-offset: 6px;
 }
 
@@ -2749,14 +2789,33 @@ input:focus-visible {
    telefon finns ingen pekare att avslöja med, och en knapp som står
    kvar som ordet "Webbdesign" säger ingenting om vart den leder.
    Utan hover visas därför lådorna och namnet direkt. */
+/* PEKSKÄRMENS VILOLÄGE ÄR TYSTARE ÄN HOVERNS.
+
+   En telefon kan inte hovra, så knappen måste visa sitt innehåll
+   direkt — annars står den kvar som ordet "Webbdesign" med en länk
+   till en sajt den inte nämner. Men att visa HOVERLÄGET direkt gav
+   tre fyllda amber-element som stod utfällda hela tiden: uppmätt
+   156 × 132 px, alltså 19 procent av footerns höjd, permanent.
+
+   Här visas därför NAMNET OCH ADRESSEN utan fyllning. Lådorna
+   tappar sin bakgrund och tar den dämpade färgen, "Byggd av" utgår
+   helt — det står redan i länkens tillgängliga namn — och kvar blir
+   två rader tyst text i en hörnram. */
 @media not all and (hover: hover) and (pointer: fine) {
   .byggd {
-    margin-block: clamp(3.5rem, 8vw, 4.5rem) 2.5rem;
+    margin-block: clamp(1.75rem, 4vw, 2.5rem) 0;
   }
 
-  .byggd__lada {
+  .byggd__lada--upp {
+    display: none;
+  }
+
+  .byggd__lada--ner {
     opacity: 1;
     transform: none;
+    background: none;
+    color: var(--byggd-farg);
+    padding-block-start: 0.45rem;
   }
 
   .byggd__vila {
@@ -2766,6 +2825,7 @@ input:focus-visible {
   .byggd__aktiv {
     opacity: 1;
     transform: none;
+    filter: none;
   }
 
   .byggd__horn--nv { transform: translate(calc(var(--byggd-vandring) * -1), calc(var(--byggd-vandring) * -1)); }
@@ -2775,6 +2835,13 @@ input:focus-visible {
 }
 
 @media (hover: hover) and (pointer: fine) {
+  /* Belöningen: färgen slår om till amber i samma rörelse som
+     lådorna glider ut. */
+  .byggd:hover,
+  .byggd:focus-visible {
+    --byggd-farg: var(--byggd-farg-vaken);
+  }
+
   .byggd:hover .byggd__lada,
   .byggd:focus-visible .byggd__lada {
     opacity: 1;
@@ -2785,12 +2852,14 @@ input:focus-visible {
   .byggd:focus-visible .byggd__vila {
     opacity: 0;
     transform: translateY(-0.35em);
+    filter: blur(2px);
   }
 
   .byggd:hover .byggd__aktiv,
   .byggd:focus-visible .byggd__aktiv {
     opacity: 1;
     transform: none;
+    filter: none;
   }
 
   .byggd:hover .byggd__horn--nv,
@@ -3440,6 +3509,7 @@ input:focus-visible {
   .byggd__vila,
   .byggd__aktiv {
     transform: none !important;
+    filter: none !important;
   }
 
   /* FINALEN: färdig logga, ingen montering. Delarna hålls synliga
