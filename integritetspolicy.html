@@ -19,12 +19,25 @@
       content="Så behandlar Delens Bistro personuppgifter. Sajten sätter inga kakor och har inget kontaktformulär."
     />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Titan+One&family=Barlow:wght@400;500;600;800&display=swap"
-    />
+    <!-- IKONER. favicon.ico är kundens egen fil och bär 16, 32 och 48 px
+         i samma fil — ritad för de graderna. De större är den runda
+         logotypen på djuprött; se verktyg/ikoner.mjs. Innan låg här
+         href="data:," , en tom bild vars enda uppgift var att slippa
+         404. Nu finns det en riktig ikon att peka på. -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/ikoner/ikon-192.png" />
+    <link rel="apple-touch-icon" href="/ikoner/apple-touch-icon.png" />
+
+    <!-- TYPSNITTEN ÄR SJÄLVHOSTADE. Mouse Memoirs bär brödtext och de
+         mindre rubrikerna, Titan One hero-lockupen och lagerrubriken.
+         Preload, inte bara @font-face: stilmallen upptäcks först när
+         webbläsaren läst den, och snitten först när den läst stilmallen.
+         Med preload går båda filerna ut i samma sekund som HTML:en
+         tolkas. Se PLAN.md avsnitt 13 och verktyg/typsnitt.mjs. -->
+    <link rel="preload" href="/typsnitt/mouse-memoirs.woff2" as="font"
+          type="font/woff2" crossorigin />
+    <link rel="preload" href="/typsnitt/titan-one.woff2" as="font"
+          type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
 
@@ -79,10 +92,9 @@
             kommer förbi; uppgifterna står längst ned på den här sidan.
           </p>
           <p data-rader>
-            Typsnitt hämtas från Google Fonts, vilket innebär att din
-            webbläsare kontaktar Googles servrar och att din IP-adress syns
-            för dem. Vid skarp lansering självhostas typsnitten och den
-            kontakten upphör.
+            Typsnitten ligger på sajtens egen server. Din webbläsare
+            kontaktar ingen annan när sidan laddas, och sidan hämtar
+            ingenting från Google.
           </p>
 
           <h2 class="rubrik">Beställningar</h2>

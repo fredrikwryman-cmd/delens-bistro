@@ -381,7 +381,12 @@ indexet.
 
 ## 13. Typsnitt
 
-Låsta: **Titan One** och **Barlow**, båda från Google Fonts.
+Låsta: **Titan One** och **Mouse Memoirs**, båda hämtade från Google
+Fonts, båda **självhostade och delmängdade** i `public/typsnitt/`
+(19 kB tillsammans). Sajten hämtar ingenting från Google i drift.
+
+Barlow bar sajten fram till 2026-09-19 och är utbytt mot Mouse Memoirs
+— samma snitt som CRAV använder till sin brödtext.
 
 *(Placerad sist för att inte bryta hänvisningarna till avsnitt 8, 9 och
 12 som redan står i koden.)*
@@ -389,7 +394,7 @@ Låsta: **Titan One** och **Barlow**, båda från Google Fonts.
 ### Regeln
 
 **Titan One används sparsamt — som accent på ett par ställen, inte på
-varje rubrik. Barlow bär sajten.**
+varje rubrik. Mouse Memoirs bär sajten.**
 
 Det är samma fördelning som CRAV har. Mätt på deras sajt: Modak syns på
 exakt två ställen, wordmarket och den gula bubbelrubriken. Mouse
@@ -404,15 +409,51 @@ skrikig Modak är.
 | Hero-lockupen: "DELENS" i kontur + "BISTRO" fylld | Sajtens enda rena varumärkesutrop. Här ska typen skrika |
 | Lagersektionens rubrik, fyra rader | Typen **är** konstverket — lagren vävs igenom raderna, och utan en fet form läser inte z-index-växlingen som djup |
 
-**Ingen annanstans.** Varje ny rubrik utgår från Barlow. Vill man ge
-Titan One ett tredje ställe ska ett av de två ovan lämna ifrån sig
-sitt — antalet ligger fast på två.
+**Ingen annanstans.** Varje ny rubrik utgår från Mouse Memoirs. Vill
+man ge Titan One ett tredje ställe ska ett av de två ovan lämna ifrån
+sig sitt — antalet ligger fast på två.
 
-### Var Barlow står
+### Var Mouse Memoirs står
 
 Allt annat: sektionsrubriker, signaturburgarnas namn, navigationens
 wordmark, footerns namn, brödtext, menyns sjuttio rader, priser,
-knappar och klistermärken. Vikt 800 för rubriker, 400–600 för löptext.
+knappar och klistermärken.
+
+### Vad bytet kostade och gav — uppmätt 2026-09-19
+
+Mouse Memoirs är smalare och tjockare än Barlow. Mätt på glyferna vid
+17 px brödtextgrad:
+
+| | Barlow | Mouse Memoirs |
+|---|---|---|
+| Steg (`n`) | 9,16 px | 6,51 px (−29 %) |
+| Stam (`l`) | 1,21 px | 2,19 px (+82 %) |
+| Puns i `o` | 4,7 px | **1,49 px** |
+
+**MENYN VANN.** Alla 68 rader ryms på en rad vid 375 px, och vid 305 px
+också — förut bröts två rader vid 375 och en gick 34 px utanför skärmen
+vid 305. Kortaste prickrad 74 px vid 375, 5 px vid 305.
+
+**BRÖDTEXTEN FÖRLORADE.** En puns på 1,49 px vid 17 px betyder att
+`o`, `e` och `a` går ihop till fläckar på en skärm utan hög
+pixeltäthet. För att få punsen till 3 px krävs 34 px grad — alltså en
+rubrikgrad. Snittet är byggt för korta texter i displaystorlek, och i
+de långa styckena märks det.
+
+Rekommendation om brödtexten ska bära mer text än den gör i dag: lyft
+`--t-s` och `--t-xs` ett par steg och dra ned radavståndet i samma
+rörelse. Det är en ändring i typskalan, alltså ett eget beslut — inte
+något som smygs in med ett snittbyte.
+
+### Radlängden räknas om vid snittbyte
+
+`ch` är bredden på siffran noll, och hur många BOKSTÄVER som ryms per
+`ch` beror på snittet: kvoten gemen/noll är 0,91 i Barlow och 0,80 i
+Mouse Memoirs. Samma `ch`-tal gav 13 procent fler tecken per rad, och
+dokumentspalten gick från omkring 68 tecken till 83. Måtten för löpande
+text är nedskalade med 0,82 (62→50, 58→47, 52→42, 46→38 ch). De
+`ch`-mått som sätter en avsiktlig radbrytning i kort displaytext står
+orörda.
 
 ### Tekniska noter
 
@@ -420,9 +461,15 @@ knappar och klistermärken. Vikt 800 för rubriker, 400–600 för löptext.
   förhindrar syntetisk fetstil, som gör formen smetig.
 - Konturvarianten är genomskinlig fyllning plus `-webkit-text-stroke`.
   Aldrig ett eget konturtypsnitt.
+- Mouse Memoirs finns **också bara i vikt 400**. Sajtens
+  `font-weight: 800` på rubriker och priser ger därför ingen bredare
+  form — uppmätt identisk teckenbredd vid 400 och 800. Hierarkin bärs
+  av grad, versaler och färg, inte av vikt.
 - Google Fonts css2 levererar woff2 per unicode-intervall — bara
   latin-intervallet hämtas och åäö ligger i det.
-- Vid skarp lansering självhostas båda och delmängdas på riktigt.
+- **Självhostningen är gjord.** `node verktyg/typsnitt.mjs` hämtar,
+  delmängdar och KONTROLLERAR att åäöÅÄÖéÉ–—…×° finns kvar; saknas
+  något bryts körningen. Båda filerna preloadas från `<head>`.
   Prestandabudgeten i avsnitt 8 säger två woff2-filer; det håller.
 
 ---

@@ -3,9 +3,10 @@
  *
  *   node verktyg/lokal.mjs
  *
- * Tre källor, tre utsnitt.
+ * Fyra källor, fyra utsnitt.
  *
- * E4 FASADEN går rakt igenom. 16:9, som platsen den ska fylla.
+ * E1 INTERIÖREN beskärs till rutans 4:3. E4 FASADEN går rakt igenom,
+ * 16:9 som platsen den ska fylla.
  *
  * E3 ÄR NU ETT RIKTIGT PORTRÄTT, inte en beskärning. Tidigare klipptes
  * det ur gruppfotot: 1672×941 liggande, tre personer bredvid varandra,
@@ -37,6 +38,18 @@ const KVALITET = 80;
  * källans — båda fotona är redan beskurna i höjdled.
  */
 const UTSNITT = [
+  {
+    id: 'E1',
+    kalla: 'interior.png',
+    /* Rutan är 4:3, källan 16:9. Full höjd behålls och 418 px tas i
+       sidled — allihop från vänster, där kylskåpet och en bit tom
+       vägg står. Ölpelaren hamnar då strax till höger om mitten och
+       glashyllan löper in i bilden uppifrån vänster, alltså diagonalt
+       genom rutan i stället för tvärs över den. */
+    extract: { left: 300, top: 0, width: 1254, height: 941 },
+    bredd: 1400,
+    beskrivning: 'interiören, baren i 4:3'
+  },
   {
     id: 'E4',
     kalla: 'fasad.png',

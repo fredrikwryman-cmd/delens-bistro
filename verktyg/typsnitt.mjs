@@ -1,31 +1,39 @@
 /**
- * Hämtar och delmängdar typsnitten från Fontshare.
+ * Hämtar och delmängdar sajtens typsnitt.
  *
  *   node verktyg/typsnitt.mjs
  *
- * BARA FONTSHARE. Outfit, Space Grotesk och Poppins ligger kvar hos
- * Google Fonts och hämtas av växlaren när de väljs; css2 levererar
- * redan woff2 per unicode-intervall och latin-intervallet bär åäö.
- * Fontshare har ingen motsvarighet — deras CDN serverar hela snittet
- * i en fil — så de tre hämtas hit och delmängdas här.
+ * TVÅ SNITT, BÅDA FRÅN GOOGLE FONTS, BÅDA SJÄLVHOSTADE.
  *
- * ALLA TRE ÄR VARIABLA. En fil per familj täcker hela viktspannet, så
- * det behövs ingen uppsättning statiska vikter:
+ *   Mouse Memoirs  brödtext och mindre rubriker
+ *   Titan One      hero-lockupen och lagerrubriken, ingenting annat
  *
- *   General Sans     200–700
- *   Cabinet Grotesk  100–900
- *   Satoshi          300–900
+ * Fontshare-familjerna som låg här — General Sans, Cabinet Grotesk och
+ * Satoshi — hämtades bara av typsnittsväxlaren. Växlaren är borta och
+ * valet är gjort, så de är det också.
  *
- * Kursiv hämtas inte. Sajten sätter ingen kursiv text, och att ta med
- * den hade dubblat vikten för noll användning.
+ * SJÄLVHOSTADE, INTE LÄNKADE. Med en css2-länk kontaktar varje
+ * besökares webbläsare Googles servrar och lämnar sin IP-adress där,
+ * och länken är dessutom renderingsblockerande: webbläsaren måste
+ * hämta CSS:en innan den vet vilken woff2 den behöver. Två
+ * request-turer innan första bokstaven kan ritas, på en sajt vars
+ * laddskärm ger sig efter 1,8 sekunder. Filerna ligger nu i
+ * public/typsnitt/ och integritetspolicyn säger inte längre att
+ * snitten hämtas från Google.
+ *
+ * BÅDA ÄR ENVIKTSSNITT, 400. Inga axlar att instansiera, ingen kursiv
+ * att hämta. Att sajten sätter font-weight: 800 på rubriker och priser
+ * är en fråga för stilmallen, inte för den här filen.
  *
  * Delmängden är svensk: latin-1-basen plus åäöÅÄÖ och de skiljetecken
  * sajten faktiskt sätter — tankstreck, typografiska citattecken,
  * multiplikationstecken för bildmått, gradtecken, akut accent (den
- * står i Qopla-adressen) och ellips.
+ * står i Qopla-adressen) och ellips. KONTROLLEN nedan bryter körningen
+ * om något av dem saknas i resultatet; ett snitt som tappat ö är värre
+ * än ett snitt som väger tio kilobyte mer.
  */
 
-import { mkdir, writeFile, readFile, stat, unlink } from 'node:fs/promises';
+import { mkdir, writeFile, stat, unlink } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import path from 'node:path';
@@ -35,9 +43,8 @@ const korProgram = promisify(execFile);
 const MAL = 'public/typsnitt';
 
 const FAMILJER = [
-  { id: 'general-sans', fil: 'general-sans' },
-  { id: 'cabinet-grotesk', fil: 'cabinet-grotesk' },
-  { id: 'satoshi', fil: 'satoshi' }
+  { namn: 'Mouse Memoirs', fil: 'mouse-memoirs' },
+  { namn: 'Titan One', fil: 'titan-one' }
 ];
 
 /** Tecknen sajten sätter. Allt annat är vikt utan nytta. */
@@ -56,26 +63,60 @@ const TECKEN = [
   'U+2026' // ellips
 ].join(',');
 
-/** Plockar ut normalstilens woff2-adress ur Fontshares CSS. */
+/** Tecken som MÅSTE finnas kvar efter delmängdningen. */
+const KRAVDA = 'åäöÅÄÖéÉ–—…×°';
+
+/**
+ * Plockar ut LATIN-blockets woff2-adress ur Googles css2-svar.
+ *
+ * Google delar redan upp snittet per unicode-intervall och levererar
+ * ett block per del: latin-ext, latin, ibland kyrilliska. Vi vill ha
+ * latin — U+0000-00FF ligger där, alltså hela svenskan. latin-ext bär
+ * bokstäver sajten aldrig sätter.
+ */
 function woff2Ur(css) {
-  // Första biten före @font-face är familjens kommentar och saknar
-  // adress; blocket ska både ha en woff2 och sakna italic.
   const block = css
-    .split('@font-face')
-    .find((b) => b.includes('.woff2') && !b.includes('italic'));
-  if (!block) throw new Error('hittade ingen normalstil i CSS:en');
-  const m = block.match(/url\('(\/\/[^']+\.woff2)'\)/);
+    .split('/*')
+    .find((b) => b.trim().startsWith('latin */') && b.includes('.woff2'));
+  if (!block) throw new Error('hittade inget latin-block i CSS:en');
+  const m = block.match(/url\((https:[^)]+\.woff2)\)/);
   if (!m) throw new Error('hittade ingen woff2-adress');
-  return 'https:' + m[1];
+  return m[1];
+}
+
+/** Bryter körningen om delmängdningen ätit ett tecken sajten behöver. */
+async function kontrollera(fil) {
+  const { stdout } = await korProgram('python', [
+    '-c',
+    'import sys\n' +
+      'from fontTools.ttLib import TTFont\n' +
+      'c = TTFont(sys.argv[1]).getBestCmap()\n' +
+      'print("".join(ch for ch in sys.argv[2] if ord(ch) not in c))\n',
+    fil,
+    KRAVDA
+  ]);
+  const saknas = stdout.trim();
+  if (saknas) {
+    throw new Error(`${fil} saknar tecken efter delmängdning: ${saknas}`);
+  }
 }
 
 async function kor() {
   await mkdir(MAL, { recursive: true });
   const rader = [];
 
-  for (const { id, fil } of FAMILJER) {
+  for (const { namn, fil } of FAMILJER) {
+    // User-Agent styr vad css2 svarar med. Utan en modern webbläsare
+    // levererar Google truetype i stället för woff2.
     const css = await fetch(
-      `https://api.fontshare.com/v2/css?f%5B%5D=${id}@1,2&display=swap`
+      `https://fonts.googleapis.com/css2?family=${namn.replace(/ /g, '+')}&display=swap`,
+      {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+            '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      }
     ).then((r) => r.text());
 
     const adress = woff2Ur(css);
@@ -87,7 +128,6 @@ async function kor() {
     const mal = path.join(MAL, fil + '.woff2');
     await writeFile(tillfallig, raBuffert);
 
-    // Ingen --instance: axlarna ska vara kvar, annars låses vikten.
     await korProgram('pyftsubset', [
       tillfallig,
       `--unicodes=${TECKEN}`,
@@ -97,12 +137,18 @@ async function kor() {
       `--output-file=${mal}`
     ]);
 
+    await kontrollera(mal);
+
     const fore = (await stat(tillfallig)).size;
     const efter = (await stat(mal)).size;
     await unlink(tillfallig);
 
-    rader.push([fil, `${(fore / 1024).toFixed(0)} kB`, `${(efter / 1024).toFixed(0)} kB`,
-      `−${Math.round((1 - efter / fore) * 100)} %`]);
+    rader.push([
+      fil,
+      `${(fore / 1024).toFixed(0)} kB`,
+      `${(efter / 1024).toFixed(0)} kB`,
+      `−${Math.round((1 - efter / fore) * 100)} %`
+    ]);
   }
 
   const bredd = [0, 1, 2, 3].map((i) =>
@@ -111,7 +157,8 @@ async function kor() {
   for (const r of rader) console.log(r.map((v, i) => v.padEnd(bredd[i])).join('  '));
 
   const summa = rader.reduce((s, r) => s + parseFloat(r[2]), 0);
-  console.log(`\n${rader.length} variabla snitt, ${summa.toFixed(0)} kB totalt`);
+  console.log(`\n${rader.length} snitt, ${summa.toFixed(0)} kB totalt`);
+  console.log(`alla ${KRAVDA.length} krävda tecken finns kvar i båda`);
 }
 
 kor();

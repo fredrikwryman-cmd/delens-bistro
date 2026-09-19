@@ -22,9 +22,15 @@
   --wrap: 1280px;
   --gutter: clamp(1rem, 4vw, 3rem);
 
-  /* Låsta typsnitt. Barlow bär sajten, Titan One är accent på två
-     ställen. Fördelningen och skälen står i PLAN.md avsnitt 13. */
-  --font: 'Barlow', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Låsta typsnitt. Mouse Memoirs bär sajten — brödtext och alla
+     mindre rubriker — och Titan One är accent på exakt två ställen:
+     hero-lockupen och lagerrubriken. Fördelningen och skälen står i
+     PLAN.md avsnitt 13.
+
+     MOUSE MEMOIRS HAR EN ENDA VIKT, 400. Det är inte en brist som
+     ska kringgås med syntetisk fetstil — se kommentaren vid
+     font-synthesis längre ned. */
+  --font: 'Mouse Memoirs', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: 'Titan One', ui-serif, Georgia, serif;
   --font-display-vikt: 400;
 
@@ -321,7 +327,7 @@ a {
 }
 
 .ingress {
-  max-width: 46ch;
+  max-width: 38ch;
   margin: 0 0 clamp(2rem, 5vw, 3.5rem);
   color: var(--dampad);
   font-size: var(--t-m);
@@ -574,13 +580,30 @@ input:focus-visible {
 /* Hela vägen ut till skärmkanten, inte bara en gutter förbi spalten:
    spaltens marginal mot vyn plus gutter. */
 .bleed-hoger {
-  /* width: auto krävs. Platshållaren sätter width: 100%, och då gör en
-     negativ marginal ingenting — bredden räknas fortfarande mot
-     föräldern och elementet blir inte bredare. */
-  width: auto;
-  margin-inline-end: calc(
-    (var(--gutter) * -1) - (100vw - min(100vw, var(--wrap))) / 2
-  );
+  /* Blödet är avståndet från spaltens innerkant ut till skärmkanten:
+     gutter plus halva marginalen mellan spalten och vyn. Det räknas ut
+     EN gång och används två — bredden läggs på, marginalen dras av.
+
+     BREDDEN MÅSTE VARA BESTÄMD, inte auto. Med en platshållare räckte
+     width: auto: en vanlig box blir bredare av en negativ marginal.
+     Ett foto är ett ersatt element, och ett ersatt element med auto i
+     båda led har ingen storlek alls förrän filen är avkodad — uppmätt
+     0 × 0 px medan bilden laddade, alltså exakt det hopp
+     platshållaren fanns för att hindra. Med en uträknad bredd står
+     rutan färdig från första bildrutan och höjden följer av
+     width/height-attributen.
+
+     max-width: none krävs av samma skäl: den globala img-regeln sätter
+     100 %, och 100 % räknas mot spalten — bilden hade kapats tillbaka
+     till spaltbredden och blödet försvunnit.
+
+     Att 100vw räknar in rullningslisten spelar ingen roll: .bestall
+     har overflow: hidden, så ett överskott på en rullningslists bredd
+     klipps och kan aldrig ge sidan vågrät rullning. */
+  --blod: calc(var(--gutter) + (100vw - min(100vw, var(--wrap))) / 2);
+  width: calc(100% + var(--blod));
+  max-width: none;
+  margin-inline-end: calc(var(--blod) * -1);
 }
 
 /* 4 · Kolumn som släpps ned ur baslinjen så raden inte blir en linjal. */
@@ -1114,7 +1137,7 @@ input:focus-visible {
 
 .bildtext {
   margin-block-start: 0.9rem;
-  max-width: 52ch;
+  max-width: 42ch;
   font-size: var(--t-s);
   line-height: var(--lh-s);
   letter-spacing: var(--ls-s);
@@ -1862,7 +1885,7 @@ input:focus-visible {
 .ratt__innehall {
   display: block;
   margin: 0.3rem 0 0;
-  max-width: 58ch;
+  max-width: 47ch;
   font-size: var(--t-xs);
   line-height: var(--lh-xs);
   letter-spacing: var(--ls-xs-gemen);
@@ -2828,172 +2851,36 @@ input:focus-visible {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   TYPSNITTSVÄXLAREN — BYGGVERKTYG
-   Tas bort i ett eget commit när ett snitt är valt, tillsammans med
-   de sex som inte valdes. Ingenting annat i sajten beror på den:
-   växlaren skriver bara om --font, --font-display och
-   --font-display-vikt på :root.
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══ SJÄLVHOSTADE TYPSNITT ═══════════════════════════════════════
 
-/* ── Självhostade snitt (Fontshare) ───────────────────────────── */
+   Två filer, 19 kB tillsammans, hämtade och delmängdade av
+   verktyg/typsnitt.mjs. Ingen css2-länk till Google längre: den
+   kontaktade Googles servrar från varje besökares webbläsare och var
+   dessutom renderingsblockerande i två steg — först CSS:en, sedan den
+   woff2 CSS:en pekade ut.
 
-/* Alla tre är variabla — en fil täcker hela viktspannet. Hämtade och
-   delmängdade av verktyg/typsnitt.mjs: 49 kB för tre familjer.
-   Webbläsaren laddar ned filen först när ett snitt faktiskt används,
-   så de sex som inte är valda kostar ingenting. */
+   font-display: swap, inte optional. Systemsnittet ritar texten
+   direkt och byts när filen är inne. Alternativet, optional, hade
+   låtit hela första besöket gå i systemsnitt om filen inte hann på
+   100 ms — och sajtens karaktär SITTER i snittet. En omflödning är
+   ett pris värt att betala en gång per besökare. */
 
 @font-face {
-  font-family: 'General Sans';
-  src: url('/typsnitt/general-sans.woff2') format('woff2');
-  font-weight: 200 700;
+  font-family: 'Mouse Memoirs';
+  src: url('/typsnitt/mouse-memoirs.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Cabinet Grotesk';
-  src: url('/typsnitt/cabinet-grotesk.woff2') format('woff2');
-  font-weight: 100 900;
+  font-family: 'Titan One';
+  src: url('/typsnitt/titan-one.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/typsnitt/satoshi.woff2') format('woff2');
-  font-weight: 300 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* ── Panelen ──────────────────────────────────────────────────── */
-
-/* Avstämningspanelen som satt i lagersektionen var störig av två skäl:
-   den låg mitt i innehållet och den gick inte att fälla ihop. Den här
-   ligger i ett hörn och är en knapp tills man öppnar den. */
-
-/* FLYTTAD IN I NAVBAREN. Chippet låg fast i nedre vänstra hörnet och
-   Fredrik hittade det inte, två gånger. Jag mätte upp det båda
-   gångerna — det fanns där, amber, överst i staplingen, mitt i vyn —
-   men ett fritt svävande chip i ett hörn läser som en kakruta eller
-   en supportbubbla, alltså som något man klickar bort utan att titta.
-
-   I navbaren är det inte längre ett flytande element utan en kontroll
-   bland de andra, på den plats man redan tittar när man vill styra
-   sajten. Det ligger dessutom i flödet, vilket gör det okänsligt för
-   det som brukar sopa bort hörnwidgetar. */
-.typval {
-  position: relative;
-  z-index: 960;
-  /* Panelens egen text ska ALDRIG byta snitt — då går den inte att
-     läsa medan man bläddrar. Bara namnen i listan sätts i sitt snitt,
-     för det är hela poängen med dem. */
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 13px;
-  line-height: 1.35;
-  letter-spacing: 0;
-  color: var(--offwhite);
-}
-
-.typval__knapp {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  background: rgb(14 14 14 / 0.92);
-  border: 1px solid var(--linje);
-  border-radius: 999px;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-}
-
-.typval__knapp::before {
-  content: 'Aa';
-  font-weight: 700;
-  color: var(--amber);
-}
-
-.typval__lista {
-  position: absolute;
-  /* Fälls NED från navbaren nu, inte upp från golvet. */
-  inset-block-start: calc(100% + 0.6rem);
-  inset-inline-end: 0;
-  width: 17rem;
-  margin: 0;
-  padding: 0.4rem;
-  list-style: none;
-  background: rgb(14 14 14 / 0.96);
-  border: 1px solid var(--linje);
-  border-radius: 0.7rem;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.8);
-}
-
-.typval__lista[hidden] {
-  display: none;
-}
-
-.typval__rad {
-  display: block;
-  width: 100%;
-  padding: 0.45rem 0.6rem;
-  background: none;
-  border: 0;
-  border-radius: 0.45rem;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-}
-
-.typval__rad[aria-checked='true'] {
-  background: rgb(232 163 61 / 0.16);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .typval__rad:hover {
-    background: rgb(242 235 224 / 0.08);
-  }
-}
-
-/* Namnet sätts i sitt eget snitt — det är jämförelsen. Siffran före
-   är tangenten som väljer det. */
-.typval__namn {
-  display: block;
-  font-family: var(--prov);
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.typval__roll {
-  display: block;
-  margin-block-start: 0.1rem;
-  font-size: 11px;
-  color: var(--dampad);
-}
-
-/* På smal skärm ryms inte snittets namn i navbaren — chippet sköt ut
-   listan i två rader och gjorde navbaren 94 px hög. Kvar blir Aa, som
-   räcker: listan säger ändå vilket snitt som är valt. */
-@media (max-width: 720px) {
-  .typval__etikett {
-    display: none;
-  }
-
-  .typval__lista {
-    width: min(15rem, calc(100vw - 2 * var(--gutter)));
-  }
-}
-
-.typval__tal {
-  display: inline-block;
-  min-width: 1.1em;
-  color: var(--amber);
-  font-weight: 700;
-}
 
 /* ═══ DOKUMENTSIDOR ═══════════════════════════════════════════════
    Integritetspolicyn och det som kommer efter den. En textsida har
@@ -3006,8 +2893,22 @@ input:focus-visible {
   padding-block-start: clamp(7rem, 14vw, 10rem);
 }
 
-/* Radlängden är det enda som avgör om en policy blir läst. 62ch ligger
-   i det spann där ögat hittar tillbaka till nästa rad utan att leta —
+/* Radlängden är det enda som avgör om en policy blir läst.
+
+   50ch, INTE 62. ch är bredden på siffran noll, och hur många
+   BOKSTÄVER som ryms per ch beror på snittet. I Barlow är nollan
+   0,55 em och gemenerna i snitt 0,50 — kvoten 0,91. I Mouse Memoirs
+   är nollan 0,40 och gemenerna 0,32 — kvoten 0,80. Samma ch-tal ger
+   alltså 13 procent fler tecken per rad, och uppmätt gick spalten
+   från omkring 68 tecken till 83. Över 75 börjar ögat tappa bort
+   vilken rad det kom ifrån.
+
+   Talet är nedskalat med 0,82 så raden landar på 68 tecken igen.
+   Samma faktor är lagd på .ingress, .bildtext och .ratt__innehall,
+   som bär löpande text av samma skäl. De ch-mått som sätter en
+   AVSIKTLIG radbrytning i en kort display-text står kvar orörda —
+   där är talet en form, inte en läsbarhetsgräns. Spannet där ögat
+   hittar tillbaka till nästa rad utan att leta —
    sajtens wrap på 1280 px hade gett över 150 tecken.
 
    MÅTTET GÄLLER TEXTEN, INTE RUBRIKEN. Först låg det på spalten som
@@ -3017,7 +2918,7 @@ input:focus-visible {
    mått — den får vara så bred den behöver. */
 .dokument__inner > p,
 .dokument__inner > h2 {
-  max-width: 62ch;
+  max-width: 50ch;
 }
 
 /* Sajtens största grad är gjord för hero-lockupen på en helskärm, inte
@@ -3059,21 +2960,4 @@ input:focus-visible {
   letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   color: var(--dampad);
-}
-
-/* ── Typsnittsväxlaren syns inte ──────────────────────────────────
-   Chippet var en mörk knapp på en mörk sida, nere i ett hörn, med
-   beställningsfältets amber direkt under sig som drog blicken. Det
-   fanns där hela tiden — Fredrik hittade det bara inte. En kontroll
-   som ska hittas ska se ut som en kontroll.                        */
-
-.typval__knapp {
-  background: var(--amber);
-  border-color: var(--amber);
-  color: var(--svart);
-  font-weight: 700;
-}
-
-.typval__knapp::before {
-  color: var(--svart);
 }
