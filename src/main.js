@@ -507,6 +507,18 @@ function riggaAvslojning() {
   });
 }
 
+/* ═══ KLISTERMÄRKENA ═════════════════════════════════════════════
+   Wobblet är dekor och får bara kosta något när det syns.          */
+
+function riggaStickers() {
+  const hero = $('#hero');
+  if (!hero) return;
+  new IntersectionObserver(
+    ([post]) => hero.setAttribute('data-synlig', String(post.isIntersecting)),
+    { threshold: 0 }
+  ).observe(hero);
+}
+
 /* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
 
 const scenLage = {
@@ -625,6 +637,7 @@ fyllStatus();
 fyllKontakt();
 byggSignaturer();
 byggMeny();
+riggaStickers();
 riggaMatpanel();
 riggaScroll();
 riggaLenis();

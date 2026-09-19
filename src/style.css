@@ -29,6 +29,49 @@
   --font-display-vikt: 400;
 
   --ut: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Typskalan ───────────────────────────────────────────────
+     Sju steg, inget annat. Tidigare låg sjutton olika grader i
+     sidan, elva av dem mellan 11 och 24 px — det var ingen skala
+     utan brus, och ögat läser brus som mall.
+
+     Stegen accelererar uppåt: 1,33 mellan de två minsta och 2,1
+     mellan de två största. Tät information behöver fin gradering,
+     display ska skrika. Ungefärliga grader vid 1440 px:
+
+       xs 12   s 17   m 23   l 34   xl 58   xxl 115   xxxl 240
+
+     Spärr och radavstånd hör till graden och sätts aldrig lösryckt.
+     Stor text får negativ spärr — bokstäver glesnar optiskt när de
+     växer — och liten text får positiv. Radavståndet går åt andra
+     hållet: tight uppe, luftigt nere.
+
+     --t-l är reserverat för rättnamnen i menyn och används inte än. */
+
+  --t-xs:   clamp(0.72rem, 0.69rem + 0.13vw, 0.8rem);
+  --t-s:    clamp(0.95rem, 0.91rem + 0.18vw, 1.06rem);
+  --t-m:    clamp(1.2rem, 1.06rem + 0.6vw, 1.45rem);
+  --t-l:    clamp(1.55rem, 1.2rem + 1.5vw, 2.1rem);
+  --t-xl:   clamp(2.1rem, 1.35rem + 3.3vw, 3.6rem);
+  --t-xxl:  clamp(2.9rem, 1.2rem + 7.4vw, 7.2rem);
+  --t-xxxl: clamp(3.4rem, 0.2rem + 16.5vw, 15rem);
+
+  --lh-xs: 1.45;   --ls-xs: 0.09em;
+  --lh-s: 1.55;    --ls-s: 0.005em;
+  --lh-m: 1.35;    --ls-m: 0em;
+  --lh-l: 1.15;    --ls-l: -0.01em;
+  --lh-xl: 1;      --ls-xl: -0.018em;
+  --lh-xxl: 0.94;  --ls-xxl: -0.025em;
+  --lh-xxxl: 0.78; --ls-xxxl: -0.032em;
+
+  /* ── Vertikalrytm ────────────────────────────────────────────
+     Tre klasser i stället för samma 144 px på sex av nio sektioner.
+     Uniform padding är det säkraste tecknet på att ingen tagit
+     ställning. Spannet är 3:1 mellan tät och vidöppen.            */
+
+  --luft-tat: clamp(2.5rem, 5vw, 4rem);
+  --luft: clamp(4rem, 9vw, 7.5rem);
+  --luft-vid: clamp(6rem, 14vw, 12rem);
 }
 
 *,
@@ -47,7 +90,13 @@ body {
   background: var(--svart);
   color: var(--offwhite);
   font-family: var(--font);
-  line-height: 1.55;
+  /* Basgraden måste vara skalans s-steg. Låg den kvar på webbläsarens
+     16 px fanns två brödtextgrader sida vid sida — 16 för det som
+     ärvde och 17 för det som satte token. Två grader som skiljer en
+     pixel är exakt den sortens slarv som får en sida att läsa som mall. */
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   /* Plats för det fasta beställningsfältet. */
@@ -99,8 +148,11 @@ a {
   inset-inline: 0;
   transform: translateY(-100%);
   text-align: center;
-  font: 700 clamp(0.9rem, 2.2vw, 1.4rem) / 1 var(--font);
-  letter-spacing: 0.08em;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   color: var(--amber);
 }
 
@@ -111,8 +163,11 @@ a {
   inset-inline: 0;
   padding-block-start: 0.4rem;
   text-align: center;
-  font: 500 0.7rem/1.2 var(--font);
-  letter-spacing: 0.04em;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   color: var(--dampad);
 }
 
@@ -124,7 +179,9 @@ a {
   display: none;
 }
 .ph--inline::before {
-  font-size: 0.6rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
 }
 
 .ph--bred {
@@ -135,10 +192,16 @@ a {
    Svart mot kol är ett steg på några procent. Utan amber-kanten
    skulle vågformen inte synas alls.                              */
 
+/* Ingen generell paddning. Varje sektion får en av de tre
+   luftklasserna, eller sätter sin egen om den har en särskild form
+   (hero är 100svh, lagersektionen är ett scrollspår). */
 .sec {
   position: relative;
-  padding-block: clamp(4rem, 11vw, 9rem);
 }
+
+.sec--tat    { padding-block: var(--luft-tat); }
+.sec--normal { padding-block: var(--luft); }
+.sec--vid    { padding-block: var(--luft-vid); }
 
 .sec--svart { background: var(--svart); }
 .sec--kol   { background: var(--kol); }
@@ -174,14 +237,16 @@ a {
   margin: 0 0 1rem;
   font-family: var(--font);
   font-weight: 800;
-  font-size: clamp(2rem, 6vw, 4.5rem);
-  line-height: 0.98;
-  letter-spacing: -0.015em;
+  font-size: var(--t-xl);
+  line-height: var(--lh-xl);
+  letter-spacing: var(--ls-xl);
   text-transform: uppercase;
 }
 
 .rubrik--stor {
-  font-size: clamp(2.6rem, 9vw, 7rem);
+  font-size: var(--t-xxl);
+  line-height: var(--lh-xxl);
+  letter-spacing: var(--ls-xxl);
 }
 
 .rubrik--mork {
@@ -198,7 +263,9 @@ a {
   max-width: 46ch;
   margin: 0 0 clamp(2rem, 5vw, 3.5rem);
   color: var(--dampad);
-  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
 }
 
 .ingress--mork {
@@ -230,20 +297,34 @@ a {
   background: var(--amber);
   color: var(--svart);
   font-weight: 800;
-  font-size: clamp(0.7rem, 1.3vw, 0.95rem);
-  letter-spacing: 0.06em;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   text-transform: uppercase;
   border-radius: 999px;
   white-space: nowrap;
   animation: wobbla 6s var(--ut) infinite;
 }
 
-.sticker--a { inset-block-start: 18%; inset-inline-start: 6%; rotate: -9deg; }
-.sticker--b { inset-block-start: 30%; inset-inline-end: 7%; rotate: 8deg; animation-delay: -3s; }
+/* --r måste sättas per märke. Var den osatt föll keyframen tillbaka
+   på -9deg för båda, och b:s deklarerade 8deg skrevs över av
+   animationen — de lutade åt samma håll i stället för mot varandra. */
+.sticker--a { --r: -9deg; inset-block-start: 18%; inset-inline-start: 6%; }
+.sticker--b { --r: 8deg; inset-block-start: 30%; inset-inline-end: 7%; animation-delay: -3s; }
 
 @keyframes wobbla {
-  0%, 100% { rotate: var(--r, -9deg); }
-  50%      { rotate: calc(var(--r, -9deg) + 3deg); }
+  0%, 100% { rotate: var(--r); }
+  50%      { rotate: calc(var(--r) + 3deg); }
+}
+
+/* Löpande rörelse utanför vyn är bortkastad. Märkena står stilla tills
+   hero är synlig. */
+.sticker {
+  animation-play-state: paused;
+}
+
+.hero[data-synlig='true'] .sticker {
+  animation-play-state: running;
 }
 
 /* ── Knappar ───────────────────────────────────────────────────── */
@@ -257,7 +338,9 @@ a {
   background: var(--amber);
   color: var(--svart);
   font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   text-transform: uppercase;
   text-decoration: none;
   border-radius: 999px;
@@ -266,7 +349,9 @@ a {
 
 .knapp--stor {
   padding: 1.1rem 2.6rem;
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -337,8 +422,9 @@ input:focus-visible {
 .loader__text {
   margin: 0;
   font-weight: 800;
-  font-size: clamp(1rem, 3vw, 1.5rem);
-  letter-spacing: 0.06em;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   text-transform: uppercase;
   color: var(--offwhite);
 }
@@ -391,16 +477,18 @@ input:focus-visible {
 .nav__wordmark {
   font-family: var(--font);
   font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: 0.02em;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
 }
 
 .nav__links {
   display: flex;
   gap: clamp(0.8rem, 2.5vw, 2rem);
-  font-size: 0.85rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   font-weight: 700;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -442,9 +530,10 @@ input:focus-visible {
 
 .hero__outline {
   display: block;
-  font-size: clamp(3.5rem, 19vw, 15rem);
+  font-size: var(--t-xxxl);
+  line-height: var(--lh-xxxl);
+  letter-spacing: var(--ls-xxxl);
   font-weight: var(--font-display-vikt);
-  letter-spacing: -0.03em;
   color: transparent;
   -webkit-text-stroke: clamp(1px, 0.22vw, 3px) var(--offwhite);
 }
@@ -454,9 +543,10 @@ input:focus-visible {
   position: relative;
   z-index: 5;
   margin-block-start: -0.08em;
-  font-size: clamp(2.6rem, 13vw, 10rem);
+  font-size: var(--t-xxl);
+  line-height: var(--lh-xxl);
+  letter-spacing: var(--ls-xxl);
   font-weight: var(--font-display-vikt);
-  letter-spacing: -0.02em;
   color: var(--amber);
 }
 
@@ -491,7 +581,9 @@ input:focus-visible {
   position: absolute;
   inset-block-end: -2.5rem;
   max-width: 24ch;
-  font-size: clamp(0.85rem, 1.4vw, 1rem);
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   color: var(--dampad);
 }
 
@@ -522,22 +614,22 @@ input:focus-visible {
 
   .nav__links {
     gap: 0.75rem;
-    font-size: 0.7rem;
+    font-size: var(--t-xs);
+    line-height: var(--lh-xs);
+    letter-spacing: var(--ls-xs);
     white-space: nowrap;
   }
 
   /* Hela namnet på en rad, annars blir navigationen dubbelt så hög. */
   .nav__wordmark {
-    font-size: 0.95rem;
+    font-size: var(--t-s);
+    line-height: var(--lh-s);
+    letter-spacing: var(--ls-s);
     white-space: nowrap;
   }
 }
 
 /* ═══ 2 · ÖPPET NU ════════════════════════════════════════════ */
-
-.status {
-  padding-block: clamp(2.5rem, 6vw, 4rem);
-}
 
 .status__inner {
   display: flex;
@@ -557,8 +649,9 @@ input:focus-visible {
   gap: 0.75rem;
   margin: 0;
   font-weight: 800;
-  font-size: clamp(1rem, 2.4vw, 1.5rem);
-  letter-spacing: 0.02em;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   text-transform: uppercase;
 }
 
@@ -576,7 +669,9 @@ input:focus-visible {
 .status__tel {
   color: var(--amber);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   text-transform: uppercase;
   text-decoration: none;
   border-block-end: 1px solid currentColor;
@@ -616,8 +711,9 @@ input:focus-visible {
 .kort__etikett {
   display: block;
   margin-block-start: 0.6rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   color: var(--dampad);
 }
@@ -630,8 +726,9 @@ input:focus-visible {
 .bildtext {
   margin-block-start: 0.9rem;
   max-width: 52ch;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   color: rgb(242 235 224 / 0.78);
   border-inline-start: 2px solid var(--amber);
   padding-inline-start: 0.9rem;
@@ -645,6 +742,8 @@ input:focus-visible {
    Fem lager på samma kvadratiska duk, staplade i monterad
    position. Scrollen driver dem isär och vrider scenen.         */
 
+/* Lagersektionen är ett scrollspår, inte en textsektion. Den får
+   ingen luftklass — spårets höjd är hela dess form. */
 .lager {
   padding-block: 0;
 }
@@ -677,9 +776,9 @@ input:focus-visible {
   gap: 0.02em;
   font-family: var(--font-display);
   font-weight: var(--font-display-vikt);
-  font-size: clamp(2.2rem, 11vw, 9rem);
-  line-height: 0.82;
-  letter-spacing: -0.03em;
+  font-size: var(--t-xxl);
+  line-height: var(--lh-xxl);
+  letter-spacing: var(--ls-xxl);
   text-transform: uppercase;
   text-align: center;
   pointer-events: none;
@@ -765,15 +864,18 @@ input:focus-visible {
   border: 1px solid var(--linje);
   border-radius: 0.6rem;
   backdrop-filter: blur(8px);
-  font-size: 0.78rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
 }
 
 .matpanel[hidden] { display: none; }
 
 .matpanel h3 {
   margin: 0 0 0.6rem;
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   color: var(--dampad);
 }
@@ -787,7 +889,9 @@ input:focus-visible {
   display: block;
   margin-block-start: 0.5rem;
   color: var(--dampad);
-  font-size: 0.72rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
 }
 
 .matpanel output { float: inline-end; color: var(--offwhite); }
@@ -983,9 +1087,10 @@ input:focus-visible {
 .dragspel__namn {
   display: block;
   font-weight: 800;
-  font-size: clamp(1rem, 1.5vw, 1.35rem);
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -997,22 +1102,26 @@ input:focus-visible {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--amber);
-  font-size: 0.95rem;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
 }
 
 .dragspel__pitch {
   display: block;
   margin-block-start: 0.2rem;
   max-width: 34ch;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   color: rgb(242 235 224 / 0.8);
 }
 
 .dragspel__hjalp {
   margin: 1rem 0 0;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   color: var(--dampad);
 }
@@ -1141,8 +1250,11 @@ input:focus-visible {
   border: 1px solid rgb(20 20 20 / 0.18);
   border-radius: 999px;
   color: var(--mork-text);
-  font: 800 0.78rem/1 var(--font);
-  letter-spacing: 0.06em;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
@@ -1176,9 +1288,10 @@ input:focus-visible {
 .meny__underrubrik {
   max-width: 46rem;
   margin: 0 auto 1.4rem;
-  font-size: 0.75rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   font-weight: 800;
-  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mork-text-svag);
 }
@@ -1234,8 +1347,9 @@ input:focus-visible {
 
 .ratt__namn {
   font-weight: 800;
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
-  letter-spacing: 0.005em;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   text-transform: uppercase;
 }
 
@@ -1245,8 +1359,9 @@ input:focus-visible {
   background: var(--amber);
   color: var(--svart);
   border-radius: 999px;
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   vertical-align: 0.15em;
 }
 
@@ -1258,7 +1373,9 @@ input:focus-visible {
 
 .ratt__pris {
   font-weight: 800;
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   transition: color 220ms var(--ut);
@@ -1268,8 +1385,9 @@ input:focus-visible {
   display: block;
   margin: 0.25rem 0 0;
   max-width: 54ch;
-  font-size: 0.88rem;
-  line-height: 1.5;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   color: var(--mork-text-svag);
   transition: color 220ms var(--ut);
 }
@@ -1459,9 +1577,10 @@ input:focus-visible {
   background: var(--offwhite);
   color: var(--svart);
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   font-weight: 800;
-  letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1477,8 +1596,9 @@ input:focus-visible {
 
 .hitta__block h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   color: var(--amber);
 }
@@ -1550,7 +1670,9 @@ input:focus-visible {
   margin: 0 0 0.4rem;
   font-family: var(--font);
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
   text-transform: uppercase;
 }
 
@@ -1561,8 +1683,9 @@ input:focus-visible {
   z-index: 2;
   margin: clamp(2rem, 5vw, 3rem) 0 0;
   text-align: center;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   text-transform: uppercase;
   color: rgb(242 235 224 / 0.35);
 }
@@ -1585,8 +1708,9 @@ input:focus-visible {
 
 .orderbar__text {
   font-weight: 800;
-  font-size: clamp(0.78rem, 1.6vw, 0.95rem);
-  letter-spacing: 0.04em;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
   text-transform: uppercase;
 }
 
@@ -1594,7 +1718,9 @@ input:focus-visible {
   background: var(--svart);
   color: var(--amber);
   padding: 0.6rem 1.3rem;
-  font-size: 0.8rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
 }
 
 @media (hover: hover) and (pointer: fine) {
