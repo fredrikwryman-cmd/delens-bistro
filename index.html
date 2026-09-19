@@ -85,7 +85,7 @@
 
     <main id="top">
       <!-- ═══ 1 · HERO — svart ═════════════════════════════════════ -->
-      <section class="sec sec--rod hero" id="hero">
+      <section class="sec sec--svart hero" id="hero">
         <div class="hero__inner">
           <h1 class="hero__title">
             <span class="hero__outline" data-reveal>Delens</span>
@@ -133,17 +133,16 @@
       </section>
 
       <!-- ═══ 2 · ÖPPET NU — kol ═══════════════════════════════════ -->
-      <section class="sec sec--tat sec--kol status" id="status" style="--wave-fill: var(--rod)">
-        <!-- Skarv förut, när hero var svart: svart mot kol är fyra
-             procents ljushetsskillnad och en våg syns inte i det steget.
-             Nu är hero djuprött. Djuprött mot kol skiljer sig knappt i
-             ljushet heller — 1,41 — men kraftigt i KULÖR, och då läser
-             siluetten. Samma regel som förut, annat utfall: en våg är
-             ett snitt mellan två tydligt skilda toner. -->
-        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-          <path class="wave__body" d="M0,52 C240,12 500,80 760,40 C1000,4 1230,68 1440,32 L1440,0 L0,0 Z" />
-          <path class="wave__edge" d="M0,52 C240,12 500,80 760,40 C1000,4 1230,68 1440,32" />
-        </svg>
+      <section class="sec sec--tat sec--kol status" id="status">
+        <!-- Här stod en våg medan hero var djuprött: röd mot kol skiljer
+             sig knappt i ljushet men kraftigt i kulör, och då läser
+             siluetten. Hero är svart igen, och svart mot kol är fyra
+             procents ljushetsskillnad utan kulörskillnad att luta sig
+             mot — en våg syns inte i det steget, bara dess amber-kant.
+             Skarv igen, alltså. Regeln är densamma hela vägen: en våg
+             är ett snitt mellan två tydligt skilda toner, och där
+             tonerna ligger nära är ljuset hela händelsen. -->
+        <span class="skarv" aria-hidden="true"></span>
         <div class="status__inner">
           <p class="status__now" id="status-now">
             <span class="status__dot" id="status-dot"></span>
@@ -430,18 +429,26 @@
            inte i det steget, bara dess amber-kant. Skarv i stället. -->
       <span class="skarv" aria-hidden="true"></span>
 
-      <!-- Jongleringen. Tre märken kastas i båge, förskjutna 0,55 s.
-           Det är de märken som redan står på sidan — de ligger i cachen,
-           så numret kostar noll extra byte. De vilande maskotarna hade
-           kostat 129 kB för samma rörelse.
+      <!-- Jongleringen. Tre bilder kastas i båge, förskjutna 0,55 s.
 
-           Märkena går att gripa mitt i flykten och kasta i väg; se
+           MAT, INTE MASKOTAR. Här flög tre klistermärken förut, och en
+           maskot med ben och skor som virvlar 600 grader läser som en
+           figur som ramlat omkull — inte som något någon kastar. En
+           köttpuck som snurrar läser som mat i luften.
+
+           Urvalet styrs av att rotationen måste SYNAS. Köttpucken är
+           tagen snett uppifrån, så dess kant vrider sig; ostskivan har
+           fyra hörn; salladsbladet har en siluett som aldrig upprepar
+           sig. Tomatskivan är utesluten med flit — en perfekt cirkel
+           som snurrar ser stillastående ut.
+
+           Bilderna går att gripa mitt i flykten och kasta i väg; se
            tröghetskastet i main.js. Därför pointer-events auto på dem
            trots att behållaren är genomsläpplig. -->
       <div class="jonglering" id="jonglering" aria-hidden="true">
-        <img class="jongl kastbar" src="/bilder/marken/delens-not.webp" alt="" width="400" height="417" loading="lazy" decoding="async" />
-        <img class="jongl kastbar" src="/bilder/marken/delens-smash.webp" alt="" width="400" height="428" loading="lazy" decoding="async" />
-        <img class="jongl kastbar" src="/bilder/marken/delens-kock.webp" alt="" width="400" height="429" loading="lazy" decoding="async" />
+        <img class="jongl kastbar" src="/bilder/ingredienser/kott.webp" alt="" width="200" height="128" loading="lazy" decoding="async" />
+        <img class="jongl kastbar" src="/bilder/ingredienser/ost.webp" alt="" width="200" height="121" loading="lazy" decoding="async" />
+        <img class="jongl kastbar" src="/bilder/ingredienser/sallad.webp" alt="" width="200" height="171" loading="lazy" decoding="async" />
       </div>
 
       <div class="wrap foot__inner">

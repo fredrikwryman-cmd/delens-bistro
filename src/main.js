@@ -1421,7 +1421,15 @@ const KEDJA = {
   huvud: 16,
   segBas: 38,
   segSteg: 3.2,
-  knutar: ['A1', 'A2', 'A4', 'A5']
+  /* Knutarna var burgarlagren A1, A2, A4 och A5 — bilder skurna för
+     lagerscenen, där de visas 500 px breda. I en knut på 30 px blev de
+     färgfläckar. Ingredienserna är frilagda och fotade något uppifrån
+     och tål att visas små.
+
+     Andra varianten av varje motiv, eftersom första varianten
+     jonglerar i footern. Samma bild ska inte stå på två ställen
+     samtidigt. */
+  knutar: ['kott-2', 'ost-2', 'sallad-2', 'tomat-2']
 };
 
 function riggaKedja() {
@@ -1439,7 +1447,7 @@ function riggaKedja() {
     } else if (i % 2 === 1 && KEDJA.knutar[(i - 1) / 2]) {
       el.className = 'led led--knut';
       const bild = document.createElement('img');
-      bild.src = `/bilder/lager/${KEDJA.knutar[(i - 1) / 2]}.webp`;
+      bild.src = `/bilder/ingredienser/${KEDJA.knutar[(i - 1) / 2]}.webp`;
       bild.alt = '';
       bild.decoding = 'async';
       el.append(bild);
@@ -1456,6 +1464,10 @@ function riggaKedja() {
   let malY = -200;
   let over = false;
   let avstangd = false;
+  // Vilar handen? Då finns inget släp att visa och inget att rita om.
+  let vilar = true;
+  let vilotimer = 0;
+  const VILA_MS = 420;
 
   window.addEventListener(
     'pointermove',
@@ -1463,6 +1475,15 @@ function riggaKedja() {
       if (e.pointerType !== 'mouse') return;
       malX = e.clientX;
       malY = e.clientY;
+      if (vilar) {
+        vilar = false;
+        scen.removeAttribute('data-vilar');
+      }
+      clearTimeout(vilotimer);
+      vilotimer = setTimeout(() => {
+        vilar = true;
+        scen.setAttribute('data-vilar', 'true');
+      }, VILA_MS);
       const t = e.target;
       const nu = !!(
         t &&
@@ -1502,8 +1523,19 @@ function riggaKedja() {
     if (e.key === 'Escape' || e.key === 'Tab') slaAv();
   });
 
+  scen.setAttribute('data-vilar', 'true');
+
   varvSteg.push((nu, dt) => {
     if (flikenDold || avstangd) return;
+    // I vila, när huvudet hunnit fram, finns ingenting att räkna om.
+    // Leden ligger redan på sin punkt och släpet är bortstonat.
+    if (
+      vilar &&
+      Math.abs(leder[0].x - malX) < 0.5 &&
+      Math.abs(leder[0].y - malY) < 0.5
+    ) {
+      return;
+    }
     for (let i = 0; i < leder.length; i++) {
       const led = leder[i];
       const mx = i === 0 ? malX : leder[i - 1].x;

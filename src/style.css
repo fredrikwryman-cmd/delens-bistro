@@ -875,16 +875,11 @@ input:focus-visible {
 
 /* ═══ 2 · ÖPPET NU ════════════════════════════════════════════ */
 
-/* Statusremsan är sajtens tunnaste sektion, och vågen måste rätta sig
-   efter den — inte tvärtom. Full höjd (90 px) plus scrubbens 1,5 blev
-   134 px våg i en remsa vars hela luft är 64. Uppmätt nådde den röda
-   fyllningen 69 px förbi textens överkant och målade över öppettiderna.
-   En tunn sektion får en tunn våg. z-index är bältet till hängslena:
-   texten ligger över vågen även om någon ändrar höjderna igen. */
-.status .wave {
-  height: clamp(26px, 3vw, 46px);
-}
-
+/* Statusremsan är sajtens tunnaste sektion: hela dess luft är 64 px,
+   och skarven ovanför den är upp till 132. Avdelaren är alltså högre
+   än sektionen den inleder, och utan z-index här lägger sig dess
+   skugga över öppettiderna. Samma fälla fanns när det stod en våg
+   här i stället — då nådde fyllningen 69 px förbi textens överkant. */
 .status__inner {
   position: relative;
   z-index: 3;
@@ -2427,12 +2422,28 @@ input:focus-visible {
   will-change: transform;
 }
 
-/* Huvudet är en ring, inte en prick: den lägger sig runt det man
-   pekar på i stället för att täcka det. */
+/* Huvudet är en ring: den lägger sig RUNT det man pekar på i stället
+   för att täcka det.
+
+   Ringen låg först i kedjan och målades därmed underst. När pekaren
+   står still hinner alla åtta leden ikapp och lägger sig på samma
+   punkt — och då stack ingredienserna över ringen och pekaren såg ut
+   som en hög, inte som en ring. Huvudet ligger nu över resten.
+   Släpet syns ändå så fort handen rör sig; det är då kedjan är en
+   kedja. */
 .led--huvud {
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
+  z-index: 2;
+  /* Ringen måste vara STÖRRE än knutarna, inte bara ligga över dem.
+     När handen står still hinner alla åtta leden ikapp och lägger sig
+     på samma punkt; en ring på 34 px hamnade då inne i en tomatskiva
+     på 54 och lästes som en detalj på tomaten. Vid 68 mot 52 omsluter
+     den högen i stället, och pekaren är en ring i vila precis som i
+     rörelse. Att ringen samlar ingredienserna inuti sig är dessutom
+     det enda läget där kedjan står stilla nog att se ut som något —
+     en tallrik. */
+  width: 68px;
+  height: 68px;
+  margin: -34px 0 0 -34px;
   border: 2px solid var(--amber);
   border-radius: 999px;
   transition:
@@ -2443,16 +2454,22 @@ input:focus-visible {
 }
 
 .kedja[data-over='true'] .led--huvud {
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
   background: rgb(232 163 61 / 0.16);
 }
 
+/* Knutarna var 30 px. En köttpuck på 30 px är en brun fläck — den
+   läser inte som mat, och då är det ingen idé att den är mat. 54 ger
+   motivet plats att kännas igen utan att kedjan blir en vägg. */
 .led--knut {
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  /* Ingredienserna är fotograferade, inte ritade. En tät skugga
+     skiljer dem från underlaget på både svart och off-white. */
+  filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.55));
 }
 
 .led--knut img {
@@ -2468,6 +2485,28 @@ input:focus-visible {
   margin: -3.5px 0 0 -3.5px;
   border-radius: 999px;
   background: rgb(232 163 61 / 0.55);
+}
+
+/* SLÄPET FINNS BARA NÄR HANDEN RÖR SIG.
+
+   Knutarna växte till 52 px för att läsas som mat, och då blev de
+   också något som TÄCKER. När pekaren står still hinner alla åtta
+   leden ikapp och lägger sig på samma punkt, och en ogenomskinlig
+   tomatskiva på 52 px låg över precis det man pekade på — värst i
+   menyn, där man pekar på text man läser.
+
+   Ett släp är en följd av rörelse. Finns ingen rörelse finns inget
+   släp: maten tonar bort och kvar står ringen, ensam, vilket också
+   är vad en pekare ska vara. Den tonar in igen vid första rörelsen.
+   Kedjan slutar dessutom ritas om helt i viloläge. */
+.led--knut,
+.led--prick {
+  transition: opacity 260ms var(--ut);
+}
+
+.kedja[data-vilar='true'] .led--knut,
+.kedja[data-vilar='true'] .led--prick {
+  opacity: 0;
 }
 
 /* ── 12 · TRÖGHETSKAST ─────────────────────────────────────────── */
