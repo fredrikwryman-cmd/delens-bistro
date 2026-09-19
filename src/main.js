@@ -1440,10 +1440,16 @@ function riggaKedja() {
   scen.setAttribute('aria-hidden', 'true');
 
   const leder = [];
+  let hand = null;
   for (let i = 0; i < 8; i++) {
     const el = document.createElement('span');
     if (i === 0) {
       el.className = 'led led--huvud';
+      hand = document.createElement('img');
+      hand.src = '/bilder/granssnitt/muspekare.webp';
+      hand.alt = '';
+      hand.decoding = 'async';
+      el.append(hand);
     } else if (i % 2 === 1 && KEDJA.knutar[(i - 1) / 2]) {
       el.className = 'led led--knut';
       const bild = document.createElement('img');
@@ -1458,7 +1464,6 @@ function riggaKedja() {
     leder.push({ el, x: -200, y: -200 });
   }
   document.body.append(scen);
-  document.documentElement.classList.add('kedja-pa');
 
   let malX = -200;
   let malY = -200;
@@ -1518,6 +1523,21 @@ function riggaKedja() {
     scen.remove();
     avstangd = true;
   };
+
+  /* Systemmarkören döljs FÖRST när handen är målad, inte när kedjan
+     byggs. Huvudet är en bild nu, och mellan att kedjan skapas och att
+     bilden hunnit avkodas fanns ett glapp där cursor: none redan
+     gällde men ingenting ritats — alltså en sida helt utan synlig
+     pekare. Kort, men det är just det läget som inte får uppstå.
+
+     Går bilden inte att ladda alls rivs hela kedjan: ett släp utan
+     huvud är ingen pekare, och då ska systemets egen stå kvar. */
+  hand
+    .decode()
+    .then(() => {
+      if (!avstangd) document.documentElement.classList.add('kedja-pa');
+    })
+    .catch(slaAv);
   window.addEventListener('keydown', (e) => {
     if (avstangd) return;
     if (e.key === 'Escape' || e.key === 'Tab') slaAv();
