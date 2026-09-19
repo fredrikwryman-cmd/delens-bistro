@@ -331,6 +331,22 @@ a {
   );
 }
 
+/* Text som bara finns för skärmläsaren. Inte display: none och inte
+   visibility: hidden — båda tar bort texten ur tillgänglighetsträdet
+   också, alltså från dem den är till för. En ruta på en pixel som
+   klipps bort finns kvar för uppläsning och för sidsökning. */
+.visuellt-dold {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ── Typografi ─────────────────────────────────────────────────── */
 
 .rubrik {
@@ -1195,11 +1211,6 @@ input:focus-visible {
   letter-spacing: var(--ls-xs);
   text-transform: uppercase;
   color: var(--dampad);
-}
-
-.vaggmalning {
-  margin: clamp(2.5rem, 6vw, 4.5rem) 0 0;
-  max-width: 62rem;
 }
 
 .bildtext {
@@ -2076,7 +2087,33 @@ input:focus-visible {
 }
 
 
-/* ═══ 7 · HITTA HIT ═══════════════════════════════════════════ */
+/* ═══ 7 · PERSONALEN ══════════════════════════════════════════ */
+
+/* Texten i EN spalt, inte två. Sektionen har ett enda jobb — att säga
+   vilka de fem är — och en tvåspaltig uppställning hade gjort läsaren
+   till redaktör: vilken spalt först? Rubriken, tre stycken, en bild.
+
+   Måttet står i ch och är räknat på samma kvot som resten av sidan
+   efter snittbytet; se kommentaren vid dokumentspalten. */
+.personal__text {
+  max-width: 50ch;
+  margin-block-start: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.personal__text p {
+  margin-block: 0 1.1rem;
+  color: rgb(242 235 224 / 0.86);
+}
+
+/* Bilden är sektionens avslut och får ligga bredare än texten —
+   62rem är samma tak som väggmålningen hade i rebranden, så de två
+   breda bilderna på sidan håller samma mått. */
+.personal__bild {
+  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+  max-width: 62rem;
+}
+
+/* ═══ 8 · HITTA HIT ═══════════════════════════════════════════ */
 
 /* Kartan är en bild med en länk, inte en inbäddning. Se kommentaren i
    index.html och integritetspolicyn — sajten sätter inga kakor, och det
@@ -2217,10 +2254,40 @@ input:focus-visible {
 
 /* ═══ 9 · FOOTER ══════════════════════════════════════════════ */
 
+/* HÖJDEN ÄR SATT AV KASTBANAN, inte av innehållet.
+
+   Footern var 436 px hög medan kastets högsta punkt låg på 0,6 gånger
+   vyhöjden — 540 px på en 900 px skärm. Ingredienserna gick alltså ur
+   bild i överkant varje varv, och det som såg ut som ett kast var en
+   bit som försvann och kom tillbaka.
+
+   Två ändringar, båda behövs. Här: en minsta höjd. I main.js: bågen
+   räknas mot SCENENS höjd i stället för mot vyns, så den kan inte bli
+   högre än rummet den kastas i oavsett vad någon ändrar här.
+
+   68svh, inte vh. Adressfältet på en telefon äter av vh och gör
+   footern högre än skärmen i just det ögonblick fältet är utfällt.
+   Spannet 26–44rem håller den rimlig på en låg bred skärm och på en
+   mycket hög.
+
+   align-content: center lägger innehållet i mitten av den nya höjden i
+   stället för att lämna ett tomt fält under det. Kastet passerar då
+   bakom texten, vilket är hela poängen med att ha det där. */
 .foot {
   position: relative;
   overflow: hidden;
   padding-block-end: clamp(3rem, 8vw, 5rem);
+}
+
+/* Höjden gäller BARA den footer som har ett kast i sig. Policysidans
+   footer bär samma klass men ingen jonglering, och där hade 68svh
+   varit ett halvtomt svart fält utan uppgift. :has() frågar efter
+   scenen i stället för att lita på att någon minns att sätta en
+   extra klass på rätt av två footrar. */
+.foot:has(.jonglering) {
+  min-height: clamp(26rem, 68svh, 44rem);
+  display: grid;
+  align-content: center;
 }
 
 .foot__strossel {
@@ -2260,6 +2327,70 @@ input:focus-visible {
 
 .foot__inner p { margin: 0 0 0.3rem; color: var(--dampad); }
 
+/* ── Sociala knappar ───────────────────────────────────────────── */
+
+/* 48 px knapp runt en 24 px ikon. Ikonen är märkets form och ska inte
+   växa; det som ska växa är ytan man träffar. */
+.sociala {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.6rem 0 0.9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.social {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--linje);
+  color: var(--offwhite);
+  /* Exakt egenskaper, aldrig all. En transition på all hade fångat
+     upp border-radius och width också, och båda ligger på layout. */
+  transition:
+    transform 160ms var(--ut),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.social__ikon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  /* Ikonen ärver knappens färg och följer därmed med i hovern utan en
+     egen regel. */
+}
+
+/* Nedtryckningen ligger utanför hover-grinden med flit: den gäller
+   fingret lika mycket som muspekaren, och den är enda kvittot en
+   ikonknapp kan ge på att den hörde tryckningen. 0,97 — tillräckligt
+   för att kännas, för lite för att läsa som en animation. */
+.social:active {
+  transform: scale(0.97);
+}
+
+.social:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .social:hover {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: var(--svart);
+  }
+}
+
+/* INGEN VERSALISERING HÄR LÄNGRE. Raden bär ett egennamn — AiM
+   Studios — och text-transform: uppercase hade gjort det till AIM
+   STUDIOS. Ett varumärke med avsiktligt blandad skrivning tål inte
+   att en stilregel skriver om det; det är samma sak som att ändra
+   namnet. Versalerna satt där för att raden skulle läsa som en
+   stämpel, och den rollen bär spärren och den dämpade färgen. */
 .foot__not {
   position: relative;
   z-index: 2;
@@ -2268,7 +2399,6 @@ input:focus-visible {
   font-size: var(--t-s);
   line-height: var(--lh-s);
   letter-spacing: var(--ls-s);
-  text-transform: uppercase;
   color: rgb(242 235 224 / 0.35);
 }
 
@@ -2899,6 +3029,14 @@ input:focus-visible {
   .jonglering,
   .kedja {
     display: none;
+  }
+
+  /* Footerns extra höjd finns BARA för kastbanan. Är kastet borta
+     — och det är det, raden ovanför tar bort scenen — så är de 612
+     pixlarna ett tomt svart fält utan uppgift. Höjden följer med
+     rörelsen ut. */
+  .foot:has(.jonglering) {
+    min-height: 0;
   }
 
   .rad-mask > span {

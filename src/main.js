@@ -195,6 +195,7 @@ function fyllKontakt() {
   for (const sel of ['#hitta-fb', '#foot-fb']) {
     satt(sel, (el) => (el.href = kontakt.facebook));
   }
+  satt('#foot-ig', (el) => (el.href = kontakt.instagram));
   for (const sel of ['#bestall-lank', '#orderbar-lank']) {
     satt(sel, (el) => (el.href = kontakt.bestall));
   }
@@ -1075,7 +1076,7 @@ function riggaGlans() {
 }
 
 /* ═══ 4 · FOOTERJONGLERINGEN ═════════════════════════════════════
-   Tre märken i båge. Apex 38–60 vh, 0,9–1,3 s upp med power2.out,
+   Tre märken i båge. Apex 50–78 % av footerns höjd, 0,9–1,3 s upp med power2.out,
    nedvägen 1,15–1,5 gånger så lång med power2.in, 220–600 graders
    rotation och drift i x. Förskjutning 0,55 s mellan märkena.
 
@@ -1089,8 +1090,18 @@ function riggaGlans() {
    faller tillbaka in i numret.                                     */
 
 const JONGL = {
-  apexMin: 0.38,
-  apexMax: 0.6,
+  /* APEX ÄR EN ANDEL AV SCENEN, inte av vyn. Med vyhöjden som mått
+     låg högsta punkten på 540 px i en footer som var 436 — bitarna
+     gick ur bild i överkant varje varv, och ett kast man inte ser
+     toppen av läser inte som ett kast.
+
+     Scenen är footern, och footern har en minsta höjd i stilmallen.
+     Talen nedan är därför ett löfte som inte kan brytas av en ändrad
+     vyhöjd: 0,78 gånger scenen plus bitens egen höjd ryms alltid, så
+     länge scenen är minst 26rem. Vid 68svh på en 900 px skärm blir
+     högsta punkten 477 px i en 612 px hög footer. */
+  apexMin: 0.5,
+  apexMax: 0.78,
   uppMin: 900,
   uppMax: 1300,
   nedFaktorMin: 1.15,
@@ -1228,7 +1239,6 @@ function riggaJonglering() {
     const s = scen.getBoundingClientRect();
     const h = s.height || 1;
     const b = s.width || 1;
-    const vh = window.innerHeight;
 
     for (const k of kast) {
       const m = k.m;
@@ -1284,10 +1294,10 @@ function riggaJonglering() {
       let del;
       if (t < k.upp) {
         del = t / k.upp;
-        hojd = ut2(del) * k.apex * vh; // bromsar in mot apex
+        hojd = ut2(del) * k.apex * h; // bromsar in mot apex
       } else {
         del = (t - k.upp) / k.ned;
-        hojd = (1 - in2(del)) * k.apex * vh; // accelererar nedåt
+        hojd = (1 - in2(del)) * k.apex * h; // accelererar nedåt
       }
 
       const framsteg = t / varv;

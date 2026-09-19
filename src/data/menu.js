@@ -294,5 +294,10 @@ export const kontakt = {
   telefonLank: 'tel:+46842006564',
   epost: 'info@delensbistro.se',
   facebook: 'https://www.facebook.com/DelensBistro/',
+  /* Instagram står INTE på restaurangens egen sajt — den länkar bara
+     Facebook. Adressen är hämtad ur kontot självt, vars sidtitel läser
+     "@delensbistro — Delens bistro & burger". Stäms av med Hakan innan
+     skarp lansering. */
+  instagram: 'https://www.instagram.com/delensbistro/',
   bestall: 'https://qopla.com/restaurant/delen%C2%B4s-bistro/qry072eV8q/order'
 };
