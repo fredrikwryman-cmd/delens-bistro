@@ -340,7 +340,15 @@ function byggMeny() {
 
       const rader = k.ratter
         .map((r, ri) => {
+          /* PRISET OCH MARKÖREN LIGGER I EN EGEN ENHET, och det är inte
+             en extra div för sakens skull. Raden är en flexrad som
+             får brytas när namnet och priset inte får plats bredvid
+             varandra — och bryts de var för sig hamnar bara markören
+             på nästa rad, en ensam prick under priset. I en enhet
+             flyttar de tillsammans. */
           const pris = `<span class="ratt__pris">${r.pris} kr</span>`;
+          const slut = (markor = '') =>
+            `<span class="ratt__slut">${pris}${markor}</span>`;
           const namn = `<span class="ratt__namn">${r.namn}${
             r.signatur ? '<span class="ratt__signatur">signatur</span>' : ''
           }</span>`;
@@ -352,7 +360,7 @@ function byggMeny() {
             return `
             <li class="ratt">
               <span class="ratt__rad">
-                ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${pris}
+                ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${slut()}
               </span>
               ${innehall}
             </li>`;
@@ -370,8 +378,9 @@ function byggMeny() {
               <button class="ratt__knapp" type="button"
                       aria-expanded="${oppen}" aria-controls="${luckaId}">
                 <span class="ratt__rad">
-                  ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${pris}
-                  <span class="ratt__markor" aria-hidden="true"></span>
+                  ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${slut(
+                    '<span class="ratt__markor" aria-hidden="true"></span>'
+                  )}
                 </span>
                 ${innehall}
               </button>
@@ -695,10 +704,10 @@ function riggaHeroburgare() {
 
 /* ═══ 2 · GELÉVÅGEN ══════════════════════════════════════════════
    Vågavdelarna är statiska SVG-banor. Nu lever kontrollpunkterna:
-   tre oscillatorer med olika period — 1 s, 2 s och 1,8 s —
-   förskjutna 0, 0,3 och 0,6 s, precis som förlagan. Olika perioder
-   är hela poängen; samma period på alla tre ger en våg som guppar i
-   takt och läser som en flagga, inte som gelé.
+   tre oscillatorer med olika period — 7 s, 11 s och 9,5 s —
+   förskjutna 0, 2,1 och 4,3 s. Olika perioder är hela poängen; samma
+   period på alla tre ger en våg som guppar i takt och läser som en
+   flagga, inte som gelé.
 
    Banans d skrivs om per bildruta. Det är den enda egenskapen här
    som inte går på GPU:n, och det finns ingen transform-motsvarighet
@@ -710,8 +719,21 @@ function riggaHeroburgare() {
    1,2 på mobil när sektionen närmar sig.                          */
 
 const VAG = {
-  perioder: [1000, 2000, 1800],
-  forskjutning: [0, 300, 600],
+  /* PERIODERNA ÄR SEXDUBBLADE mot förlagans 1, 2 och 1,8 sekunder.
+     Förlagan är en knapp som svarar på en klickning — där är ett
+     sekundlångt varv rätt. Här är vågen en fast del av sidan som
+     syns i tiotals sekunder medan man läser, och i den rollen läste
+     samma takt som nervös flimmer: en punkt som vänder varje halvsekund
+     kastar upp och ned i stället för att svalla.
+
+     Sju, elva och tio sekunder ger en topp som tar flera sekunder på
+     sig att resa sig. Olika perioder är fortfarande hela poängen —
+     samma period på alla tre ger en våg som guppar i takt och läser
+     som en flagga, inte som gelé. Förskjutningarna är skalade i samma
+     omfång, annars hade de tre oscillatorerna startat nästan
+     samtidigt i förhållande till sina nya varv. */
+  perioder: [7000, 11000, 9500],
+  forskjutning: [0, 2100, 4300],
   utslag: 9,
   hojd: 90, // viewBoxens höjd
   skalaMax: () => (window.innerWidth < 720 ? 1.2 : 1.5)
@@ -735,7 +757,8 @@ function riggaVagor() {
       bana,
       tal: tal ? tal.map(Number) : null,
       inne: false,
-      sist: ''
+      sist: '',
+      sistSkala: ''
     };
   });
 
@@ -804,9 +827,21 @@ function riggaVagor() {
       // färg — det är själva snittet mellan de två sektionerna.
       if (s.kropp) s.kropp.setAttribute('d', d + ' L1440,0 L0,0 Z');
 
-      // Scrubben: hur nära är sektionens överkant? Mätt ovan.
-      const skala = 1 + (narhet.get(s) || 0) * (VAG.skalaMax() - 1);
-      s.svg.style.setProperty('--vag-skala', skala.toFixed(3));
+      /* Scrubben: hur nära är sektionens överkant? Mätt ovan.
+
+         Skrivs BARA när värdet ändrats, av samma skäl som banan. Den
+         hängde tidigare med på varje bildruta där d ändrades — och
+         eftersom d ändras varje bildruta medan vågen syns, sattes en
+         ärvd anpassad egenskap om sextio gånger i sekunden även när
+         sidan stod helt stilla. Custom properties ärvs, så varje
+         skrivning smutsade ned svgn och båda dess banor. */
+      const skala = (
+        1 + (narhet.get(s) || 0) * (VAG.skalaMax() - 1)
+      ).toFixed(3);
+      if (skala !== s.sistSkala) {
+        s.sistSkala = skala;
+        s.svg.style.setProperty('--vag-skala', skala);
+      }
     }
   });
 }

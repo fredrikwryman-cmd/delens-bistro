@@ -247,10 +247,15 @@ a {
   fill: var(--wave-fill, var(--svart));
 }
 
+/* 3,5 px, inte 1,5. Strecket är vågens enda kontur och satt med
+   non-scaling-stroke, alltså samma tjocklek i px oavsett hur högt
+   scrubben tänjer svgn — men 1,5 px mot ett 44 px högt band läste som
+   ett hårstreck, inte som en kant. Opaciteten står kvar: kanten ska
+   vara en glimt i snittet, inte en ram runt sektionen. */
 .wave__edge {
   fill: none;
   stroke: var(--amber);
-  stroke-width: 1.5;
+  stroke-width: 3.5;
   opacity: 0.55;
   vector-effect: non-scaling-stroke;
 }
@@ -752,6 +757,13 @@ input:focus-visible {
 .hero {
   min-height: 100svh;
   display: grid;
+  /* minmax(0, 1fr), inte den underförstådda auto-kolumnen. En auto-
+     kolumn tar sin minsta bredd ur innehållet, och lockupen ÄR bredare
+     än spalten med flit — vid 305 px sköt den ut rutnätet 1,4 px och
+     gav hela sidan vågrät rullning. Med noll som undre gräns får
+     spåret aldrig växa av sitt innehåll, och lockupen svämmar över
+     rent visuellt i stället för att flytta sidan. */
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   padding-block: clamp(6rem, 14vw, 10rem) clamp(4rem, 10vw, 8rem);
 }
@@ -796,6 +808,43 @@ input:focus-visible {
      bokstavsformen och läser likadant i hela spannet. */
   --ram-delens: 0.042em;
   --ram-bistro: 0.058em;
+
+  /* BISTRO uttryckt som en andel av DELENS, EN gång. Både graden och
+     förskjutningen hänger i den, så de två raderna inte kan glida
+     isär av att någon ändrar det ena och glömmer det andra. */
+  --lockup-andel: 0.48;
+
+  /* Glappet mellan raderna, mätt i DELENS em. Båda raderna flyttas
+     lika långt åt var sitt håll — DELENS upp, BISTRO ned — så mitten
+     mellan dem står still och burgaren inte behöver röra sig.
+     0,07em är 24 px på desktop och 6 på mobil: samma andel av
+     bokstavshöjden i hela spannet. */
+  --lockup-glapp: 0.07em;
+}
+
+/* CENTRERINGEN SKÖTS INTE AV text-align HÄR, och det är inte ett
+   påhitt. DELENS är 1283 px brett på en 1425 px skärm medan rubrikens
+   spalt är 1184 — raden är bredare än sin behållare med flit, det är
+   hela poängen med lockupen. Och en centrerad rad som inte får plats
+   centreras INTE i CSS: radboxen får inte börja före behållarens
+   innerkant, så hela överskottet hamnar till höger. Uppmätt gav det
+   DELENS mitt 49,5 px till höger om BISTRO:s.
+
+   Med width: max-content och margin-inline-start: 50% hamnar
+   vänsterkanten i mitten, och translate -50 % drar tillbaka halva
+   den egna bredden. Då centreras raden på sin egen bredd oavsett om
+   den får plats eller inte, och båda raderna står på samma mittlinje.
+
+   padding-inline-end kompenserar spärren. Negativ spärr läggs på
+   efter SISTA bokstaven också, så boxen blir smalare än bläcket och
+   texten hamnar ett halvt spärrmått för långt åt höger — 5,6 px på
+   DELENS, 2,1 på BISTRO, alltså inte samma fel på båda. Padding lika
+   stor som spärren ger tillbaka det utrymmet. */
+.hero__outline,
+.hero__fill {
+  width: max-content;
+  max-width: none;
+  margin-inline-start: 50%;
 }
 
 /* PAINT-ORDER ÄR HELA GREPPET HÄR.
@@ -823,6 +872,8 @@ input:focus-visible {
   color: var(--rod);
   -webkit-text-stroke: var(--ram-delens) var(--offwhite);
   paint-order: stroke fill;
+  padding-inline-end: calc(-1 * var(--ls-xxxl));
+  translate: -50% calc(-1 * var(--lockup-glapp));
 }
 
 .hero__fill {
@@ -833,7 +884,7 @@ input:focus-visible {
   /* Bunden till DELENS i stället för till skalan, så förhållandet
      mellan raderna ligger fast när lockupen växer. 0,48 är samma
      förhållande som xxl mot xxxl hade. */
-  font-size: calc(var(--lockup-stor) * 0.48);
+  font-size: calc(var(--lockup-stor) * var(--lockup-andel));
   line-height: var(--lh-xxl);
   letter-spacing: var(--ls-xxl);
   font-weight: var(--font-display-vikt);
@@ -843,6 +894,11 @@ input:focus-visible {
      som två olika pennor i stället för en. */
   -webkit-text-stroke: var(--ram-bistro) var(--offwhite);
   paint-order: stroke fill;
+  padding-inline-end: calc(-1 * var(--ls-xxl));
+  /* Delat med andelen: 0,07em av DELENS är 0,146em av BISTRO. Utan
+     divisionen hade BISTRO flyttat sig 48 % så långt som DELENS och
+     lockupen blivit sned i höjdled i stället. */
+  translate: -50% calc(var(--lockup-glapp) / var(--lockup-andel));
 }
 
 /* Elementet är ett span inuti h1. Utan display: block blir det inline
@@ -1137,14 +1193,39 @@ input:focus-visible {
   text-align: center;
   pointer-events: none;
   hyphens: manual;
+
+  /* Samma mått som hero-lockupens ram, i em av den egna graden.
+     Lagerrubriken går i --t-xxl, alltså drygt hälften av DELENS, och
+     en ram i px hade blivit hälften så tung i förhållande till
+     bokstaven. */
+  --lager-ram: 0.05em;
 }
 
 /* Raderna får olika z så lagren passerar framför vissa och bakom
-   andra. Det är djupillusionen — inte parallaxen i sig. */
+   andra. Det är djupillusionen — inte parallaxen i sig.
+
+   KONTURRADERNA ÄR FYLLDA NU, av samma skäl som hero-lockupen.
+   Tom kontur i 2 px och 55 procents vitt betyder att raden bärs av
+   ett hårstreck och att allt innanför är det som råkar ligga bakom.
+   Bakom ligger burgarlagren: VARJE hamnade mot överbullen i nästan
+   samma ljushet och HANDLAGT mot sallad och underbulle. Uppmätt
+   lästes bara LAGER och PÅ PLATS — de två fyllda raderna.
+
+   Samma recept som i hero: djupröd fyllning, tjock vit ram, ramen
+   mätt i em så den följer graden, och paint-order så ramen växer
+   utåt i stället för att äta upp bokstaven inifrån.
+
+   FYLLNINGEN STÄRKER DJUPET, den bryter det inte. En rad som ligger
+   FÖRE ett lager skymmer det nu på riktigt i stället för att visa
+   det genom sina egna hålrum, och en rad som ligger BAKOM täcks som
+   förut. z-ordningen är orörd: position och z-index står kvar, och
+   ingen ny stackningskontext tillkommer — varken färg, kontur eller
+   paint-order skapar någon. */
 .lager__rad {
   position: relative;
-  color: transparent;
-  -webkit-text-stroke: clamp(1px, 0.16vw, 2px) rgb(242 235 224 / 0.55);
+  color: var(--rod);
+  -webkit-text-stroke: var(--lager-ram) var(--offwhite);
+  paint-order: stroke fill;
 }
 
 .lager__rad:nth-child(2),
@@ -1686,7 +1767,32 @@ input:focus-visible {
   cursor: pointer;
 }
 
+/* RADEN FÅR BRYTAS, och det är en mätt sak, inte en försiktighetsåtgärd.
+   Vid 305 px vybredd gick raden Cheeseburger 34 px utanför skärmen och
+   gav hela sidan vågrät rullning: namnet 176 px, priset "129 / 164 kr"
+   103 px, markören 9 och tre mellanrum 33 — 321 px i en spalt på 273.
+   Ett dubbelpris är dubbelt så brett som ett vanligt, och på en 320 px
+   telefon finns inte plats för namn och dubbelpris på samma rad.
+
+   Brytningen är INNEHÅLLSSTYRD, inte en brytpunkt. Prickarnas flex-bas
+   är 0, så raden bryts exakt när namnet och prisenheten inte längre
+   ryms bredvid varandra — inte vid en gissad skärmbredd. På 390 px står
+   allt kvar på en rad med 37 px prickar emellan.
+
+   justify-content gäller i praktiken bara den brutna raden: på första
+   raden äter prickarna (flex: 1) upp allt fritt utrymme, så det finns
+   ingenting kvar att fördela. På rad två ligger bara prisenheten, och
+   då läggs den mot högerkanten där ögat redan letar efter priset. */
 .ratt__rad {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 0.7rem;
+}
+
+/* Priset och markören som en enhet. Se kommentaren i main.js. */
+.ratt__slut {
   display: flex;
   align-items: baseline;
   gap: 0.7rem;

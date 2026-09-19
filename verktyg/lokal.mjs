@@ -3,24 +3,25 @@
  *
  *   node verktyg/lokal.mjs
  *
- * Två källor, tre utsnitt.
+ * Tre källor, tre utsnitt.
  *
  * E4 FASADEN går rakt igenom. 16:9, som platsen den ska fylla.
  *
- * E3 OCH E5 KOMMER UR SAMMA FOTO men visar inte samma sak, och det är
- * med flit. Gruppbilden är 1672×941 — tre personer bredvid varandra i
- * ett liggande format. E3-kortet är 3:4 stående, och i den rutan får
- * tre personer sida vid sida helt enkelt inte plats: provbeskärningar
- * vid tre olika lägen klippte alltid bort minst en av dem.
+ * E3 ÄR NU ETT RIKTIGT PORTRÄTT, inte en beskärning. Tidigare klipptes
+ * det ur gruppfotot: 1672×941 liggande, tre personer bredvid varandra,
+ * och i en stående 3:4-ruta fick bara mittenpersonen plats. Det var en
+ * nödlösning — ett utsnitt ur ett vidvinkelfoto blir mjukt, och Hakan
+ * stod dessutom inte still för kameran i den bilden.
  *
- * Att lägga samma vida bild i båda rutorna vore dessutom samma
- * fotografi två gånger inom sexhundra pixlar i samma sektion.
+ * Den nya källan är fotad som porträtt i baren, 1122×1402. Den enda
+ * beskärningen som behövs är i sidled: 1122×1402 är 0,800 och rutan
+ * är 0,750, alltså 71 px för brett. Snittet läggs 8 px in från vänster
+ * och tar resten från höger — där ligger bara en växt och en flaska i
+ * bakgrunden, medan vänsterkanten bär bardisken som ramar in honom.
  *
- * Därför bär de olika motiv ur samma bild:
- *   E3  stående, tätt på Hakan — mannen rebrandtexten handlar om
- *   E5  vidvinkel, alla tre framför väggmålningen
- *
- * Båda platshållarna fylls, ingenting upprepas.
+ * E5 står kvar ur gruppfotot: vidvinkel, alla tre framför
+ * väggmålningen. De två korten visar nu olika tillfällen, inte samma
+ * fotografi två gånger inom sexhundra pixlar.
  */
 
 import sharp from 'sharp';
@@ -44,11 +45,11 @@ const UTSNITT = [
   },
   {
     id: 'E3',
-    kalla: 'local-heros.png',
-    // 3:4 av 941 px höjd blir 706 bred. Mitten av bilden är Hakan.
-    extract: { left: 483, top: 0, width: 706, height: 941 },
+    kalla: 'hakan-portratt.png',
+    // 3:4 av 1402 px höjd blir 1051 bred, 71 px smalare än källan.
+    extract: { left: 8, top: 0, width: 1051, height: 1402 },
     bredd: 900,
-    beskrivning: 'stående, Hakan'
+    beskrivning: 'porträtt i baren, Hakan'
   },
   {
     id: 'E5',
