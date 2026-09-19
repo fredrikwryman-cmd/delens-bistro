@@ -102,13 +102,18 @@
             <span class="hero__fill" data-reveal>Bistro</span>
           </h1>
 
-          <span class="sticker sticker--etikett sticker--amber sticker--a"
-                style="--r: -9deg; --s-top: 18%; --s-left: 6%">Smashad</span>
-          <span class="sticker sticker--sigill sticker--ben sticker--vand sticker--b"
-                style="--r: 8deg; --s-top: 28%; --s-right: 6%; animation-delay: -3s">
-            <span class="mk__stor">2017</span>
-            <span class="mk__liten">sedan</span>
-          </span>
+          <!-- Ett märke i hero, inte två. Maskotarna är stora nog att ta
+               över rubriken om de står i par. Smashad-påståendet står
+               redan i brödtexten intill.
+
+               Läget räknas mot .hero__inner, inte mot sektionen — den
+               börjar 293 px ned. Negativ topp lyfter alltså klockan UPP
+               ur rubrikblocket, till ytan ovanför högerspaltens text.
+               Med positiv topp låg den över "Centralvägen 3 …". -->
+          <img class="sticker sticker--hero" src="/bilder/marken/delens-klocka.webp"
+               alt="Klistermärke: en väckarklocka håller upp en banderoll med texten Sedan 2017"
+               width="400" height="500" decoding="async"
+               style="--r: 7deg; --s-top: -16%; --s-right: 4%; --mk-bredd: 12rem" />
 
           <div class="hero__copy hero__copy--v">
             <p>
@@ -146,10 +151,8 @@
           <path class="wave__edge" d="M0,40 C300,84 560,8 780,44 C1000,80 1220,24 1440,56" />
         </svg>
         <div class="wrap rebrand__inner">
-          <!-- Märket daterar bytet. Rubriken går i trappa i stället för
-               att stapla rakt — första axelbrottet. -->
-          <span class="sticker sticker--etikett sticker--ben"
-                style="--r: 6deg; --s-top: 7%; --s-right: 8%">Januari 2026</span>
+          <!-- Rubriken går i trappa i stället för att stapla rakt —
+               första axelbrottet. Märket sitter längre ned, på kortet. -->
           <h2 class="rubrik rubrik--stor rubrik--trappa" data-reveal>
             <span class="rubrik__rad">Från</span>
             <span class="rubrik__rad">Brutal Burgers</span>
@@ -179,6 +182,16 @@
             <div class="rebrand__bilder">
               <div class="kort kort--lut-a">
                 <span class="ph" style="--ar: 3 / 2" data-id="E2" data-spec="1800 × 1200 · JPG"></span>
+                <!-- Maskotens röda ligger på 1,47:1 mot sektionens djupröda
+                     och ingen röd i paletten löser det — skälen står i
+                     stilmallen. Märket står därför på kortets mörka yta,
+                     som dessutom är precis vad det påstår. Det är mindre än
+                     de andra tre med flit: ju mer som hänger utanför kortet,
+                     desto mer av det röda tappas mot väggen bakom. -->
+                <img class="sticker sticker--smash" src="/bilder/marken/delens-smash.webp"
+                     alt="Klistermärke: en stekspade smashar en biff, med ordet Smashad"
+                     width="400" height="428" loading="lazy" decoding="async"
+                     style="--r: -8deg; --s-top: -7%; --s-left: -7%; --mk-bredd: 8rem" />
                 <span class="kort__etikett">Smashmomentet</span>
               </div>
               <div class="kort kort--lut-b">
@@ -210,11 +223,10 @@
             <!-- Märket ligger INUTI det sticky spåret. Utanför rullade det
                  bort efter 460 px medan scenen det uttalar sig om satt
                  kvar i 2880 px — ett påstående utan sitt motiv. -->
-            <span class="sticker sticker--i-scen sticker--sigill sticker--amber"
-                  style="--r: -7deg; --s-top: 14%; --s-left: 6%">
-              <span class="mk__stor">100 %</span>
-              <span class="mk__liten">nötkött</span>
-            </span>
+            <img class="sticker" src="/bilder/marken/delens-not.webp"
+                 alt="Klistermärke: en biff håller upp en rosett med texten 100 % nötkött"
+                 width="400" height="417" loading="lazy" decoding="async"
+                 style="--r: -7deg; --s-top: 11%; --s-left: 4%; --mk-bredd: 12rem" />
             <!-- Rubriken i fyra rader. Lagren vävs in mellan raderna. -->
             <h2 class="lager__rubrik" aria-label="Varje lager handlagt">
               <span class="lager__rad" data-z="1">Varje</span>
@@ -274,15 +286,11 @@
         <div class="wrap">
           <!-- Andra axelbrottet: ingressen ligger mot höger kant i stället
                för under rubriken, så raden inte blir en linjal. -->
-          <!-- Sigillet är bredare än pillret det ersatte och lade sig
-               över ingressens löpande text. Flyttat till gallerets övre
-               vänstra hörn: där finns bara kortkant, och ett märke som
-               går över en kant läser som påklistrat. -->
-          <span class="sticker sticker--sigill sticker--ben sticker--c"
-                style="--r: -5deg; --s-top: 23%; --s-left: 6%">
-            <span class="mk__stor">5</span>
-            <span class="mk__liten">av 68</span>
-          </span>
+          <!-- Inget märke här. Ingen av de åtta maskotarna påstår "5 av
+               68", och regeln är att märket ska säga något sant om det
+               som står bredvid. Att sätta dit närmaste maskot hade brutit
+               regeln OCH lagt ett andra stort märke i samma svep som
+               galleriet. -->
           <div class="signatur__topp">
             <h2 class="rubrik" data-reveal>Fem som får stå för sig själva</h2>
             <p class="ingress ingress--hoger">
@@ -372,8 +380,13 @@
         <!-- Fjärde axelbrottet, och det största: sektionen var helt
              centrerad. Rubriken går nu ut ur spalten åt höger och bilden
              hänger utanför kanten. -->
-        <span class="sticker sticker--etikett sticker--amber sticker--d"
-              style="--r: 7deg; --s-top: 14%; --s-left: 5%">Handlagt</span>
+        <!-- Kocken räcker fram brickan, och står därför bredvid knappen som
+             gör samma sak. Uppe i vänstra hörnet låg han över rubriken och
+             BESTÄLL klipptes — samma fel som redan rättats en gång här. -->
+        <img class="sticker sticker--bestall" src="/bilder/marken/delens-kock.webp"
+             alt="Klistermärke: en kock håller upp en bricka med burgare och pommes"
+             width="400" height="429" loading="lazy" decoding="async"
+             style="--r: 7deg; --s-top: 60%; --s-left: 27%; --mk-bredd: 12rem" />
         <div class="wrap bestall__inner">
           <div class="bestall__text">
             <h2 class="rubrik rubrik--stor" data-reveal>Beställ online</h2>

@@ -573,22 +573,38 @@ function riggaOrderbar() {
   ).observe(mal);
 }
 
+/* Utgångsläget sätts härifrån och inte i CSS. Ett märke som ligger på
+   opacity 0 i stilmallen är osynligt för den som kör utan JS, och det
+   är ett fel som ingen skanner hittar. Det måste stå före första
+   målningen — annars syns märket, släcks och tänds igen. */
+function forberedStickers() {
+  for (const m of $$('.sticker')) m.setAttribute('data-ankomst', '');
+}
+
 function riggaStickers() {
   // Varje MÄRKE observeras, inte sektionen det ligger i. Sektionerna är
   // 1800 till 2900 px höga, så en sektion räknas som synlig långt efter
-  // att märket rullat ur bild — då wobblade det för ingen.
-  const sektioner = $$('.sticker');
-  if (!sektioner.length) return;
+  // att märket rullat ur bild.
+  const marken = $$('.sticker');
+  if (!marken.length) return;
 
+  // Ankomsten sker EN gång. Den gamla vaggningen gick i all evighet;
+  // på en 200 px illustration är det en sak som aldrig slutar röra sig
+  // mitt i läsningen. Märket sätts dit och står sedan still, vilket
+  // också är sannare mot vad ett klistermärke är.
   const io = new IntersectionObserver(
     (poster) => {
       for (const p of poster) {
-        p.target.setAttribute('data-synlig', String(p.isIntersecting));
+        if (!p.isIntersecting) continue;
+        p.target.setAttribute('data-synlig', 'true');
+        io.unobserve(p.target);
       }
     },
-    { threshold: 0 }
+    // Märket ska vara nere i vyn innan det sätts dit, inte klippa in
+    // i samma bildruta som dess första pixel.
+    { threshold: 0.35 }
   );
-  sektioner.forEach((s) => io.observe(s));
+  marken.forEach((m) => io.observe(m));
 }
 
 /* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
@@ -709,7 +725,7 @@ fyllStatus();
 fyllKontakt();
 byggSignaturer();
 byggMeny();
-riggaStickers();
+forberedStickers();
 riggaOrderbar();
 riggaMatpanel();
 riggaScroll();
@@ -720,4 +736,14 @@ setInterval(fyllStatus, 60_000);
 
 // Avslöjningen startar när laddskärmen släppt. Hoppas den över
 // löser löftet direkt och avslöjningen körs på en gång.
-startaLaddskarm().then(riggaAvslojning);
+//
+// Märkena observeras vid samma tillfälle, inte tidigare. Observatören
+// låg förut på modulnivå och klockan i hero är synlig från första
+// bildrutan — den satte sig alltså på plats bakom laddskärmen, och när
+// skärmen lyfte stod den redan där. Rubrikens ord avslöjades ett i
+// taget medan märket bredvid aldrig anlände. Nu landar de i samma
+// ögonblick.
+startaLaddskarm().then(() => {
+  riggaAvslojning();
+  riggaStickers();
+});

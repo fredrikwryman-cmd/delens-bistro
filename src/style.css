@@ -326,162 +326,102 @@ a {
 
 /* ── Klistermärken ───────────────────────────────────────────────── */
 
-/* Ett amber-piller med versaltext är en etikett — något som är tryckt
-   i ytan. Ett klistermärke ligger PÅ den. Tre saker skiljer dem åt:
-   en stansad form som inte är ett piller, en ritad kontur innanför
-   kanten, och en marginal av bärmaterialet utanför konturen. Plus en
-   tjocklek, som kastar en tät skugga strax under.
+/* Åtta retromaskotar ersätter de sex märken som byggdes i CSS. De
+   gamla var så nära ett klistermärke man kommer med en ram, en
+   stanskant och en skugga — och det räckte inte. Ett märke är en
+   ILLUSTRATION med en stansad kant, inte en etikett med en kontur.
+   Skillnaden går inte att bygga i CSS, den måste ritas.
 
-   Två former bär alla sex märkena.
+   Fyra av de åtta står på sidan, inte sex som förut. De är stora och
+   två i samma synfält tar över, så det står ett åt gången:
 
-     SIGILLET är runt och sätter ett tal eller ett kort ord stort med
-     en bildtext under ett hårstreck. Innerringen är streckad — det
-     är stämpelns kännetecken. Används där märket daterar eller
-     räknar: 2017, 100 %, 5 av 68.
+     klocka   "SEDAN 2017"       hero, svart
+     smash    "SMASHAD"          rebranden, på kortet Smashmomentet
+     nöt      "100 % NÖTKÖTT"    lagerscenen, svart
+     kock     kocken med brickan beställsektionen, svart
 
-     ETIKETTEN är rektangulär med stansade hörn och bär ett enda ord
-     innanför en ritad ram. Används där märket påstår något om
-     hantverket: smashad, handlagt, januari 2026.
+   Reglerna följer med från de gamla märkena: märket påstår något
+   sant om det som står bredvid, det lutar som om någon satt dit det
+   för hand, det är dekor och fångar aldrig ett klick, och det rör
+   sig inte förrän det syns.
 
-   Stanskanten är gemensam. Bärmaterialet är off-white, samma i båda
-   formerna: på ett amber märke syns det som en vit kant runt om, på
-   ett off-white märke smälter det ihop med märket självt och gör det
-   bara större — vilket är precis vad en stans gör. Alla sex står på
-   mörka sektioner, inget märke ligger på det ljusa menyblocket, så
-   den off-white marginalen läser överallt.                          */
+   OM DET DJUPRÖDA. Maskotarnas röda ligger runt #9b1a15 och
+   sektionens på #6b1410 — 1,47:1. Två röda så nära varandra i samma
+   vy läser som ett fel, och ingen röd i paletten löser det:
+
+     #5a100c  mot maskotrött 1,69   mot svart 1,39
+     #4a0c09                 1,89             1,24
+     #3e0a07                 2,04             1,15
+     #7d1a15                 1,26             1,87
+
+   Ju mer den röda skiljer sig från maskoten, desto mindre skiljer
+   den sig från svart — och då försvinner de två vågorna som avgränsar
+   sektionen, precis det fel som just rättades mellan svart och kol.
+   Därför står smash inte på den röda ytan utan på sektionens egna
+   mörka kort, det som heter Smashmomentet. Det är dessutom exakt vad
+   märket påstår.                                                   */
 
 .sticker {
   position: absolute;
   z-index: 6;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  background: var(--mk-fyll);
-  color: var(--mk-ink);
-  font-weight: 800;
-  text-transform: uppercase;
-  white-space: nowrap;
-  /* Ett märke är dekor. Det ligger över kortkanter och rubriker och
+  display: block;
+  width: var(--mk-bredd, 12.5rem);
+  height: auto;
+  /* Ett märke är dekor. Det ligger över rubriker och kortkanter och
      får aldrig fånga en klickning som var avsedd för det under. */
   pointer-events: none;
-  /* Bärmaterialets marginal, och tjockleken. Skuggan sitter tätt och
-     strax under: märket ligger på ytan, det svävar inte över den. */
-  box-shadow:
-    0 0 0 5px var(--offwhite),
-    0 7px 16px -6px rgb(0 0 0 / 0.75);
-  animation: wobbla 6s var(--ut) infinite;
-}
+  /* Skuggan följer alfakanalen och alltså silhuetten, inte en
+     rektangel. På ett urklipp är dropshadow det enda som ger
+     tjocklek — och på den djupröda ytan mörknar den dessutom
+     underlaget just där maskotens röda möter det. */
+  filter: drop-shadow(0 0.7rem 1.1rem rgb(0 0 0 / 0.55));
+  rotate: var(--r);
 
-/* Bläck och fyllning. Amber mot svart ger 8,9:1, off-white mot
-   djuprött 10,3:1 — båda långt över kravet. */
-.sticker--amber { --mk-fyll: var(--amber);    --mk-ink: var(--svart); }
-.sticker--ben   { --mk-fyll: var(--offwhite); --mk-ink: var(--rod); }
-
-/* --r måste sättas per märke. Var den osatt föll keyframen tillbaka
-   på -9deg för båda, och b:s deklarerade 8deg skrevs över av
-   animationen — de lutade åt samma håll i stället för mot varandra. */
-/* Placeringen sätts där märket står, inte här. Ett märke är alltid
-   ett påstående om något i närheten — då ska läget stå bredvid
-   påståendet och inte i en lista av lägesklasser. */
-.sticker {
+  /* Placeringen sätts där märket står, inte här. Ett märke är alltid
+     ett påstående om något i närheten — då ska läget stå bredvid
+     påståendet och inte i en lista av lägesklasser. */
   inset-block-start: var(--s-top, auto);
   inset-block-end: var(--s-bottom, auto);
   inset-inline-start: var(--s-left, auto);
   inset-inline-end: var(--s-right, auto);
 }
 
-/* ── Sigillet ──────────────────────────────────────────────────── */
+/* ── Ankomsten ─────────────────────────────────────────────────── */
 
-.sticker--sigill {
-  width: clamp(5rem, 8vw, 6.8rem);
-  aspect-ratio: 1;
-  padding: 0.3rem;
-  border-radius: 999px;
-}
+/* Den gamla vaggningen var en 6-sekunderscykel som gick för evigt.
+   På ett 100 px piller var den nätt och jämnt märkbar; på en 200 px
+   illustration är den en sak som aldrig slutar röra sig mitt i
+   läsningen. Rörelsen sker i stället en gång: märket sätts dit när
+   det kommer i vy och står sedan still. Det är också sannare mot vad
+   ett klistermärke är — någon tryckte dit det, en gång.
 
-.sticker--sigill::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 1.5px dashed currentColor;
-  border-radius: inherit;
-  opacity: 0.5;
-  pointer-events: none;
-}
+   Utgångsläget sätts med data-ankomst, som JS lägger på. Utan JS
+   finns attributet aldrig och märket står synligt och lutat från
+   början. En osynlig dekor utan JS vore ett tyst fel.              */
 
-/* ── Etiketten ─────────────────────────────────────────────────── */
-
-.sticker--etikett {
-  padding: 0.55rem 1.05rem;
-  border-radius: 0.3rem;
-  font-size: var(--t-s);
-  line-height: var(--lh-s);
-  letter-spacing: var(--ls-s);
-}
-
-.sticker--etikett::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1.5px solid currentColor;
-  border-radius: 0.14rem;
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-/* ── Sigillets två rader ───────────────────────────────────────── */
-
-.mk__stor {
-  font-size: var(--t-m);
-  line-height: 1;
-  letter-spacing: var(--ls-m);
-}
-
-/* Hårstrecket är lika brett som bildtexten och inte som märket —
-   en stämpel drar sin linje under orden, inte tvärs över formen. */
-.mk__liten {
-  margin-block-start: 0.24rem;
-  padding-block-start: 0.24rem;
-  border-block-start: 1px solid currentColor;
-  font-size: var(--t-xs);
-  line-height: 1;
-  letter-spacing: var(--ls-xs);
-  opacity: 0.85;
-}
-
-/* "2017 / SEDAN" läses baklänges. Vänd ordningen där bildtexten hör
-   hemma före talet — då står hårstrecket över i stället för under,
-   och sigillet läser "sedan 2017". */
-.sticker--vand .mk__liten {
-  order: -1;
-  margin-block: 0 0.24rem;
-  padding-block: 0 0.24rem;
-  border-block-start: 0;
-  border-block-end: 1px solid currentColor;
-}
-
-@keyframes wobbla {
-  0%, 100% { rotate: var(--r); }
-  50%      { rotate: calc(var(--r) + 3deg); }
-}
-
-/* Löpande rörelse utanför vyn är bortkastad. Märkena står stilla tills
-   sektionen de uttalar sig om är synlig. */
-.sticker {
-  animation-play-state: paused;
+.sticker[data-ankomst] {
+  opacity: 0;
+  scale: 0.92;
+  /* Sätts dit med en extra grads vridning som rätar upp sig — handen
+     som trycker ner märket och släpper. */
+  rotate: calc(var(--r) - 7deg);
+  transition:
+    opacity 380ms var(--ut),
+    scale 380ms var(--ut),
+    rotate 380ms var(--ut);
 }
 
 .sticker[data-synlig='true'] {
-  animation-play-state: running;
+  opacity: 1;
+  scale: 1;
+  rotate: var(--r);
 }
 
-/* Rotationen är hela poängen med ett klistermärke: någon har satt dit
-   det för hand. Vid reducerad rörelse behålls lutningen, det är
-   vaggningen som tas bort. */
 @media (prefers-reduced-motion: reduce) {
-  .sticker {
-    animation: none;
+  .sticker[data-ankomst] {
+    scale: 1;
     rotate: var(--r);
+    transition: opacity 200ms linear;
   }
 }
 
@@ -867,24 +807,29 @@ input:focus-visible {
   }
   .hero__copy--h { text-align: start; }
 
-  .sticker--a { inset-block-start: 9%; inset-inline-start: 3%; }
-  .sticker--b { inset-block-start: 9%; inset-inline-end: 3%; }
+  /* Maskotarna skalas ned med två tredjedelar, och de behåller sina
+     inbördes storlekar. Bredden sätts som width och inte som
+     --mk-bredd: en egenskap satt i style-attributet vinner över en
+     som sätts i stilmallen, så en omskrivning av variabeln här hade
+     inte gjort någonting alls. */
+  .sticker { width: calc(var(--mk-bredd, 12.5rem) * 0.66); }
 
-  /* Staplat flyttar ingressen ned i sigillets läge, och galleriets
-     kort lägger sina namn och priser i vänsterkanten. Märket byter
-     sida: höger om korten är bara motiv. */
-  .sticker--c {
-    inset-block-start: 26%;
+  /* Staplat lägger allt i en spalt, och då finns inga tomma ytor kvar
+     vid sidan av texten. Varje märke får ett eget läge här. */
+  /* Lutningen på 7 grader gör den omslutande rutan bredare än bilden.
+     Vid 1 procent stack den ut 6 px och gav sidan vågrät rullning. */
+  .sticker--hero { inset-block-start: -13%; inset-inline-end: 4%; }
+
+  .sticker--smash {
+    inset-block-start: -9%;
     inset-inline-start: auto;
-    inset-inline-end: 5%;
+    inset-inline-end: -6%;
   }
 
-  /* Samma sak i beställsektionen: staplat lägger märket över
-     BESTÄLL och rubriken läser "ÄLL ONLINE". Byter sida hit också,
-     där raderna slutar och ytan är tom. */
-  .sticker--d {
+  .sticker--bestall {
+    inset-block-start: 58%;
     inset-inline-start: auto;
-    inset-inline-end: 4%;
+    inset-inline-end: 3%;
   }
 
   .nav__links {
