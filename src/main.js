@@ -1569,9 +1569,12 @@ function stukaStapeln() {
 
 /* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
 
+/* LÅSTA. Framreglade i avstämningspanelen och fastställda; panelen
+   är borttagen och de här två talen ändras inte längre av ett
+   reglage utan av ett beslut. */
 const scenLage = {
-  maxVrid: 33, // grader
-  sep: 1.0 // multiplikator på lagrens fart
+  maxVrid: 7, // grader
+  sep: 1.6 // multiplikator på lagrens fart
 };
 
 function riggaScroll() {
@@ -1610,7 +1613,6 @@ function riggaScroll() {
     }
 
     nav.setAttribute('data-fast', String(window.scrollY > 40));
-    matUppdatera(progress);
   };
 
   // Ett varv för allt scrollstyrt OCH för all löpande rörelse. Varje
@@ -1631,52 +1633,16 @@ function riggaScroll() {
   requestAnimationFrame(varv);
 }
 
-/* ═══ AVSTÄMNINGSPANEL ═══════════════════════════════════════════
-   Byggverktyg. Tas bort när rörelsen är låst.                     */
-
-let matEl = null;
-
-function riggaMatpanel() {
-  if (new URLSearchParams(location.search).has('ren')) return;
-
-  const panel = $('#matpanel');
-  panel.hidden = false;
-
-  matEl = {
-    progress: $('#m-progress'),
-    vrid: $('#m-vrid'),
-    sep: $('#m-sep')
-  };
-
-  const vridReg = $('#m-vrid-reg');
-  const sepReg = $('#m-sep-reg');
-
-  vridReg.addEventListener('input', () => {
-    scenLage.maxVrid = +vridReg.value;
-    $('#m-vrid-ut').textContent = vridReg.value + '°';
-  });
-
-  sepReg.addEventListener('input', () => {
-    scenLage.sep = +sepReg.value / 10;
-    $('#m-sep-ut').textContent = scenLage.sep.toFixed(1).replace('.', ',') + '×';
-  });
-}
-
-function matUppdatera(p) {
-  if (!matEl) return;
-  const h = $('#lager-scen')?.offsetHeight || 0;
-  matEl.progress.textContent = Math.round(p * 100) + ' %';
-  matEl.vrid.textContent = (p * scenLage.maxVrid).toFixed(1) + '°';
-  matEl.sep.textContent = Math.round(0.4 * p * h * scenLage.sep) + ' px';
-}
-
 /* ═══ MJUK SCROLL ════════════════════════════════════════════════ */
 
 function riggaLenis() {
   if (reducerad.matches) return;
   const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
-  // Exponeras under bygget så rörelsen går att hoppa till exakta lägen.
-  // Tas bort tillsammans med avstämningspanelen.
+  /* Handtag för att hoppa till exakta scrollägen under bygget. Stod
+     förut att det skulle bort med avstämningspanelen; det får stå
+     kvar. Panelen var en ruta i vägen, det här är en variabel utan
+     avtryck i sidan, och den är enda vägen att styra Lenis utifrån
+     när ett läge behöver mätas. Bort vid skarp lansering. */
   window.__lenis = lenis;
   // Lenis körde ett eget rAF-varv vid sidan av sajtens. Två varv som
   // båda vill äga bildrutan är ett varv för mycket, och det var Lenis
@@ -1694,7 +1660,6 @@ byggSignaturer();
 byggMeny();
 forberedStickers();
 riggaOrderbar();
-riggaMatpanel();
 
 // Momenten registrerar sina varvsteg FÖRE riggaScroll, som startar
 // varvet. Registreras de efter kör första bildrutan utan dem.

@@ -1102,53 +1102,6 @@ input:focus-visible {
 .lager__bit[data-lager='sallad']     img { --b: 78.3%; --t: 19.5%; }
 .lager__bit[data-lager='underbulle'] img { --b: 74.4%; --t: 35.2%; }
 
-/* ── Avstämningspanel ─────────────────────────────────────────── */
-
-.matpanel {
-  position: fixed;
-  inset-block-start: 5rem;
-  inset-inline-start: 1rem;
-  z-index: 950;
-  width: min(15rem, calc(100vw - 2rem));
-  padding: 0.9rem 1rem;
-  background: rgb(10 10 10 / 0.9);
-  border: 1px solid var(--linje);
-  border-radius: 0.6rem;
-  backdrop-filter: blur(8px);
-  font-size: var(--t-xs);
-  line-height: var(--lh-xs);
-  letter-spacing: var(--ls-xs);
-}
-
-.matpanel[hidden] { display: none; }
-
-.matpanel h3 {
-  margin: 0 0 0.6rem;
-  font-size: var(--t-xs);
-  line-height: var(--lh-xs);
-  letter-spacing: var(--ls-xs);
-  text-transform: uppercase;
-  color: var(--dampad);
-}
-
-.matpanel dl { margin: 0 0 0.7rem; display: grid; gap: 0.15rem; }
-.matpanel dl div { display: flex; justify-content: space-between; gap: 1rem; }
-.matpanel dt { color: var(--dampad); }
-.matpanel dd { margin: 0; font-variant-numeric: tabular-nums; }
-
-.matpanel label {
-  display: block;
-  margin-block-start: 0.5rem;
-  color: var(--dampad);
-  font-size: var(--t-xs);
-  line-height: var(--lh-xs);
-  letter-spacing: var(--ls-xs);
-}
-
-.matpanel output { float: inline-end; color: var(--offwhite); }
-.matpanel input[type='range'] { width: 100%; accent-color: var(--amber); }
-
-
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
 
 /* Rubrik och ingress på var sin sida i stället för staplade. Pilen
