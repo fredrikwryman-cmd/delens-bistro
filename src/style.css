@@ -111,9 +111,16 @@ body {
   padding-bottom: 5.5rem;
 }
 
+/* height: auto MÅSTE stå här. Bilderna bär width- och height-attribut
+   för att reservera plats innan de laddat, och utan den här raden
+   ritas de i attributens höjd så fort max-width klämmer bredden —
+   ett foto på 900×1200 i en spalt på 280 blev 280 brett och 1200
+   högt, alltså en pelare rakt genom sektionen. Samma fälla som
+   hero-burgaren gick i tidigare i bygget. */
 img {
   display: block;
   max-width: 100%;
+  height: auto;
 }
 
 a {
@@ -679,6 +686,37 @@ input:focus-visible {
   align-items: center;
   gap: 0.6rem;
   text-decoration: none;
+  border-radius: 999px;
+}
+
+/* Hemknappen är en bild och inget annat. Den behöver därför en egen
+   synlig fokusring — utan text finns ingenting som visar var
+   tangentbordet står. */
+.nav__logo:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 4px;
+}
+
+.nav__logotyp {
+  display: block;
+  width: clamp(38px, 4.5vw, 52px);
+  height: auto;
+  transition: scale 200ms var(--ut);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav__logo:hover .nav__logotyp {
+    scale: 1.06;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__logotyp {
+    transition: none;
+  }
+  .nav__logo:hover .nav__logotyp {
+    scale: 1;
+  }
 }
 
 .nav__wordmark {
@@ -991,6 +1029,30 @@ input:focus-visible {
 
 @media (max-width: 860px) {
   .rebrand__grid { grid-template-columns: 1fr; }
+
+  /* Korten låg kvar i två spalter även när grid:en stackat, och med
+     riktiga foton i stället för platshållare sköt det högra kortet ut
+     32 px utanför skärmen. Ett lutat kort får dessutom aldrig ligga
+     tätt mot kanten — rotationen behöver luft. */
+  .rebrand__bilder {
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 6vw, 2.5rem);
+  }
+
+  /* ETT LUTAT KORT ÄR BREDARE ÄN SIN BREDD. Stående i full spaltbredd
+     blev det stående kortet 419 px omslutande ruta på en skärm som är
+     375 — rotationen på 4,5 grader lägger till kortets HÖJD gånger
+     sinus på varje sida. Korten smalnas därför av på mobil i stället
+     för att rätas upp; lutningen är hela greppet. */
+  .rebrand__bilder .kort {
+    max-width: 72%;
+    /* CENTRERADE, inte kantställda. Skjuts ett lutat kort mot kanten
+       hamnar rotationens tillägg utanför skärmen; centrerat får det
+       fjorton procent luft på varje sida att luta i. */
+    margin-inline: auto;
+  }
+
+  .kort--lut-b { margin-block-start: 0; }
 }
 
 /* ═══ 4 · LAGERSEKTIONEN ══════════════════════════════════════
@@ -2638,10 +2700,18 @@ input:focus-visible {
    den låg mitt i innehållet och den gick inte att fälla ihop. Den här
    ligger i ett hörn och är en knapp tills man öppnar den. */
 
+/* FLYTTAD IN I NAVBAREN. Chippet låg fast i nedre vänstra hörnet och
+   Fredrik hittade det inte, två gånger. Jag mätte upp det båda
+   gångerna — det fanns där, amber, överst i staplingen, mitt i vyn —
+   men ett fritt svävande chip i ett hörn läser som en kakruta eller
+   en supportbubbla, alltså som något man klickar bort utan att titta.
+
+   I navbaren är det inte längre ett flytande element utan en kontroll
+   bland de andra, på den plats man redan tittar när man vill styra
+   sajten. Det ligger dessutom i flödet, vilket gör det okänsligt för
+   det som brukar sopa bort hörnwidgetar. */
 .typval {
-  position: fixed;
-  inset-block-end: 6.5rem;
-  inset-inline-start: var(--gutter);
+  position: relative;
   z-index: 960;
   /* Panelens egen text ska ALDRIG byta snitt — då går den inte att
      läsa medan man bläddrar. Bara namnen i listan sätts i sitt snitt,
@@ -2657,7 +2727,7 @@ input:focus-visible {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
+  padding: 0.4rem 0.75rem;
   background: rgb(14 14 14 / 0.92);
   border: 1px solid var(--linje);
   border-radius: 999px;
@@ -2675,8 +2745,9 @@ input:focus-visible {
 
 .typval__lista {
   position: absolute;
-  inset-block-end: calc(100% + 0.5rem);
-  inset-inline-start: 0;
+  /* Fälls NED från navbaren nu, inte upp från golvet. */
+  inset-block-start: calc(100% + 0.6rem);
+  inset-inline-end: 0;
   width: 17rem;
   margin: 0;
   padding: 0.4rem;
@@ -2729,6 +2800,19 @@ input:focus-visible {
   margin-block-start: 0.1rem;
   font-size: 11px;
   color: var(--dampad);
+}
+
+/* På smal skärm ryms inte snittets namn i navbaren — chippet sköt ut
+   listan i två rader och gjorde navbaren 94 px hög. Kvar blir Aa, som
+   räcker: listan säger ändå vilket snitt som är valt. */
+@media (max-width: 720px) {
+  .typval__etikett {
+    display: none;
+  }
+
+  .typval__lista {
+    width: min(15rem, calc(100vw - 2 * var(--gutter)));
+  }
 }
 
 .typval__tal {

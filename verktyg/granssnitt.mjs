@@ -24,7 +24,13 @@ import path from 'node:path';
 const KALLA = 'kalla/granssnitt';
 const MAL = 'public/bilder/granssnitt';
 
-const MAL_BREDD = 160;
+/**
+ * Bredd per fil. Pekaren ritas 26 px och logotypen ~44; båda får
+ * rejäl marginal för pixeltäthet utan att någon av dem bär den
+ * andras mått.
+ */
+const MAL_BREDD = { muspekare: 160, logotyp: 180 };
+const STANDARD_BREDD = 160;
 const KVALITET = 82;
 const TRIM_TROSKEL = 6;
 
@@ -68,7 +74,7 @@ async function kor() {
     const ankare = await ankarpunkt(beskuren);
 
     const info = await sharp(beskuren)
-      .resize({ width: MAL_BREDD })
+      .resize({ width: MAL_BREDD[id] ?? STANDARD_BREDD })
       // alphaQuality 100: förstörande komprimerad alfa lägger brus som
       // delvis genomskinliga pixlar mitt i motivet.
       .webp({ quality: KVALITET, alphaQuality: 100, effort: 6 })

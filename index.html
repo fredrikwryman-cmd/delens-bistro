@@ -68,9 +68,14 @@
 
     <!-- ═══ FAST TOPPNAV ═══════════════════════════════════════════ -->
     <header class="nav" id="nav">
+      <!-- Hemknappen. Bilden BÄR namnet: alt-texten är det tillgängliga
+           namnet på länken nu när ordmärkestexten är borta, och utan den
+           hade länken hetat ingenting. Ett <a> är fokuserbart av sig
+           självt; fokusringen sitter i stilmallen. -->
       <a class="nav__logo" href="#top">
-        <span class="ph ph--inline" style="--ar: 885 / 951" data-id="F4" data-spec="SVG"></span>
-        <span class="nav__wordmark">Delens Bistro</span>
+        <img class="nav__logotyp" src="/bilder/granssnitt/logotyp.webp"
+             alt="Delens Bistro" width="180" height="193"
+             fetchpriority="high" decoding="async" />
       </a>
       <!-- Två staplade rader per länk. Den undre är identisk och ligger
            exakt en radhöjd ned; vid hover rullar paret upp så att kopian
@@ -102,7 +107,7 @@
                   src="/bilder/hero/B1.webp"
                   alt=""
                   width="1100"
-                  height="1009"
+                  height="1052"
                   fetchpriority="high"
                   decoding="async"
                 />
@@ -190,8 +195,7 @@
               <p data-rader>Resultatet är Delens Bistro.</p>
               <p data-rader>
                 Menyn har utvecklats med omtanke. Våra burgare är numera
-                <span class="understruket">smashade<svg class="kritstreck kritstreck--under" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C42,3 72,12 106,6 C140,1 170,11 197,5" /></svg></span>,
-                krispiga i kanterna och gjorda på vår egen hemmagjorda
+                <span class="understruket">smashade<svg class="kritstreck kritstreck--under" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C42,3 72,12 106,6 C140,1 170,11 197,5" /></svg></span>, krispiga i kanterna och gjorda på vår egen hemmagjorda
                 köttfärssmet av 100 % nötkött — ett tydligt avsteg från de
                 tidigare tjocka puckarna. Utöver burgare serverar vi klassisk
                 kebab, fräscha bowls och rätter som passar alla tillfällen.
@@ -217,17 +221,22 @@
                 <span class="kort__etikett">Smashmomentet</span>
               </div>
               <div class="kort kort--lut-b">
-                <span class="ph" style="--ar: 3 / 4" data-id="E3" data-spec="1200 × 1600 · JPG"></span>
-                <span class="kort__etikett">Personal i arbete</span>
+                <img src="/bilder/lokal/E3.webp"
+                     alt="Hakan Delen vid bordet i lokalen, i svart t-shirt med restaurangens logotyp."
+                     width="900" height="1200" loading="lazy" decoding="async" />
+                <span class="kort__etikett">Hakan tog över</span>
               </div>
             </div>
           </div>
 
           <figure class="vaggmalning">
-            <span class="ph" style="--ar: 16 / 9" data-id="E5" data-spec="2400 × 1350 · JPG"></span>
+            <img src="/bilder/lokal/E5.webp"
+                 alt="Ömer, Hakan och Emil sitter vid ett bord framför väggmålningen, som bär texten Local Heroes 194 i neon."
+                 width="1600" height="900" loading="lazy" decoding="async" />
             <figcaption class="bildtext">
-              Väggarna är målade av Petter Skagaard. Motiven hyllar Väsby och
-              stammisarna — de lokala hjältarna.
+              Från vänster: Ömer, Hakan och Emil. Ömer står i köket. Väggarna
+              är målade av Petter Skagaard — motiven hyllar Väsby och
+              stammisarna, de lokala hjältarna.
             </figcaption>
           </figure>
         </div>
@@ -389,7 +398,9 @@
               <p><a class="lank" id="hitta-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
             </div>
             <div class="hitta__block hitta__block--bild">
-              <span class="ph" style="--ar: 16 / 9" data-id="E4" data-spec="2400 × 1350 · JPG"></span>
+              <img src="/bilder/lokal/E4.webp"
+                   alt="Delens Bistro på Centralvägen 3: mörk fasad med skylten Fast Food &amp; Bar, uteservering och en vimpel vid entrén."
+                   width="1600" height="900" loading="lazy" decoding="async" />
               <span class="kort__etikett">Fasaden</span>
             </div>
           </div>

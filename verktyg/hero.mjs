@@ -1,112 +1,80 @@
 /**
- * Bildpipeline för hero-bilderna.
+ * Bildpipeline för hero-burgaren.
  *
  *   node verktyg/hero.mjs
  *
- * B1 och B2 levererades som JPEG mot en nästan svart botten, inte
- * frilagda. Bakgrunden mättes till rgb(2,10,10) i båda, alltså mörkare
- * än sektionens #0E0E0E och med ett svagt blågrönt stick — rött ligger
- * åtta steg under grönt och blått. Som rektangel ovanpå sektionen blir
- * det en synlig mörkare ruta runt burgaren.
+ * KÄLLAN BYTTE KARAKTÄR. Förut låg här två JPEG-er — B1 liggande och
+ * B2 porträtt — fotade mot en nästan svart botten och INTE frilagda.
+ * Den pipelinen byggde alfa ur ljusstyrkan och fick avgöra vad som
+ * var bakgrund med en översvämning från bildkanten, eftersom
+ * burgarens egna mörka partier annars blev genomskinliga och
+ * konturtexten lyste igenom skuggan under bullen.
  *
- * Lösningen är inte att färgjustera rutan utan att ta bort den: alfa
- * byggs ur ljusstyrkan, burgaren blir frilagd och sektionens egen
- * bakgrund lyser igenom. Då finns ingen ruta att matcha.
+ * Nu är källan en enda PNG med alfa, gjord som ett klistermärke.
+ * Ingen nyckling behövs, ingen översvämning, ingen gissning om vad
+ * som är motiv. Den koden är borta med källan den fanns för; ligger
+ * kvar i git om en ny ofrilagd bild någon gång dyker upp.
  *
- * Efter frilägningen beskärs den genomskinliga marginalen bort så att
- * bildrutan motsvarar motivet. Det gör hero-layouten förutsägbar i
- * stället för att texten måste kompensera för död yta.
+ * DET SOM ÄNDÅ MÅSTE GÖRAS: alfan är NÄSTAN ogenomskinlig, inte
+ * ogenomskinlig. Mätt på källan ligger 984 754 pixlar på alfa 253 och
+ * bara 1 648 på 255. 253 av 255 är 99,2 procent, alltså släpper
+ * motivet igenom knappt en procent av det som ligger bakom — och
+ * bakom den här bilden ligger konturtexten DELENS. Det är exakt den
+ * genomlysning bilden togs fram för att bli av med.
+ *
+ * Därför snäpps alfan: allt över SNAPP blir helt ogenomskinligt. Den
+ * äkta mjuka kanten går från 0 till full på några få pixlar och
+ * ligger långt under tröskeln — den lämnas i fred, annars blir
+ * siluetten hackig.
+ *
+ * TVÅ FILER, SAMMA BESKÄRNING. B1 och B2 är inte längre två motiv
+ * utan samma bild i två upplösningar. Hero-burgaren ritas som mest
+ * 520 px bred på desktop och ~305 på mobil, och en telefon ska inte
+ * hämta desktopfilen.
  */
 
 import sharp from 'sharp';
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-const KALLA = 'kalla/hero';
+const KALLA = 'kalla/hero/ny-hero.png';
 const MAL = 'public/bilder/hero';
 
-/**
- * Målbredd per bild. Desktop ritar hero-burgaren som mest 520 px bred,
- * mobilen som mest ~305 px. 2× av vardera, avrundat uppåt.
- */
+/** Två gångers pixeltäthet av respektive visningsbredd. */
 const MAL_BREDD = { B1: 1100, B2: 700 };
-const KVALITET = 76;
+const KVALITET = 82;
 
 /**
- * Nyckling mot den mörka bottnen.
- *   LO  under denna ljusstyrka är pixeln helt genomskinlig
- *   HI  över denna är den helt ogenomskinlig
- * Bakgrunden mäter ljusstyrka ~8. Ramp 14 → 34 ger en mjuk kant.
+ * Alfa över detta blir 255.
  *
- * MEN LJUSSTYRKA ENSAM RÄCKER INTE. Premissen "mörk betyder bakgrund"
- * gäller inte för en burgare: skuggan under bullen och de brända
- * kanterna på köttet är lika mörka som bottnen. De hamnade i rampen
- * och blev delvis genomskinliga — 193 692 pixlar i B1 låg mellan 14
- * och 34 — så konturtexten DELENS bakom burgaren lyste igenom motivets
- * mörkaste partier. Det såg ut som hål i burgaren, och det var det
- * första man såg på sidan.
- *
- * Rättningen är att avgöra bakgrund på SAMMANHANG i stället för på
- * ljusstyrka. Bakgrunden är den mörka yta som hänger ihop med
- * bildens kant. En mörk fläck inne i burgaren hänger inte ihop med
- * kanten — den är omsluten av motiv — och ska alltså vara kvar.
- *
- * Mätt på källan: ljusaste pixeln längs hela ramen är 15,1, så
- * motivet rör aldrig kanten och översvämningen kan inte läcka in i
- * burgaren.
- *
- * Rampen finns kvar, men bara INUTI den översvämmade ytan. Då
- * behåller silhuetten sin mjuka antialiasade kant samtidigt som allt
- * som inte är bakgrund är helt ogenomskinligt.
+ * 240, inte 250. Vid 250 blev 648 pixlar i B1 kvar på 244–249 — ett
+ * genomsläpp på 2,7 procent, uppmätt, alltså osynligt i praktiken men
+ * ändå inte det bilden togs fram för. Den äkta mjuka kanten löper
+ * från 0 till full över flera pixlar och har sin massa långt under
+ * 240, så tröskeln rör bara en sliver av rampens topp.
  */
-const LO = 14;
-const HI = 34;
+const SNAPP = 240;
 
-/** Marginal som lämnas kvar runt motivet, i procent av motivets bredd. */
-const MARGINAL = 0.03;
+/** Marginal runt motivet, i andel av motivets bredd. */
+const MARGINAL = 0.02;
 
-async function frilagg(fil) {
-  const { data, info } = await sharp(fil).ensureAlpha().raw()
+/** Räknar äkta hål: delvis genomskinliga pixlar INNE i siluetten. */
+async function inreHal(fil) {
+  const { data, info } = await sharp(fil)
+    .ensureAlpha()
+    .raw()
     .toBuffer({ resolveWithObject: true });
   const { width: W, height: H, channels: C } = info;
-
-  const lum = new Float32Array(W * H);
-  for (let p = 0; p < W * H; p++) {
-    const i = p * C;
-    lum[p] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-  }
-
-  // Ramens ljusaste pixel. Ligger den över HI rör motivet kanten och
-  // översvämningen skulle läcka in i burgaren — då är bilden fel
-  // beskuren och pipelinen ska säga ifrån, inte gissa.
-  let ramMax = 0;
-  for (let x = 0; x < W; x++) {
-    ramMax = Math.max(ramMax, lum[x], lum[(H - 1) * W + x]);
-  }
-  for (let y = 0; y < H; y++) {
-    ramMax = Math.max(ramMax, lum[y * W], lum[y * W + W - 1]);
-  }
-  if (ramMax >= HI) {
-    throw new Error(
-      `${fil}: motivet rör bildkanten (ljusaste rampixel ${ramMax.toFixed(1)} ` +
-      `>= HI ${HI}). Beskär källan med marginal först.`
-    );
-  }
-
-  /* Översvämning från ramen genom allt som är mörkare än HI. Det som
-     nås är bakgrund; allt annat är motiv, hur mörkt det än är. Kön är
-     en typad ringbuffert — en vanlig array med push/shift blir
-     kvadratisk på fyra miljoner pixlar. */
-  const bakgrund = new Uint8Array(W * H);
+  const a = (p) => data[p * C + 3];
+  const natt = new Uint8Array(W * H);
   const ko = new Int32Array(W * H);
   let huvud = 0;
   let svans = 0;
   const salt = (p) => {
-    if (bakgrund[p] || lum[p] >= HI) return;
-    bakgrund[p] = 1;
+    if (natt[p] || a(p) >= SNAPP) return;
+    natt[p] = 1;
     ko[svans++] = p;
   };
-
   for (let x = 0; x < W; x++) {
     salt(x);
     salt((H - 1) * W + x);
@@ -115,7 +83,6 @@ async function frilagg(fil) {
     salt(y * W);
     salt(y * W + W - 1);
   }
-
   while (huvud < svans) {
     const p = ko[huvud++];
     const x = p % W;
@@ -125,27 +92,36 @@ async function frilagg(fil) {
     if (y > 0) salt(p - W);
     if (y < H - 1) salt(p + W);
   }
+  let hal = 0;
+  for (let p = 0; p < W * H; p++) if (a(p) < SNAPP && !natt[p]) hal++;
+  return hal;
+}
 
-  let x0 = W, y0 = H, x1 = -1, y1 = -1;
-  let borttagna = 0;
-  let raddade = 0;
+async function kor() {
+  await mkdir(MAL, { recursive: true });
+
+  const { data, info } = await sharp(KALLA)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const { width: W, height: H, channels: C } = info;
+
+  let heltFore = 0;
+  let snappade = 0;
+  let x0 = W;
+  let y0 = H;
+  let x1 = -1;
+  let y1 = -1;
 
   for (let p = 0; p < W * H; p++) {
-    let a;
-    if (bakgrund[p]) {
-      a = (lum[p] - LO) / (HI - LO);
-      a = a < 0 ? 0 : a > 1 ? 1 : a;
-    } else {
-      // Motiv. Mörkt motiv är fortfarande motiv.
-      a = 1;
-      if (lum[p] < HI) raddade++;
+    const i = p * C + 3;
+    const a = data[i];
+    if (a === 255) heltFore++;
+    if (a >= SNAPP && a < 255) {
+      data[i] = 255;
+      snappade++;
     }
-    data[p * C + 3] = Math.round(a * 255);
-    if (a === 0) {
-      borttagna++;
-      continue;
-    }
-    if (a > 0.5) {
+    if (data[i] > 12) {
       const x = p % W;
       const y = (p - x) / W;
       if (x < x0) x0 = x;
@@ -155,65 +131,73 @@ async function frilagg(fil) {
     }
   }
 
-  return { data, W, H, C, ruta: { x0, y0, x1, y1 }, borttagna, raddade, ramMax };
-}
+  const mw = x1 - x0 + 1;
+  const pad = Math.round(mw * MARGINAL);
+  const left = Math.max(0, x0 - pad);
+  const top = Math.max(0, y0 - pad);
+  const width = Math.min(W - left, mw + pad * 2);
+  const height = Math.min(H - top, y1 - y0 + 1 + pad * 2);
 
-async function kor() {
-  await mkdir(MAL, { recursive: true });
+  const beskuren = await sharp(data, {
+    raw: { width: W, height: H, channels: C }
+  })
+    .extract({ left, top, width, height })
+    .png()
+    .toBuffer();
+
+  const kallstorlek = (await stat(KALLA)).size;
   const rader = [];
 
-  for (const id of ['B1', 'B2']) {
-    const kalla = path.join(KALLA, id + '.jpeg');
+  for (const [id, bredd] of Object.entries(MAL_BREDD)) {
     const mal = path.join(MAL, id + '.webp');
-    const fore = (await stat(kalla)).size;
 
-    const { data, W, H, C, ruta, borttagna, raddade, ramMax } =
-      await frilagg(kalla);
+    /* SNÄPPNINGEN GÖRS OM EFTER OMSKALNINGEN. lanczos3 ringer kring
+       skarpa alfakanter och lägger tillbaka värden strax under 255
+       inne i motivet — uppmätt 648 hål i B1 när snäppningen bara
+       gjordes på källan. Skalan först, snäppet sedan, kodningen
+       sist. */
+    const skalad = await sharp(beskuren)
+      .resize({ width: bredd, kernel: 'lanczos3' })
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-    // Beskär till motivet plus marginal.
-    const mw = ruta.x1 - ruta.x0 + 1;
-    const pad = Math.round(mw * MARGINAL);
-    const left = Math.max(0, ruta.x0 - pad);
-    const top = Math.max(0, ruta.y0 - pad);
-    const width = Math.min(W - left, mw + pad * 2);
-    const height = Math.min(H - top, ruta.y1 - ruta.y0 + 1 + pad * 2);
+    const sd = skalad.data;
+    const sc = skalad.info.channels;
+    for (let p = 0; p < skalad.info.width * skalad.info.height; p++) {
+      const i = p * sc + 3;
+      if (sd[i] >= SNAPP && sd[i] < 255) sd[i] = 255;
+    }
 
-    await sharp(data, { raw: { width: W, height: H, channels: C } })
-      .extract({ left, top, width, height })
-      .resize({ width: MAL_BREDD[id], withoutEnlargement: true, kernel: 'lanczos3' })
-      // alphaQuality 100. Vid 90 är alfakanalen förstörande komprimerad,
-      // och bruset landar som delvis genomskinliga pixlar MITT I motivet
-      // — uppmätt 20 042 i B1 och 36 708 i B2 efter att nycklingen
-      // gjort dem helt ogenomskinliga. Exakt samma hål som just
-      // rättades, återinförda av kodaren.
+    const ut = await sharp(sd, {
+      raw: {
+        width: skalad.info.width,
+        height: skalad.info.height,
+        channels: sc
+      }
+    })
+      // alphaQuality 100: förstörande komprimerad alfa lägger tillbaka
+      // exakt det brus snäppningen just tog bort.
       .webp({ quality: KVALITET, alphaQuality: 100, effort: 6 })
       .toFile(mal);
 
-    const efter = (await stat(mal)).size;
-    const ny = await sharp(mal).metadata();
-
-    rader.push({
-      id,
-      fore: `${W}×${H}`,
-      efter: `${ny.width}×${ny.height}`,
-      foreKB: Math.round(fore / 1024),
-      efterKB: Math.round(efter / 1024),
-      minskning: Math.round((1 - efter / fore) * 100) + ' %',
-      bortklippt: `${W - width}×${H - height} px`,
-      genomskinligt: Math.round(borttagna / (W * H) * 100) + ' %',
-      // Mörka motivpixlar som ljusstyrkerampen ensam hade gjort
-      // delvis genomskinliga, alltså hålen i burgaren.
-      raddade: raddade.toLocaleString('sv-SE') + ' px',
-      ramMax: ramMax.toFixed(1),
-      alfa: ny.hasAlpha ? 'ja' : 'NEJ'
-    });
+    rader.push(
+      `${id}  ${ut.width}×${ut.height}  ${((await stat(mal)).size / 1024).toFixed(0)} kB`
+    );
   }
 
-  console.table(rader);
+  for (const r of rader) console.log(r);
   console.log(
-    `Totalt: ${rader.reduce((s, r) => s + r.foreKB, 0)} kB → ` +
-    `${rader.reduce((s, r) => s + r.efterKB, 0)} kB`
+    `\nkälla ${W}×${H}, ${(kallstorlek / 1048576).toFixed(2)} MB  →  ` +
+      `beskuren ${width}×${height}, förhållande ${(width / height).toFixed(3)}`
   );
+  console.log(
+    `helt ogenomskinliga i källan ${heltFore.toLocaleString('sv-SE')}  ` +
+      `snäppta till 255 ${snappade.toLocaleString('sv-SE')}`
+  );
+  for (const id of Object.keys(MAL_BREDD)) {
+    console.log(`ÄKTA INRE HÅL i ${id}: ${await inreHal(path.join(MAL, id + '.webp'))}`);
+  }
 }
 
 kor();

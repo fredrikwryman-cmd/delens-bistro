@@ -1309,6 +1309,19 @@ function riggaRadavslojning() {
       rader[rader.length - 1].push(o);
     }
 
+    /* Mellanrummen FLYTTAS med, de hittas inte på. Förut lades ett
+       blanksteg efter varje nod, och då fick "smashade</span>," ett
+       mellanslag mitt i: "smashade ,". Ett elementbarn som följs
+       direkt av skiljetecken är precis det fallet, och kritstrecket
+       under ordet smashade är ett sådant element. */
+    const efterforande = new Map();
+    for (const o of platta) {
+      const n = o.nextSibling;
+      if (n && n.nodeType === Node.TEXT_NODE && /^\s+$/.test(n.textContent)) {
+        efterforande.set(o, n);
+      }
+    }
+
     for (const rad of rader) {
       const mask = document.createElement('span');
       mask.className = 'rad-mask';
@@ -1317,7 +1330,8 @@ function riggaRadavslojning() {
       rad[0].before(mask);
       for (const o of rad) {
         inre.append(o);
-        inre.append(document.createTextNode(' '));
+        const mellan = efterforande.get(o);
+        if (mellan) inre.append(mellan);
       }
     }
     // Kvarvarande lösa blanksteg mellan maskerna.
@@ -1806,8 +1820,13 @@ function riggaTypval() {
     return b;
   });
 
+  // Namnet i en egen span, så smal skärm kan dölja just den och
+  // behålla Aa-märket. textContent hade svept bort ::before också.
+  const etikett = document.createElement('span');
+  etikett.className = 'typval__etikett';
+  knapp.append(etikett);
   const skrivKnapp = () => {
-    knapp.textContent = TYPSNITT[vald].namn;
+    etikett.textContent = TYPSNITT[vald].namn;
   };
 
   function valj(i) {
@@ -1833,7 +1852,12 @@ function riggaTypval() {
   skrivKnapp();
 
   rot.append(knapp, lista);
-  document.body.append(rot);
+  /* I navbaren, inte i ett hörn. Se kommentaren vid .typval i
+     stilmallen — ett fritt svävande chip hittades inte. Faller
+     navbaren bort läggs växlaren sist i body, så den finns kvar. */
+  const nav = $('#nav');
+  if (nav) nav.append(rot);
+  else document.body.append(rot);
 
   /* Siffertangenterna 1–7 byter direkt. Sajten har inga textfält, så
      de är lediga, och att kunna bläddra utan att öppna panelen är
