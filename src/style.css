@@ -2269,6 +2269,89 @@ input:focus-visible {
   .bestall__bild { border-radius: 0.6rem 0 0 0.6rem; }
 }
 
+/* ═══ 10 · FINALEN ════════════════════════════════════════════ */
+
+/* Märket monteras av sina egna delar och sidan skriver under. Skälen
+   till svart botten och till att den mörka skivan inte syns står i
+   uppmärkningen. */
+
+.final__inner {
+  display: grid;
+  justify-items: center;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  text-align: center;
+}
+
+.final__logga {
+  width: clamp(11rem, 30vw, 17.5rem);
+  height: auto;
+}
+
+.final__rad {
+  margin: 0;
+  max-width: 24ch;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
+  color: var(--offwhite);
+}
+
+/* UTGÅNGSLÄGET SÄTTS AV JS, inte här. Ett data-attribut som bara
+   JS kan sätta betyder att sidan utan JS visar en färdig logga i
+   stället för en tom ruta — samma regel som ord-för-ord-avslöjningen
+   följer. */
+.final[data-bygger='vantar'] .final__del,
+.final[data-bygger='vantar'] .final__rad {
+  opacity: 0;
+}
+
+/* DELARNA SKALAS KRING SIN EGEN MITT, inte kring märkets. Med
+   märkets mitt som origo hade hela loggan blåsts upp inifrån; med
+   varje dels egen mitt sätter sig varje element på sin plats och
+   stannar där. transform-box: fill-box krävs — utan den ligger
+   origo i SVG-rutans hörn och delarna svingar in från vänster.
+
+   90 ms förskjutning och 360 ms per del: sista delen landar på
+   7 × 90 + 360 = 990 ms, raden 260 ms efter det. 1 250 ms totalt,
+   alltså under laddskärmens 1 800. Finalen får inte väga mer än
+   öppningen.
+
+   360 ms är längre än en knapptryckning får ta, och det är rätt
+   här: det här är sidans enda rörelse som ses EN gång per besök.
+   Det är i den änden av frekvensskalan man får kosta på sig något. */
+.final__del {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.final[data-bygger='kor'] .final__del {
+  animation: del-pa-plats 360ms var(--ut) both;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+@keyframes del-pa-plats {
+  from {
+    opacity: 0;
+    /* Aldrig från scale(0) — ingenting i världen uppstår ur intet.
+       0,92 och fjorton enheter ovanifrån: delen kommer uppifrån och
+       lägger sig, samma riktning som laddskärmens lager. */
+    transform: translateY(-14px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.final[data-bygger='kor'] .final__rad {
+  animation: rad-fram 260ms var(--ut) 990ms both;
+}
+
+@keyframes rad-fram {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
 /* ═══ 9 · FOOTER ══════════════════════════════════════════════ */
 
 /* HÖJDEN ÄR SATT AV KASTBANAN, inte av innehållet.
@@ -2304,6 +2387,14 @@ input:focus-visible {
 .foot:has(.jonglering) {
   min-height: clamp(26rem, 68svh, 44rem);
   display: grid;
+  /* minmax(0, 1fr), av exakt samma skäl som heron. Den underförstådda
+     auto-kolumnen tar sin bredd ur innehållet, och kolofonraden är en
+     lång mening som inte vill brytas: vid 305 px blev spåret 336 px
+     och allt i footern lades ut mot den bredden. Med overflow: hidden
+     ovanpå syntes det inte som rullning utan som att adressen,
+     telefonnumret och länkarna var AVKLIPPTA 15 px in från kanten.
+     Uppmätt före: elva element med högerkant på 320 i en 305 px vy. */
+  grid-template-columns: minmax(0, 1fr);
   align-content: center;
 }
 
@@ -3046,6 +3137,38 @@ input:focus-visible {
   .jonglering,
   .kedja {
     display: none;
+  }
+
+  /* FINALEN: färdig logga, ingen montering. Delarna hålls synliga
+     och hela blocket tonas in en gång på 200 ms. Monteringen är
+     rörelse, men märket och hälsningen är innehåll — det senare
+     står kvar. */
+  .final[data-bygger='vantar'] .final__del,
+  .final[data-bygger='vantar'] .final__rad,
+  .final[data-bygger='kor'] .final__del,
+  .final[data-bygger='kor'] .final__rad {
+    opacity: 1;
+    animation: none;
+    transform: none;
+  }
+
+  .final[data-bygger='vantar'] .final__inner {
+    opacity: 0;
+  }
+
+  /* !important behövs för att slå den globala regeln högre upp i den
+     här filen, som nollar animation-duration på ALLT vid reducerad
+     rörelse. Uppmätt utan den: toningen blev 0,00001 s, alltså ett
+     hopp — och ett hopp är inte en mildare version av en rörelse,
+     det är den hårdaste versionen. 200 ms är kort nog att inte
+     läsa som rörelse och lång nog att inte slå till. */
+  .final[data-bygger='kor'] .final__inner {
+    animation: final-tona 200ms linear both !important;
+  }
+
+  @keyframes final-tona {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   /* Footerns extra höjd finns BARA för kastbanan. Är kastet borta

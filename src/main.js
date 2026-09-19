@@ -1758,6 +1758,41 @@ function riggaScroll() {
   requestAnimationFrame(varv);
 }
 
+/* ═══ 5 · FINALEN ════════════════════════════════════════════════
+   Märket monteras av sina egna delar när sektionen kommer i vy.
+   All timing ligger i stilmallen; det här är bara avtryckaren.
+
+   UTGÅNGSLÄGET SÄTTS HÄRIFRÅN. Låg det i CSS skulle en besökare
+   utan JS få en tom ruta där loggan ska stå. Nu är ordningen den
+   omvända: utan JS står märket färdigt, och JS är det som gör det
+   omonterat för att kunna montera det.
+
+   EN GÅNG PER SIDLADDNING. Observatören kopplas ned i samma andetag
+   som den utlöser. Att bygga om märket varje gång någon passerar
+   förbi är det som gör scrollutlösta effekter irriterande andra
+   gången — och det här är sidans sista ögonblick, inte en kontroll
+   man återvänder till.                                            */
+
+function riggaFinal() {
+  const sek = $('#final');
+  if (!sek) return;
+
+  sek.setAttribute('data-bygger', 'vantar');
+
+  const io = new IntersectionObserver(
+    ([post]) => {
+      if (!post.isIntersecting) return;
+      io.disconnect();
+      sek.setAttribute('data-bygger', 'kor');
+    },
+    // Märket ska ha kommit upp en bit i vyn innan det börjar byggas,
+    // annars startar sekvensen medan sektionen fortfarande är en rand
+    // längst ned på skärmen.
+    { rootMargin: '0px 0px -10% 0px', threshold: 0.25 }
+  );
+  io.observe(sek);
+}
+
 /* ═══ MJUK SCROLL ════════════════════════════════════════════════ */
 
 function riggaLenis() {
@@ -1789,6 +1824,7 @@ riggaOrderbar();
 // Momenten registrerar sina varvsteg FÖRE riggaScroll, som startar
 // varvet. Registreras de efter kör första bildrutan utan dem.
 riggaVagor();
+riggaFinal();
 riggaAvskalning();
 riggaBlick();
 riggaGlans();
