@@ -223,6 +223,15 @@ a {
   z-index: 2;
 }
 
+/* VÅGEN ÄR SILUETTEN MELLAN TVÅ FÄRGER, inte ett streck ovanpå den
+   ena. Banan fyller ytan OVANFÖR kurvan, alltså bär kroppen färgen
+   från sektionen OVANFÖR — aldrig sektionens egen.
+
+   Med sektionens egen färg målade den rött på rött och gjorde
+   ingenting alls: kanten mellan blocken förblev spikrak och enbart
+   amber-strecket syntes, som en lös linje en bit ned i nästa
+   sektion. Varje --wave-fill i index.html pekar på grannen ovanför
+   och ska fortsätta göra det när sektionsordningen ändras. */
 .wave__body {
   fill: var(--wave-fill, var(--svart));
 }
@@ -720,11 +729,24 @@ input:focus-visible {
   font-family: var(--font-display);
   line-height: 0.78;
   text-transform: uppercase;
+
+  /* Hero-lockupen är sajtens enda rena varumärkesutrop och det enda
+     stället där typen får gå förbi skalans översta steg. Faktorn
+     ligger HÄR, på lockupen, och inte i skalan: de sju stegen styr
+     resten av sidan och ska inte rubbas av att en sektion vill
+     skrika högre.
+
+     Att i stället lyfta BISTRO ett helt steg, från xxl till xxxl,
+     provades först. Då blev raden 240 px, la sig över burgaren och
+     täckte båda brödtextspalterna — lockupen åt upp sektionen den
+     skulle inleda. Faktorn låter båda raderna växa och behåller
+     samtidigt förhållandet dem emellan. */
+  --lockup: 1.2;
 }
 
 .hero__outline {
   display: block;
-  font-size: var(--t-xxxl);
+  font-size: calc(var(--t-xxxl) * var(--lockup));
   line-height: var(--lh-xxxl);
   letter-spacing: var(--ls-xxxl);
   font-weight: var(--font-display-vikt);
@@ -737,7 +759,7 @@ input:focus-visible {
   position: relative;
   z-index: 5;
   margin-block-start: -0.08em;
-  font-size: var(--t-xxl);
+  font-size: calc(var(--t-xxl) * var(--lockup));
   line-height: var(--lh-xxl);
   letter-spacing: var(--ls-xxl);
   font-weight: var(--font-display-vikt);
@@ -814,7 +836,13 @@ input:focus-visible {
      vid sidan av texten. Varje märke får ett eget läge här. */
   /* Lutningen på 7 grader gör den omslutande rutan bredare än bilden.
      Vid 1 procent stack den ut 6 px och gav sidan vågrät rullning. */
-  .sticker--hero { inset-block-start: -13%; inset-inline-end: 4%; }
+  /* Kolofonmärket: staplat lägger footerns spalter under varandra och
+     märket skulle hamna över nästa rubrik. Ned i hörnet i stället. */
+  .sticker--kolofon {
+    inset-block-end: auto;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+  }
 
   .sticker--smash {
     inset-block-start: -9%;
@@ -847,7 +875,19 @@ input:focus-visible {
 
 /* ═══ 2 · ÖPPET NU ════════════════════════════════════════════ */
 
+/* Statusremsan är sajtens tunnaste sektion, och vågen måste rätta sig
+   efter den — inte tvärtom. Full höjd (90 px) plus scrubbens 1,5 blev
+   134 px våg i en remsa vars hela luft är 64. Uppmätt nådde den röda
+   fyllningen 69 px förbi textens överkant och målade över öppettiderna.
+   En tunn sektion får en tunn våg. z-index är bältet till hängslena:
+   texten ligger över vågen även om någon ändrar höjderna igen. */
+.status .wave {
+  height: clamp(26px, 3vw, 46px);
+}
+
 .status__inner {
+  position: relative;
+  z-index: 3;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1917,6 +1957,13 @@ input:focus-visible {
   gap: clamp(1.5rem, 4vw, 3rem);
 }
 
+/* Märket i kolofonen placeras mot NAMNBLOCKET, inte mot hela footern.
+   Utan position här föll det tillbaka på .foot och hamnade längst ut
+   till höger, bredvid länkspalten i stället för bredvid namnet. */
+.foot__namnblock {
+  position: relative;
+}
+
 .foot__namn {
   margin: 0 0 0.4rem;
   font-family: var(--font);
@@ -2126,20 +2173,22 @@ input:focus-visible {
   --veck: calc(100% - var(--skal, 0) * 21%);
 }
 
-/* HERO-MÄRKET RULLAS NED PÅ TID, INTE PÅ SCROLL.
+/* MÄRKEN SOM INTE KAN SCRUBBAS SÄTTS DIT PÅ TID.
 
-   Rullsträckan är 28 procent av vyhöjden, men hero-märket står redan
-   över vyns mitt när sidan laddas — det har 60 px scroll på sig att
-   klara en sträcka på 235. Följden var att det stod kvar 77 procent
-   uppvikt i viloläge och sedan snäppte ned. Tre fjärdedels uppvikt är
-   dessutom det fulaste läget i hela spannet, och det var det första
-   man såg på sidan.
+   Rullsträckan är 28 procent av vyhöjden. Ett märke måste alltså
+   kunna nå så högt i vyn för att hinna rulla ned — och det kan inte
+   alla. Ett märke ovanför vikningen har bara några tiotal pixlar på
+   sig innan det passerat, och ett märke i footern kan aldrig komma
+   över vyns mitt eftersom sidan tar slut. Båda blev stående halvt
+   uppvikta för alltid, och tre fjärdedels uppvikt är det fulaste
+   läget i hela spannet.
 
-   Ett scroll-scrubbat läge ovanför mitten är alltid fel: dess
-   tillstånd beror på var sidan råkar stå. Här ska märket i stället
-   SÄTTAS DIT — det landar med ankomsten och trycks ned strax efter.
-   Fördröjningen gör de två till en följd i stället för till två
-   rörelser ovanpå varandra. */
+   Ett scroll-scrubbat läge som scrollen inte kan nå är alltid fel:
+   dess tillstånd beror på var sidan råkar sluta. Sådana märken
+   markeras med data-satt vid riggningen — JS räknar ut om sträckan
+   går att nå — och SÄTTS DIT i stället: de landar med ankomsten och
+   trycks ned strax efter. Fördröjningen gör de två till en följd i
+   stället för två rörelser ovanpå varandra. */
 /* Övergången är armad först när märket ANLÄNT, inte innan.
 
    Utgångsläget --skal 1 sätts från JS vid riggningen. Låg övergången
@@ -2154,7 +2203,7 @@ input:focus-visible {
    Hela listan upprepas för att ankomstens transition står på
    .sticker[data-ankomst] med samma specificitet; utan upprepning
    skulle den här regeln slå ut opacity, scale och rotate. */
-.sticker--hero[data-synlig='true'] {
+.sticker[data-satt='true'] {
   transition:
     opacity 380ms var(--ut),
     scale 380ms var(--ut),
@@ -2485,7 +2534,7 @@ input:focus-visible {
     transform: none;
   }
 
-  .sticker--hero[data-synlig='true'] {
+  .sticker[data-satt='true'] {
     transition: opacity 200ms linear;
   }
 

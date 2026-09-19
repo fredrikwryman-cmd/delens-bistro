@@ -85,7 +85,7 @@
 
     <main id="top">
       <!-- ═══ 1 · HERO — svart ═════════════════════════════════════ -->
-      <section class="sec sec--svart hero" id="hero">
+      <section class="sec sec--rod hero" id="hero">
         <div class="hero__inner">
           <h1 class="hero__title">
             <span class="hero__outline" data-reveal>Delens</span>
@@ -111,22 +111,11 @@
             <span class="hero__fill" data-reveal>Bistro</span>
           </h1>
 
-          <!-- Ett märke i hero, inte två. Maskotarna är stora nog att ta
-               över rubriken om de står i par. Smashad-påståendet står
-               redan i brödtexten intill.
-
-               Läget räknas mot .hero__inner, inte mot sektionen — den
-               börjar 293 px ned. Negativ topp lyfter alltså klockan UPP
-               ur rubrikblocket, till ytan ovanför högerspaltens text.
-               Med positiv topp låg den över "Centralvägen 3 …". -->
-          <span class="sticker sticker--hero"
-                style="--r: 7deg; --s-top: -16%; --s-right: 4%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-klocka.webp')">
-            <img class="sticker__blad" src="/bilder/marken/delens-klocka.webp"
-                 alt="Klistermärke: en väckarklocka håller upp en banderoll med texten Sedan 2017"
-                 width="400" height="500" decoding="async" />
-            <span class="sticker__flarp" aria-hidden="true"></span>
-            <span class="sticker__glans" aria-hidden="true"></span>
-          </span>
+          <!-- Inget märke i hero längre. Sektionen är djupröd nu, och
+               maskotarnas röda ligger på 1,47:1 mot den. Klockan med
+               "sedan 2017" står i footern i stället, där ett
+               grundningsår hör hemma och underlaget är kol.
+          -->
 
           <div class="hero__copy hero__copy--v">
             <p>
@@ -144,10 +133,17 @@
       </section>
 
       <!-- ═══ 2 · ÖPPET NU — kol ═══════════════════════════════════ -->
-      <section class="sec sec--tat sec--kol status" id="status">
-        <!-- Svart mot kol: fyra procents ljushetsskillnad. En våg syns
-             inte i det steget, bara dess amber-kant. Skarv i stället. -->
-        <span class="skarv" aria-hidden="true"></span>
+      <section class="sec sec--tat sec--kol status" id="status" style="--wave-fill: var(--rod)">
+        <!-- Skarv förut, när hero var svart: svart mot kol är fyra
+             procents ljushetsskillnad och en våg syns inte i det steget.
+             Nu är hero djuprött. Djuprött mot kol skiljer sig knappt i
+             ljushet heller — 1,41 — men kraftigt i KULÖR, och då läser
+             siluetten. Samma regel som förut, annat utfall: en våg är
+             ett snitt mellan två tydligt skilda toner. -->
+        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+          <path class="wave__body" d="M0,52 C240,12 500,80 760,40 C1000,4 1230,68 1440,32 L1440,0 L0,0 Z" />
+          <path class="wave__edge" d="M0,52 C240,12 500,80 760,40 C1000,4 1230,68 1440,32" />
+        </svg>
         <div class="status__inner">
           <p class="status__now" id="status-now">
             <span class="status__dot" id="status-dot"></span>
@@ -158,7 +154,7 @@
       </section>
 
       <!-- ═══ 3 · REBRANDEN — djuprött ═════════════════════════════ -->
-      <section class="sec sec--vid sec--rod rebrand" id="rebrand" style="--wave-fill: var(--rod)">
+      <section class="sec sec--vid sec--rod rebrand" id="rebrand" style="--wave-fill: var(--kol)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,40 C300,84 560,8 780,44 C1000,80 1220,24 1440,56 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,40 C300,84 560,8 780,44 C1000,80 1220,24 1440,56" />
@@ -232,7 +228,7 @@
       </section>
 
       <!-- ═══ 4 · LAGERSEKTIONEN — svart ═══════════════════════════ -->
-      <section class="sec sec--svart lager" id="lager" style="--wave-fill: var(--svart)">
+      <section class="sec sec--svart lager" id="lager" style="--wave-fill: var(--rod)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,52 C260,12 520,80 760,40 C1000,0 1220,68 1440,32 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,52 C260,12 520,80 760,40 C1000,0 1220,68 1440,32" />
@@ -332,7 +328,7 @@
       </section>
 
       <!-- ═══ 6 · HELA MENYN — off-white ═══════════════════════════ -->
-      <section class="sec sec--normal sec--ljus meny" id="meny" style="--wave-fill: var(--offwhite)">
+      <section class="sec sec--normal sec--ljus meny" id="meny" style="--wave-fill: var(--kol)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,56 C240,16 500,88 740,48 C980,8 1210,72 1440,40 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,56 C240,16 500,88 740,48 C980,8 1210,72 1440,40" />
@@ -349,7 +345,7 @@
       </section>
 
       <!-- ═══ 7 · HITTA HIT — djuprött ═════════════════════════════ -->
-      <section class="sec sec--normal sec--rod hitta" id="hitta" style="--wave-fill: var(--rod)">
+      <section class="sec sec--normal sec--rod hitta" id="hitta" style="--wave-fill: var(--offwhite)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,44 C300,4 540,76 780,36 C1020,-4 1230,64 1440,28 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,44 C300,4 540,76 780,36 C1020,-4 1230,64 1440,28" />
@@ -396,7 +392,7 @@
       </section>
 
       <!-- ═══ 8 · BESTÄLL — svart ══════════════════════════════════ -->
-      <section class="sec sec--vid sec--svart bestall" id="bestall" style="--wave-fill: var(--svart)">
+      <section class="sec sec--vid sec--svart bestall" id="bestall" style="--wave-fill: var(--rod)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,32 C260,72 520,8 760,48 C1000,88 1220,20 1440,56 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,32 C260,72 520,8 760,48 C1000,88 1220,20 1440,56" />
@@ -449,10 +445,22 @@
       </div>
 
       <div class="wrap foot__inner">
-        <div>
+        <div class="foot__namnblock">
           <p class="foot__namn">Delens Bistro</p>
           <p id="foot-adress"></p>
           <p><a class="lank" id="foot-tel" href="#"></a></p>
+          <!-- Ett grundningsår hör hemma i en kolofon, bredvid namnet
+               och adressen. Klockan låg i hero tills den sektionen blev
+               djupröd; maskotrött mot djuprött är 1,47:1 och märket
+               tappade sin teckning. Kol ger den tillbaka. -->
+          <span class="sticker sticker--kolofon"
+                style="--r: -6deg; --s-bottom: -6%; --s-right: 0%; --mk-bredd: 8.5rem; --mk-bild: url('/bilder/marken/delens-klocka.webp')">
+            <img class="sticker__blad" src="/bilder/marken/delens-klocka.webp"
+                 alt="Klistermärke: en väckarklocka håller upp en banderoll med texten Sedan 2017"
+                 width="400" height="500" loading="lazy" decoding="async" />
+            <span class="sticker__flarp" aria-hidden="true"></span>
+            <span class="sticker__glans" aria-hidden="true"></span>
+          </span>
         </div>
         <div>
           <!-- Hela veckan stod ordagrant två gånger, här och i Hitta hit.

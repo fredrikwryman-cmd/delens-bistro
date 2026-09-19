@@ -600,13 +600,14 @@ function riggaStickers() {
       for (const p of poster) {
         if (!p.isIntersecting) continue;
         p.target.setAttribute('data-synlig', 'true');
-        // Märken som inte scrubbas trycks ned här i stället. CSS:en
+        // Märken som scrollen inte kan rulla ned trycks ned här i
+        // stället; riggningen har märkt dem med data-satt. CSS:en
         // håller fördröjningen så att landningen hinner läsas först.
         //
         // Nedtryckningen väntar en bildruta: övergången för --skal
-        // armas av data-synlig, och sätts värdet i samma omgång som
+        // armas av data-satt, och sätts värdet i samma omgång som
         // attributet finns inget gammalt läge att gå ifrån.
-        if (p.target.classList.contains('sticker--hero')) {
+        if (p.target.getAttribute('data-satt') === 'true') {
           const mal = p.target;
           requestAnimationFrame(() => mal.style.setProperty('--skal', '0'));
         }
@@ -709,6 +710,7 @@ const VAG = {
   perioder: [1000, 2000, 1800],
   forskjutning: [0, 300, 600],
   utslag: 9,
+  hojd: 90, // viewBoxens höjd
   skalaMax: () => (window.innerWidth < 720 ? 1.2 : 1.5)
 };
 
@@ -762,14 +764,29 @@ function riggaVagor() {
     for (const s of spar) {
       if (!s.inne || !s.tal) continue;
 
-      // Varannan y-koordinat i banan är en kontrollpunkt att vagga.
+      /* Varannan y-koordinat i banan är en kontrollpunkt att vagga.
+
+         Utslaget dämpas nära viewBoxens kanter. Nu när kroppen bär
+         grannens färg betyder en kurva som bågnar ovanför y=0 att
+         fyllningen upphör där — och då möter sektionens egen färg
+         grannen i en spikrak kant, mitt i vågen. Punkter som redan
+         ligger nära 0 eller 90 vaggar alltså mindre, och kurvan kan
+         aldrig lämna rutan. */
       const tal = s.tal.slice();
       let knut = 0;
       for (let i = 1; i < tal.length; i += 2) {
         const k = knut % 3;
         const fas =
           ((nu + VAG.forskjutning[k]) / VAG.perioder[k]) * Math.PI * 2;
-        tal[i] = s.tal[i] + Math.sin(fas) * VAG.utslag;
+        const bas = s.tal[i];
+        // Några kontrollpunkter i källbanorna ligger redan UTANFÖR
+        // rutan — en av dem på 90,7 i en ruta som är 90 hög. Utan
+        // nedre gräns blev marginalen negativ och utslaget vände
+        // fasen för just den punkten, uppmätt -4 i hitta-vågen.
+        const marginal = Math.min(bas, VAG.hojd - bas);
+        const utslag =
+          VAG.utslag * Math.max(0, Math.min(1, marginal / VAG.utslag));
+        tal[i] = bas + Math.sin(fas) * utslag;
         knut++;
       }
 
@@ -779,12 +796,10 @@ function riggaVagor() {
       s.sist = d;
 
       if (s.kant) s.kant.setAttribute('d', d);
-      if (s.kropp) {
-        s.kropp.setAttribute(
-          'd',
-          d + ` L${tal[tal.length - 2] > 0 ? 1440 : 1440},0 L0,0 Z`
-        );
-      }
+      // Kroppen är kurvan sluten upp till viewBoxens överkant. Ytan
+      // som fylls är alltså den OVANFÖR vågen, och den bär grannens
+      // färg — det är själva snittet mellan de två sektionerna.
+      if (s.kropp) s.kropp.setAttribute('d', d + ' L1440,0 L0,0 Z');
 
       // Scrubben: hur nära är sektionens överkant? Mätt ovan.
       const skala = 1 + (narhet.get(s) || 0) * (VAG.skalaMax() - 1);
@@ -816,15 +831,36 @@ function riggaAvskalning() {
   const marken = $$('.sticker');
   if (!marken.length) return;
 
-  const spar = marken
-    .map((m) => {
-      if (!reducerad.matches) m.style.setProperty('--skal', '1');
-      return { m, inne: false, min: 1 };
-    })
-    // Hero-märket står över vyns mitt redan vid sidladdning och kan
-    // därför inte scrubbas — det skulle stå kvar halvuppvikt tills
-    // någon scrollar. Det rullas ned på tid i stället, av ankomsten.
-    .filter((s) => !s.m.classList.contains('sticker--hero'));
+  /* Går märket att rulla ned med scrollen?
+
+     Rullningen är klar när märkets mitt nått h*0,5 − h*0,28 i vyn.
+     Lägsta mitt ett märke kan nå är dess dokumentläge minus största
+     möjliga scroll. Går den punkten inte tillräckligt högt — märket
+     ligger ovanför vikningen, eller i footern där sidan tar slut —
+     kan scrollen aldrig fullborda rullningen, och märket blir
+     stående halvt uppvikt för alltid.
+
+     De märkena markeras i stället som SATTA och trycks ned på tid av
+     ankomsten. Räknat här, en gång, i stället för att hårdkodas per
+     sektion: flyttas ett märke följer beslutet med. */
+  const maxScroll = Math.max(
+    0,
+    document.documentElement.scrollHeight - window.innerHeight
+  );
+  const h = window.innerHeight;
+  const spar = [];
+
+  for (const m of marken) {
+    if (!reducerad.matches) m.style.setProperty('--skal', '1');
+    const dokumentY = m.getBoundingClientRect().top + window.scrollY + m.offsetHeight / 2;
+    const lagstaMitt = dokumentY - maxScroll;
+    if (lagstaMitt > h * 0.22) {
+      m.setAttribute('data-satt', 'true');
+      continue;
+    }
+    spar.push({ m, inne: false, min: 1 });
+  }
+  if (!spar.length) return;
 
   const io = new IntersectionObserver(
     (poster) => {
@@ -839,7 +875,29 @@ function riggaAvskalning() {
 
   varvSteg.push(() => {
     if (reducerad.matches || flikenDold) return;
-    const h = window.innerHeight;
+    const vy = window.innerHeight;
+
+    /* Skyddsnät. Beslutet ovan om vad som går att rulla med scrollen
+       fattas EN gång, vid riggningen, och sidhöjden ändras efteråt:
+       menyrader fälls ut och in med drygt 400 px, radmaskerna byggs
+       om vid ny bredd, sena bilder flyttar saker. Krymper sidan kan
+       ett märke som bedömdes nåbart sluta vara det, och då stod det
+       halvuppvikt för alltid.
+
+       Är man längst ned finns ingen scroll kvar att vänta på, så
+       allt som fortfarande är uppvikt trycks ned här. Det gör felet
+       omöjligt oavsett vad som hänt med höjden sedan riggningen. */
+    if (
+      window.scrollY >=
+      document.documentElement.scrollHeight - window.innerHeight - 2
+    ) {
+      for (const s of spar) {
+        if (s.min <= 0) continue;
+        s.min = 0;
+        s.m.style.setProperty('--skal', '0');
+      }
+      return;
+    }
 
     for (const s of spar) {
       if (!s.inne) continue;
@@ -847,7 +905,7 @@ function riggaAvskalning() {
       const mitt = r.top + r.height / 2;
       // 0 medan märket är på väg upp mot vyns mitt, 1 när det nått en
       // fjärdedel upp. Flärpen är alltså uppe när märket kommer in.
-      const rullat = Math.min(1, Math.max(0, (h * 0.5 - mitt) / (h * 0.28)));
+      const rullat = Math.min(1, Math.max(0, (vy * 0.5 - mitt) / (vy * 0.28)));
       const skal = 1 - rullat;
       if (skal >= s.min) continue; // bara nedåt, aldrig tillbaka upp
       s.min = skal;
