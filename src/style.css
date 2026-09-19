@@ -2105,12 +2105,29 @@ input:focus-visible {
   color: rgb(242 235 224 / 0.86);
 }
 
-/* Bilden är sektionens avslut och får ligga bredare än texten —
-   62rem är samma tak som väggmålningen hade i rebranden, så de två
-   breda bilderna på sidan håller samma mått. */
+/* Bilderna ligger bredare än texten — 62rem mot textens 50ch, alltså
+   ungefär 992 mot 680 px. Steget är det som gör växlingen mellan text
+   och bild läsbar utan att något behöver kantställas eller lutas. */
 .personal__bild {
-  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
   max-width: 62rem;
+  /* TÄTT MOT TEXTEN OVANFÖR, inte mitt emellan. Bilden hör till
+     stycket den illustrerar, och avståndet är det enda som säger
+     vilket av de två styckena det är. Med lika luft på båda sidor —
+     eller, som först, mer luft ovanför än under — band bilden sig
+     till fel stycke. */
+  margin-block: clamp(1.25rem, 3vw, 2rem) 0;
+  /* margin-inline: 0 måste stå här. figure får 40 px sidmarginal av
+     webbläsarens egen stilmall, och den syntes inte på desktop där
+     max-width band bredden ändå — men på 375 px blev bilden 263 px
+     bred mot textens 343. Alltså precis tvärtom mot avsikten: bilden
+     smalare än texten, och rytmen i sektionen upp och ned. */
+  margin-inline: 0;
+}
+
+/* Och glesare efter. Här slutar ett stycke med sin bild och ett nytt
+   börjar; det är sektionens enda riktiga avsnittsgräns. */
+.personal__bild + .personal__text {
+  margin-block-start: clamp(2.75rem, 7vw, 4.5rem);
 }
 
 /* ═══ 8 · HITTA HIT ═══════════════════════════════════════════ */

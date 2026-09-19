@@ -377,8 +377,8 @@
            — två snitt som läser på var sitt sätt i stället för två som
            läser likadant.
 
-           TVÅ NAMN SAKNAS ÄNNU. Sök på TODO-NAMN; det står på båda
-           ställena arbetsnamnet förekommer. -->
+           ETT NAMN SAKNAS ÄNNU. Sök på TODO-NAMN; det står på alla
+           ställen arbetsnamnet förekommer. -->
       <section class="sec sec--normal sec--svart personal" id="personal" style="--wave-fill: var(--offwhite)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,44 C250,80 500,80 760,44 C1000,8 1220,8 1440,46 L1440,0 L0,0 Z" />
@@ -390,6 +390,18 @@
             <span class="rubrik__rad">bakom disken</span>
           </h2>
 
+          <!-- TEXT OCH BILD VARVAS, och det är sektionens hela form.
+               Först låg all text i ett block och bilden sist, som en
+               illustration EFTER ett resonemang. Nu står varje bild
+               direkt under de rader den visar: köket efter stycket om
+               köket, baren efter stycket om baren. Bildtexten behöver
+               då inte upprepa vad som redan står — den namnger bara
+               vem som är vem.
+
+               Rytmen bärs av bredden. Texten går i 50ch och bilderna i
+               62rem, alltså ungefär 680 mot 992 px på en bred skärm.
+               Det steget gör växlingen läsbar utan att något behöver
+               kantställas eller lutas. -->
           <div class="personal__text">
             <p data-rader>
               Fem personer driver Delens Bistro. Tre står i köket, två i baren.
@@ -399,6 +411,18 @@
               vid plåten bredvid honom, och Emil Haglund — mannen han köpte
               stället av — blev kvar i köket.
             </p>
+          </div>
+
+          <figure class="personal__bild">
+            <img src="/bilder/lokal/E5.webp"
+                 alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
+                 width="1600" height="900" loading="lazy" decoding="async" />
+            <figcaption class="bildtext">
+              Från vänster: Ömer Delen, Hakan Delen och Emil Haglund.
+            </figcaption>
+          </figure>
+
+          <div class="personal__text">
             <p data-rader>
               <!-- TODO-NAMN: "Emils son" är ett arbetsnamn. Byt här. -->
               I baren möts du av Julia och Emils son. De tar emot
@@ -407,18 +431,15 @@
             </p>
           </div>
 
-          <!-- E6: bred gruppbild med alla fem, 16:9. Tills den finns
-               visas E5 — samma format, men bara tre av de fem. Byt src,
-               alt, width och height när filen kommer; bildtexten nedan
-               är redan skriven för E6. -->
-          <figure class="personal__bild" data-plats="E6">
-            <img src="/bilder/lokal/E5.webp"
-                 alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
-                 width="1600" height="900" loading="lazy" decoding="async" />
+          <!-- E7: Julia och Emils son i baren. 16:9, samma format som
+               gruppbilden ovanför — två bilder i samma sektion som inte
+               har samma form läser som två olika sektioner. Byt ut
+               platshållaren mot en img när fotot finns. -->
+          <figure class="personal__bild">
+            <span class="ph" style="--ar: 16 / 9" data-id="E7" data-spec="2400 × 1350 · JPG"></span>
             <figcaption class="bildtext">
               <!-- TODO-NAMN: "Emils son" är ett arbetsnamn. Byt här. -->
-              Från vänster: Ömer Delen, Hakan Delen, Emil Haglund, Emils son
-              och Julia.
+              Emils son och Julia i baren.
             </figcaption>
           </figure>
         </div>
