@@ -607,35 +607,38 @@ input:focus-visible {
   visibility: hidden;
 }
 
+/* 160 px, inte 230. Stapeln är fem FOTON nu, och de hämtas innan
+   laddskärmen kan visa något. Vid 230 px hade filerna behövt vara 380
+   px breda för samma skärpa på en retinaskärm — drygt 20 kB styck och
+   100 kB innan första lagret kan falla, på en skärm vars hela poäng är
+   att den ska vara över på 1,8 sekunder. Vid 160 px väger de fem 46 kB
+   tillsammans och är fortfarande skarpa vid dubbel pixeltäthet.
+
+   --fall är fallhöjden, satt på stapeln så delarna kan dela den.
+   Tidigare 120 px mot en 230 px stapel, alltså drygt halva höjden.
+   Samma andel av 160 är 84. Med 120 kvar hade lagren startat långt
+   utanför laddskärmen och fallet läst som ett inkast, inte som en
+   burgare som byggs. */
 .loader__stack {
   position: relative;
-  width: min(42vw, 230px);
+  width: min(42vw, 160px);
   aspect-ratio: 1;
+  --fall: -84px;
 }
 
-/* Fem delar — samma fem som lagersektionen. Ersätts av F1 som SVG. */
+/* Delarna är bilder nu, placerade ur lagerregistret ovan — samma
+   andelar som lagersektionen använder, alltså samma burgare i en
+   mindre scen. De ritade formerna som låg här förut var fem rundade
+   rektanglar i platta färger. */
 .loader__part {
   position: absolute;
+  inset-block-start: var(--t);
   inset-inline-start: 50%;
+  width: var(--b);
+  height: auto;
+  z-index: var(--z);
   translate: -50% 0;
-  background: var(--offwhite);
-  border-radius: 999px;
   opacity: 0;
-}
-
-.loader__part[data-part='1'] { inset-block-start: 6%;  width: 78%; height: 26%; border-radius: 50% 50% 18% 18%; }
-.loader__part[data-part='2'] { inset-block-start: 36%; width: 74%; height: 9%;  background: var(--amber); }
-.loader__part[data-part='3'] { inset-block-start: 48%; width: 84%; height: 15%; background: #7a4b2a; }
-.loader__part[data-part='4'] { inset-block-start: 65%; width: 88%; height: 9%;  background: #6f8f4a; }
-.loader__part[data-part='5'] { inset-block-start: 76%; width: 72%; height: 18%; border-radius: 18% 18% 45% 45%; }
-
-.loader__part[data-syns='true'] {
-  animation: bit-in 420ms var(--ut) forwards;
-}
-
-@keyframes bit-in {
-  from { opacity: 0; transform: translateY(-40px) scale(0.92); }
-  to   { opacity: 1; transform: none; }
 }
 
 .loader__text {
@@ -1260,16 +1263,34 @@ input:focus-visible {
   will-change: transform;
 }
 
-/* Lagren är genererade var för sig och ligger inte i register: olika
+/* LAGERREGISTRET. Ett ställe, två användare.
+
+   Lagren är genererade var för sig och ligger inte i register: olika
    dukstorlek, olika skala och olika mängd tom yta runt motivet.
    Värdena nedan är uträknade ur varje fils faktiska innehållsruta,
    så att delarna bildar en sammanhängande burgare i viloläget.
 
      --b  bildens bredd i procent av scenen
      --t  bildens överkant i procent av scenen
+     --z  stapelordningen, underbullen underst
 
    Negativ --t betyder att filens tomma yta ovanför motivet skjuts
-   utanför scenen. Parallaxen adderas ovanpå det här viloläget.      */
+   utanför scenen. Parallaxen adderas ovanpå det här viloläget.
+
+   Talen är andelar av en KVADRATISK scen, inte pixlar, så samma
+   register bygger burgaren i lagersektionens 560 px och i
+   laddskärmens 160. Anpassade egenskaper ärvs, alltså räcker det att
+   attributet sitter på bilden ELLER på dess förälder.
+
+   ANDEL i verktyg/bilder.mjs är samma tal som --b. Ändras ett av dem
+   måste det andra ändras samtidigt, annars ritas laddskärmens lager i
+   fel upplösning. */
+
+[data-lager='overbulle']  { --b: 72.4%; --t: -1.5%; --z: 10; }
+[data-lager='ost']        { --b: 77.3%; --t: -1.0%; --z: 8; }
+[data-lager='kottpuck']   { --b: 82.9%; --t: 1.9%;  --z: 6; }
+[data-lager='sallad']     { --b: 78.3%; --t: 19.5%; --z: 4; }
+[data-lager='underbulle'] { --b: 74.4%; --t: 35.2%; --z: 2; }
 
 .lager__bit img {
   position: absolute;
@@ -1279,12 +1300,6 @@ input:focus-visible {
   height: auto;
   translate: -50% 0;
 }
-
-.lager__bit[data-lager='overbulle']  img { --b: 72.4%; --t: -1.5%; }
-.lager__bit[data-lager='ost']        img { --b: 77.3%; --t: -1.0%; }
-.lager__bit[data-lager='kottpuck']   img { --b: 82.9%; --t: 1.9%; }
-.lager__bit[data-lager='sallad']     img { --b: 78.3%; --t: 19.5%; }
-.lager__bit[data-lager='underbulle'] img { --b: 74.4%; --t: 35.2%; }
 
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
 
@@ -2717,12 +2732,18 @@ input:focus-visible {
   transform-origin: 50% 100%;
 }
 
+/* STUKEN SITTER I UNDERKANTEN, inte i mitten. Ett lager som landar
+   plattas mot det som redan ligger där, och med origo i mitten växte
+   det lika mycket uppåt som nedåt — då sjönk överkanten ned i lagret
+   ovanför i stället för att möta underlaget. Stapeln stukas redan
+   mot sin egen underkant; delarna gör det nu också. */
 .loader__part[data-syns='true'] {
+  transform-origin: 50% 100%;
   animation: bit-faller 520ms cubic-bezier(0.45, 0, 0.35, 1) forwards;
 }
 
 @keyframes bit-faller {
-  from { opacity: 0; transform: translateY(-120px) scaleY(1.14) scaleX(0.92); }
+  from { opacity: 0; transform: translateY(var(--fall)) scaleY(1.14) scaleX(0.92); }
   60%  { opacity: 1; transform: translateY(0) scaleY(0.88) scaleX(1.06); }
   82%  { transform: translateY(0) scaleY(1.03) scaleX(0.98); }
   to   { opacity: 1; transform: none; }
@@ -2750,6 +2771,15 @@ input:focus-visible {
   .loader__stack[data-stuk='true'],
   [data-puls='true'] {
     animation: none;
+  }
+
+  /* Delarna ligger i opacity: 0 och tänds av animationen. Tas
+     animationen bort måste något annat tända dem, annars är stapeln
+     tom. I praktiken hoppas hela laddskärmen över vid reducerad
+     rörelse — men en regel som bara råkar vara oskadlig är inte en
+     regel man vill lämna efter sig. */
+  .loader__part[data-syns='true'] {
+    opacity: 1;
   }
 
   .hero__burger[data-entre='vantar'] {

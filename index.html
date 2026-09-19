@@ -55,12 +55,38 @@
   <body>
     <!-- ═══ 0 · LADDSKÄRM — djuprött ═══════════════════════════════ -->
     <div class="loader" id="loader" role="status" aria-live="polite">
+      <!-- SAMMA FEM LAGER SOM LAGERSEKTIONEN, i laddskärmens storlek.
+           De ritade formerna — fem rundade rektanglar i platta färger —
+           läste som en ikon av en burgare, inte som burgaren sidan
+           handlar om.
+
+           ORDNINGEN I MARKUPEN ÄR FALLORDNINGEN, inte stapelordningen.
+           Varje lager faller när texten som namnger det står på skärmen:
+           plåten värms och underbullen landar, köttet smashas och pucken
+           landar. Djupet sköts av --z ur registret, inte av
+           dokumentordningen, så salladen kan falla efter osten och ändå
+           hamna under den.
+
+           Bredd och höjd står på varje bild för att reservera platsen.
+           Utan dem hoppar stapeln när den första bilden är avkodad, och
+           laddskärmen är det enda stället på sidan där ett hopp INTE
+           kan döljas av att man inte tittar dit. -->
       <div class="loader__stack" aria-hidden="true">
-        <span class="loader__part" data-part="1"></span>
-        <span class="loader__part" data-part="2"></span>
-        <span class="loader__part" data-part="3"></span>
-        <span class="loader__part" data-part="4"></span>
-        <span class="loader__part" data-part="5"></span>
+        <img class="loader__part" data-part="1" data-lager="underbulle"
+             src="/bilder/ladd/A5.webp" alt="" width="238" height="232"
+             fetchpriority="high" decoding="async" />
+        <img class="loader__part" data-part="2" data-lager="kottpuck"
+             src="/bilder/ladd/A3.webp" alt="" width="265" height="246"
+             fetchpriority="high" decoding="async" />
+        <img class="loader__part" data-part="3" data-lager="ost"
+             src="/bilder/ladd/A2.webp" alt="" width="247" height="244"
+             fetchpriority="high" decoding="async" />
+        <img class="loader__part" data-part="4" data-lager="sallad"
+             src="/bilder/ladd/A4.webp" alt="" width="251" height="233"
+             fetchpriority="high" decoding="async" />
+        <img class="loader__part" data-part="5" data-lager="overbulle"
+             src="/bilder/ladd/A1.webp" alt="" width="232" height="92"
+             fetchpriority="high" decoding="async" />
       </div>
       <p class="loader__text" id="loader-text">Värmer plåten …</p>
       <div class="loader__bar"><span id="loader-fill"></span></div>
@@ -276,19 +302,19 @@
               data-fart = px förflyttning per scrollad pixel.
             -->
             <div class="lager__scen" id="lager-scen">
-              <span class="lager__bit" data-lager="overbulle" data-fart="-0.20" style="--z: 10">
+              <span class="lager__bit" data-lager="overbulle" data-fart="-0.20">
                 <img src="/bilder/lager/A1.webp" alt="Överbulle" width="900" height="359" decoding="async" />
               </span>
-              <span class="lager__bit" data-lager="ost" data-fart="-0.10" style="--z: 8">
+              <span class="lager__bit" data-lager="ost" data-fart="-0.10">
                 <img src="/bilder/lager/A2.webp" alt="Smält cheddar" width="900" height="889" decoding="async" />
               </span>
-              <span class="lager__bit" data-lager="kottpuck" data-fart="0" style="--z: 6">
+              <span class="lager__bit" data-lager="kottpuck" data-fart="0">
                 <img src="/bilder/lager/A3.webp" alt="Smashad köttpuck" width="900" height="835" decoding="async" />
               </span>
-              <span class="lager__bit" data-lager="sallad" data-fart="0.10" style="--z: 4">
+              <span class="lager__bit" data-lager="sallad" data-fart="0.10">
                 <img src="/bilder/lager/A4.webp" alt="Sallad" width="900" height="835" decoding="async" />
               </span>
-              <span class="lager__bit" data-lager="underbulle" data-fart="0.20" style="--z: 2">
+              <span class="lager__bit" data-lager="underbulle" data-fart="0.20">
                 <img src="/bilder/lager/A5.webp" alt="Underbulle" width="900" height="879" decoding="async" />
               </span>
             </div>

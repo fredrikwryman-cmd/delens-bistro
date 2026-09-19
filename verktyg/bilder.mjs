@@ -4,11 +4,23 @@
  *   node verktyg/bilder.mjs
  *
  * Läser PNG-originalen i kalla/lager/, dämpar kantfransen där den
- * lyser, skalar till den storlek sidan faktiskt använder och skriver
- * WebP med alfa till public/bilder/lager/.
+ * lyser, skalar till de storlekar sidan faktiskt använder och skriver
+ * WebP med alfa.
  *
- * Scenen är som mest 560 px bred. Bredaste lagret ritas i 83 procent
- * av den, alltså ~465 px. MAL_BREDD täcker det med marginal vid 2×.
+ * TVÅ UPPSÄTTNINGAR UR SAMMA FÖRBEHANDLING. Lagersektionen och
+ * laddskärmen visar samma fem lager i vitt skilda storlekar, och
+ * beskärningen av A1 och avfransningen av A4 måste gälla båda. Därför
+ * ligger de som två utgåvor av ett och samma pass i stället för som
+ * två skript — en andra pipeline hade kunnat driva isär från den här
+ * utan att någon märkte det.
+ *
+ *   lager  scenen är som mest 560 px bred, bredaste lagret 83 procent
+ *          av den ≈ 465 px. 900 täcker det med marginal vid 2×.
+ *   ladd   laddskärmens stapel är som mest 160 px. Varje lager får sin
+ *          EGEN bredd, uträknad ur registret i stilmallen gånger två
+ *          för pixeltäthet — en gemensam bredd hade gett det smalaste
+ *          lagret 14 procent mer upplösning än det behöver och det
+ *          bredaste för lite.
  */
 
 import sharp from 'sharp';
@@ -16,9 +28,22 @@ import { readdir, mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const KALLA = 'kalla/lager';
-const MAL = 'public/bilder/lager';
-const MAL_BREDD = 900;
-const KVALITET = 82;
+
+/* Lagrens andel av scenens bredd. SAMMA TAL SOM --b i stilmallen
+   (.lager__bit img). Står de isär ritas laddskärmens lager i fel
+   upplösning — inte fel storlek, för CSS styr det, utan mjukt. */
+const ANDEL = { A1: 0.724, A2: 0.773, A3: 0.829, A4: 0.783, A5: 0.744 };
+
+const UTGAVOR = [
+  { mal: 'public/bilder/lager', bredd: () => 900, kvalitet: 82, alfa: 90 },
+  {
+    mal: 'public/bilder/ladd',
+    // 160 px stapel × lagrets andel × 2 för pixeltäthet.
+    bredd: (id) => Math.round(160 * ANDEL[id] * 2),
+    kvalitet: 76,
+    alfa: 85
+  }
+];
 
 /**
  * Lager som behöver avfransning. Värdet är ljustöskeln: pixlar i
@@ -68,14 +93,13 @@ async function avfransa(rawBuffer, info, troskel) {
 }
 
 async function kor() {
-  await mkdir(MAL, { recursive: true });
+  for (const u of UTGAVOR) await mkdir(u.mal, { recursive: true });
   const filer = (await readdir(KALLA)).filter((f) => f.endsWith('.png')).sort();
   const rader = [];
 
   for (const fil of filer) {
     const id = path.basename(fil, '.png');
     const kalla = path.join(KALLA, fil);
-    const mal = path.join(MAL, id + '.webp');
 
     const fore = (await stat(kalla)).size;
     let bild = sharp(kalla).ensureAlpha();
@@ -99,31 +123,44 @@ async function kor() {
       });
     }
 
-    await bild
-      .resize({ width: MAL_BREDD, withoutEnlargement: true, kernel: 'lanczos3' })
-      .webp({ quality: KVALITET, alphaQuality: 90, effort: 6 })
-      .toFile(mal);
+    /* Bufferten materialiseras EN gång och skalas sedan om per
+       utgåva. Att skala om en redan nedskalad bild till en ännu
+       mindre hade lagt två resamplingar på varandra. */
+    const forbehandlad = await bild.png().toBuffer();
 
-    const efter = (await stat(mal)).size;
-    const ny = await sharp(mal).metadata();
+    for (const u of UTGAVOR) {
+      const mal = path.join(u.mal, id + '.webp');
+      await sharp(forbehandlad)
+        .resize({ width: u.bredd(id), withoutEnlargement: true, kernel: 'lanczos3' })
+        .webp({ quality: u.kvalitet, alphaQuality: u.alfa, effort: 6 })
+        .toFile(mal);
 
-    rader.push({
-      id,
-      fore: `${meta.width}×${meta.height}`,
-      efter: `${ny.width}×${ny.height}`,
-      foreKB: Math.round(fore / 1024),
-      efterKB: Math.round(efter / 1024),
-      minskning: Math.round((1 - efter / fore) * 100) + ' %',
-      beskuren: beskuren || '—',
-      alfa: ny.hasAlpha ? 'ja' : 'NEJ',
-      dampade
-    });
+      const efter = (await stat(mal)).size;
+      const ny = await sharp(mal).metadata();
+
+      rader.push({
+        id,
+        utgava: path.basename(u.mal),
+        fore: `${meta.width}×${meta.height}`,
+        efter: `${ny.width}×${ny.height}`,
+        foreKB: Math.round(fore / 1024),
+        efterKB: Math.round(efter / 1024),
+        beskuren: beskuren || '—',
+        alfa: ny.hasAlpha ? 'ja' : 'NEJ',
+        dampade
+      });
+    }
   }
 
   console.table(rader);
-  const summaFore = rader.reduce((s, r) => s + r.foreKB, 0);
-  const summaEfter = rader.reduce((s, r) => s + r.efterKB, 0);
-  console.log(`Totalt: ${summaFore} kB → ${summaEfter} kB`);
+  for (const u of UTGAVOR) {
+    const mina = rader.filter((r) => r.utgava === path.basename(u.mal));
+    const summa = mina.reduce((s, r) => s + r.efterKB, 0);
+    console.log(
+      `${path.basename(u.mal)}: ${summa} kB totalt, ` +
+        `${(summa / mina.length).toFixed(1)} kB i snitt`
+    );
+  }
 }
 
 kor();

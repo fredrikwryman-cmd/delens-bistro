@@ -20,12 +20,34 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 const LADD_TAK_MS = 1800;
 
+/* SLUTSPELET: vad som fortfarande pågår efter att SISTA etappen
+   startat. Lagret faller i 520 ms, och stapelns stuk sätts igång vid
+   nedslaget (300 ms in i fallet) och håller på i 340 — alltså 640 ms
+   från sista etappen till att burgaren står stilla.
+
+   Utan det här talet delades taket på antalet etapper: fem steg om
+   360 ms, sista etappen vid 1440, och lagret landade 1960 — 160 ms
+   EFTER att skärmen börjat tona bort, med stuken avklippt vid 2080.
+   Med ritade klossar märktes det inte. Med en riktig överbulle är
+   just den landningen hela poängen: det är den som gör "Serverar!"
+   sant. Etapperna får därför dela på taket MINUS slutspelet. */
+const LADD_SLUTSPEL_MS = 640;
+
+/* Varje etapp släpper ned DET LAGER DEN NAMNGER. Ordningen i
+   markupen följer den här listan, inte stapelordningen: plåten värms
+   och underbullen landar, köttet smashas och pucken landar. Med
+   ritade former spelade det ingen roll vilken kloss som kom när —
+   med fotografier läser en överbulle som dyker upp vid "värmer
+   plåten" som fel bild i fel ruta.
+
+   Att salladen kommer efter osten och ändå hamnar under den sköts av
+   --z i lagerregistret, inte av dokumentordningen. */
 const laddEtapper = [
-  'Värmer plåten …',
-  'Smashar köttet …',
-  'Smälter cheddarn …',
-  'Lägger salladen …',
-  'Serverar!'
+  'Värmer plåten …', // underbulle
+  'Smashar köttet …', // köttpuck
+  'Smälter cheddarn …', // ost
+  'Lägger salladen …', // sallad
+  'Serverar!' // överbulle
 ];
 
 function startaLaddskarm() {
@@ -45,12 +67,33 @@ function startaLaddskarm() {
 
   return new Promise((klar) => {
     const start = performance.now();
-    const steg = LADD_TAK_MS / laddEtapper.length;
+    const steg =
+      (LADD_TAK_MS - LADD_SLUTSPEL_MS) / (laddEtapper.length - 1);
+
+    /* Lagret släpps när DESS EGEN bild går att rita, inte när
+       klockan säger till. Delarna var ritade former förut och fanns i
+       samma ögonblick som markupen; nu är de fem filer. En del som
+       får data-syns innan bilden är avkodad faller som en tom ruta —
+       och just den här skärmen visas medan allt annat laddar, alltså
+       precis när det är som mest sannolikt.
+
+       decode() på en redan hämtad bild löser sig i en mikrouppgift,
+       så i praktiken kostar det ingenting. Misslyckas den släpps
+       lagret ändå: en trasig bild är illa, ett lager som aldrig
+       kommer är värre — då står burgaren halvbyggd när skärmen
+       släpper. Texten och taket rör sig aldrig, de går på klockan. */
+    const slappLager = (i) => {
+      const d = delar[i];
+      if (!d) return;
+      const satt = () => d.setAttribute('data-syns', 'true');
+      if (d.decode) d.decode().catch(() => {}).then(satt);
+      else satt();
+    };
 
     laddEtapper.forEach((rad, i) => {
       setTimeout(() => {
         text.textContent = rad;
-        if (delar[i]) delar[i].setAttribute('data-syns', 'true');
+        slappLager(i);
         // Sista lagret landar: hela stapeln stukas och reser sig.
         if (i === laddEtapper.length - 1) setTimeout(stukaStapeln, 300);
       }, steg * i);
