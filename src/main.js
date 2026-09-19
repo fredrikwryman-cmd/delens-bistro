@@ -600,6 +600,16 @@ function riggaStickers() {
       for (const p of poster) {
         if (!p.isIntersecting) continue;
         p.target.setAttribute('data-synlig', 'true');
+        // Märken som inte scrubbas trycks ned här i stället. CSS:en
+        // håller fördröjningen så att landningen hinner läsas först.
+        //
+        // Nedtryckningen väntar en bildruta: övergången för --skal
+        // armas av data-synlig, och sätts värdet i samma omgång som
+        // attributet finns inget gammalt läge att gå ifrån.
+        if (p.target.classList.contains('sticker--hero')) {
+          const mal = p.target;
+          requestAnimationFrame(() => mal.style.setProperty('--skal', '0'));
+        }
         io.unobserve(p.target);
       }
     },
@@ -788,17 +798,33 @@ function riggaVagor() {
    vänstra hörnet, flärpen är hörnet vikt tillbaka över vecket, och
    glansen är en ljusreflex som följer pekaren.
 
-   Avskalningen drivs av hur långt märket passerat vyns mitt. Den
-   går bara EN väg per passage: skalar man av ett klistermärke sätts
-   det inte tillbaka av sig självt. Att låta flärpen vika sig fram
-   och tillbaka när man scrollar upp och ned hade läst som en
-   trasig animation, inte som en avskalning.                        */
+   RIKTNINGEN. Märket kommer UPPVIKT och rullas ned på plats när man
+   scrollar förbi. Tvärtom — fastklistrat som rivs upp — var det
+   första bygget, och det läste fel: sidan rev sönder sin egen dekor
+   medan man tittade på den. Ett klistermärke sätts dit, det tas inte
+   bort. Nu är flärpen uppe när märket kommer in i vyn och ligger ned
+   när man passerat det.
+
+   Rörelsen går bara EN väg per besök. Att låta flärpen vika sig fram
+   och tillbaka när man scrollar upp och ned hade läst som en trasig
+   animation, inte som ett märke som sätts fast.
+
+   Utgångsläget sätts härifrån av samma skäl som ankomsten: utan JS
+   ska märket ligga fastklistrat, inte uppvikt. CSS-förvalet är 0.  */
 
 function riggaAvskalning() {
   const marken = $$('.sticker');
   if (!marken.length) return;
 
-  const spar = marken.map((m) => ({ m, inne: false, max: 0 }));
+  const spar = marken
+    .map((m) => {
+      if (!reducerad.matches) m.style.setProperty('--skal', '1');
+      return { m, inne: false, min: 1 };
+    })
+    // Hero-märket står över vyns mitt redan vid sidladdning och kan
+    // därför inte scrubbas — det skulle stå kvar halvuppvikt tills
+    // någon scrollar. Det rullas ned på tid i stället, av ankomsten.
+    .filter((s) => !s.m.classList.contains('sticker--hero'));
 
   const io = new IntersectionObserver(
     (poster) => {
@@ -819,11 +845,13 @@ function riggaAvskalning() {
       if (!s.inne) continue;
       const r = s.m.getBoundingClientRect();
       const mitt = r.top + r.height / 2;
-      // 0 vid vyns mitt, 1 när märket nått en fjärdedel upp.
-      const gatt = Math.min(1, Math.max(0, (h * 0.5 - mitt) / (h * 0.28)));
-      if (gatt <= s.max) continue;
-      s.max = gatt;
-      s.m.style.setProperty('--skal', gatt.toFixed(3));
+      // 0 medan märket är på väg upp mot vyns mitt, 1 när det nått en
+      // fjärdedel upp. Flärpen är alltså uppe när märket kommer in.
+      const rullat = Math.min(1, Math.max(0, (h * 0.5 - mitt) / (h * 0.28)));
+      const skal = 1 - rullat;
+      if (skal >= s.min) continue; // bara nedåt, aldrig tillbaka upp
+      s.min = skal;
+      s.m.style.setProperty('--skal', skal.toFixed(3));
     }
   });
 }

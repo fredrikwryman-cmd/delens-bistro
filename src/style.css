@@ -2104,11 +2104,62 @@ input:focus-visible {
    triangel. scaleY -0,92 i stället för -1 ger förkortningen av en
    flärp som lutar mot betraktaren.
 
-   --skal går 0 till 1 och skrivs från scrollvarvet.               */
+   RIKTNINGEN: märket kommer UPPVIKT och rullas ned på plats när man
+   scrollar förbi, inte tvärtom. Ett klistermärke sätts dit; det river
+   inte upp sig självt medan man tittar på det. --skal går alltså från
+   1 till 0 under passagen, en väg, och skrivs från scrollvarvet.
+
+   CSS-förvalet är 0, alltså fastklistrat. Uppvikningen sätts från JS
+   — utan skript ska märket ligga ned, inte hänga löst.            */
+
+/* Registrerad för att den ska gå att övergå. En orgistrerad egen
+   egenskap är en sträng för webbläsaren och hoppar mellan värden;
+   som <number> interpolerar den. Behövs för hero-märket, se nedan. */
+@property --skal {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
 
 /* Vecket, räknat uppifrån. Vid --skal 0 ligger det på underkanten. */
 .sticker {
   --veck: calc(100% - var(--skal, 0) * 21%);
+}
+
+/* HERO-MÄRKET RULLAS NED PÅ TID, INTE PÅ SCROLL.
+
+   Rullsträckan är 28 procent av vyhöjden, men hero-märket står redan
+   över vyns mitt när sidan laddas — det har 60 px scroll på sig att
+   klara en sträcka på 235. Följden var att det stod kvar 77 procent
+   uppvikt i viloläge och sedan snäppte ned. Tre fjärdedels uppvikt är
+   dessutom det fulaste läget i hela spannet, och det var det första
+   man såg på sidan.
+
+   Ett scroll-scrubbat läge ovanför mitten är alltid fel: dess
+   tillstånd beror på var sidan råkar stå. Här ska märket i stället
+   SÄTTAS DIT — det landar med ankomsten och trycks ned strax efter.
+   Fördröjningen gör de två till en följd i stället för till två
+   rörelser ovanpå varandra. */
+/* Övergången är armad först när märket ANLÄNT, inte innan.
+
+   Utgångsläget --skal 1 sätts från JS vid riggningen. Låg övergången
+   på data-ankomst skulle även den sättningen animeras, alltså skulle
+   märket vika UPP sig av sig självt — precis det beteende som just
+   vändes bort. Bakom laddskärmen syns det inte, men vid återbesök
+   hoppas laddskärmen över och då sker uppvikningen mitt i bild.
+
+   På data-synlig är värdet redan 1 när övergången börjar gälla, och
+   den enda förflyttning som kan ske är nedåt.
+
+   Hela listan upprepas för att ankomstens transition står på
+   .sticker[data-ankomst] med samma specificitet; utan upprepning
+   skulle den här regeln slå ut opacity, scale och rotate. */
+.sticker--hero[data-synlig='true'] {
+  transition:
+    opacity 380ms var(--ut),
+    scale 380ms var(--ut),
+    rotate 380ms var(--ut),
+    --skal 700ms var(--ut) 260ms;
 }
 
 .sticker__blad {
@@ -2432,6 +2483,10 @@ input:focus-visible {
 
   .wave {
     transform: none;
+  }
+
+  .sticker--hero[data-synlig='true'] {
+    transition: opacity 200ms linear;
   }
 
   .sticker__blad {

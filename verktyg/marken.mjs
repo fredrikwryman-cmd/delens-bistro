@@ -52,10 +52,10 @@ const KVALITET = 72;
  *               över den
  *   pommes      säger inget som inte redan står i texten
  *   stekspade   samma påstående som smash, svagare bild
- *   logo        STAVAR NAMNET "Delen's" MED APOSTROF. Namnformen är
- *               låst till Delens Bistro, samma sträng överallt. Får
- *               inte användas som ordmärke förrän den är ritad om.
- *               Samma fel som ligger i B1 och B2.
+ *   logo        ordmärket. Ingen placering hittad där det säger något
+ *               som inte redan står i navigationen och footern. Se
+ *               PLAN.md avsnitt 14 om apostrofen i loggan — den är
+ *               kundens och avgjord, inte ett fel att rapportera.
  */
 const I_BRUK = new Set([
   'delens-klocka',

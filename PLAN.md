@@ -424,3 +424,36 @@ knappar och klistermärken. Vikt 800 för rubriker, 400–600 för löptext.
   latin-intervallet hämtas och åäö ligger i det.
 - Vid skarp lansering självhostas båda och delmängdas på riktigt.
   Prestandabudgeten i avsnitt 8 säger två woff2-filer; det håller.
+
+---
+
+## 14. Loggan — avgjort, tas inte upp igen
+
+Restaurangens logga stavar namnet **Delen's** med apostrof. Den är
+kundens, den är låst, och det är ett avgjort beslut.
+
+**Gäller:** `delens-logo-sticker`, hero-burgarens inbakade bröd-logga
+i B1 och B2, och varje annan plats där loggan förekommer som bild.
+
+**Ingen ska:**
+
+- rita om loggan
+- föreslå att den ritas om
+- flagga apostrofen som ett fel i en granskning, en rapport eller en
+  kodkommentar
+- hålla tillbaka en bild, en placering eller ett bygge på grund av den
+
+### Varför det här står här
+
+Namnformen i avsnittet om löpande text är **Delens Bistro** utan
+apostrof, och den gäller fortfarande för allt som är SATT TEXT: h1,
+title, meta description, og:title, og:site_name, strukturerad data,
+navigationens wordmark, footern, alt-texter och formulärtexter.
+
+Skillnaden är att loggan inte är satt text. Den är ett ordmärke, en
+bild, en befintlig tillgång. En låst textnamnform säger ingenting om
+hur kundens logotyp ser ut, och de två reglerna står inte i konflikt.
+
+Den här punkten finns eftersom apostrofen flaggades som ett fel i tre
+rapporter i rad. Det var fel läsning av namnformsregeln. Den läsningen
+slutar här.
