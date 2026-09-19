@@ -434,16 +434,47 @@ Mouse Memoirs är smalare och tjockare än Barlow. Mätt på glyferna vid
 också — förut bröts två rader vid 375 och en gick 34 px utanför skärmen
 vid 305. Kortaste prickrad 74 px vid 375, 5 px vid 305.
 
-**BRÖDTEXTEN FÖRLORADE.** En puns på 1,49 px vid 17 px betyder att
-`o`, `e` och `a` går ihop till fläckar på en skärm utan hög
-pixeltäthet. För att få punsen till 3 px krävs 34 px grad — alltså en
-rubrikgrad. Snittet är byggt för korta texter i displaystorlek, och i
-de långa styckena märks det.
+**BRÖDTEXTEN FÖRLORADE — och graderna lyftes 2026-09-19.** En puns på
+1,49 px vid 17 px betyder att `o`, `e` och `a` går ihop till fläckar på
+en skärm utan hög pixeltäthet.
 
-Rekommendation om brödtexten ska bära mer text än den gör i dag: lyft
-`--t-s` och `--t-xs` ett par steg och dra ned radavståndet i samma
-rörelse. Det är en ändring i typskalan, alltså ett eget beslut — inte
-något som smygs in med ett snittbyte.
+Punsen i `o` är **0,090 em**, uppmätt på en renderad glyf vid 1000 px.
+Kravet på minst 3 px löser därför ut till 33,3 px grad, och `--t-s`
+står nu på 2,125rem = **34 px → 3,06 px puns**. Versalerna hjälper
+inte: minsta versalpuns är `R` på 0,089 em, alltså samma sak.
+
+Talet drog med sig hela skalans nedre halva. `m` bar priserna på 23 px
+och `l` rättnamnen på 34 — med brödtexten på 34 hade priset varit
+mindre än brödtexten och rättnamnet lika stort. En skala är ordningen
+mellan graderna, inte graderna i sig.
+
+| | före | efter | puns |
+|---|---|---|---|
+| xs | 12,8 | 26 | 2,34 px |
+| **s** | 17 | **34** | **3,06 px** |
+| m | 23,2 | 42 | 3,78 px |
+| l | 33,6 | 54 | 4,86 px |
+| xl | 57,6 | 72 | 6,48 px |
+| xxl, xxxl | oförändrade — bara Titan One | | |
+
+Radavstånden ned i samma rörelse: `--lh-s` 1,55 → 1,32, `--lh-xs` 1,45
+→ 1,30, `--lh-m` 1,35 → 1,22, `--lh-l` 1,15 → 1,10.
+
+**Vad det kostade, uppmätt:**
+
+- Sidans längd +9,2 % på desktop (11 706 → 12 778 px), **+17,6 %** på
+  390 px (10 098 → 11 875).
+- Menyn: 5 av 68 rader bryter vid 375 px, 26 av 68 vid 305 px. Noll
+  före lyftet — men också noll vågrät rullning efter, eftersom
+  brytmekaniken finns.
+- Beställningsfältet 58 → 104 px, alltså 12 % av en 844 px vy.
+- Brödtexten vid 390 px: 41 tecken per rad i stället för 62.
+- Hero-spalterna kolliderade med BISTRO och är nu bundna till
+  lockupens bredd i stället för till ett `ch`-tal.
+
+Nästa steg om det visar sig för stort: `s` på 23 px ger 2,1 px puns och
+är den punkt där MEDIAN-gemenen (`e`, `s`, `a`) passerar 3 px. Bara
+`o` och `n` ligger under där.
 
 ### Radlängden räknas om vid snittbyte
 

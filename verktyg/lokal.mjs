@@ -3,10 +3,11 @@
  *
  *   node verktyg/lokal.mjs
  *
- * Fyra källor, fyra utsnitt.
+ * Fem källor, fem utsnitt.
  *
- * E1 INTERIÖREN beskärs till rutans 4:3. E4 FASADEN går rakt igenom,
- * 16:9 som platsen den ska fylla.
+ * E1 INTERIÖREN beskärs till rutans 4:3. E2 SMASHMOMENTET och E4
+ * FASADEN går rakt igenom — 3:2 respektive 16:9, samma form som
+ * platserna de ska fylla.
  *
  * E3 ÄR NU ETT RIKTIGT PORTRÄTT, inte en beskärning. Tidigare klipptes
  * det ur gruppfotot: 1672×941 liggande, tre personer bredvid varandra,
@@ -49,6 +50,15 @@ const UTSNITT = [
     extract: { left: 300, top: 0, width: 1254, height: 941 },
     bredd: 1400,
     beskrivning: 'interiören, baren i 4:3'
+  },
+  {
+    id: 'E2',
+    kalla: 'smash.png',
+    /* Ingen beskärning. Källan är 1536×1024, alltså exakt 3:2, och
+       rutan är 3:2. Att beskära en bild som redan har rätt form är
+       bara att kasta pixlar. */
+    bredd: 1200,
+    beskrivning: 'smashmomentet, 3:2 rakt av'
   },
   {
     id: 'E4',
