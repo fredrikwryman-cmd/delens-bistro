@@ -510,6 +510,20 @@ function riggaAvslojning() {
 /* ═══ KLISTERMÄRKENA ═════════════════════════════════════════════
    Wobblet är dekor och får bara kosta något när det syns.          */
 
+/* ═══ FASTA FÄLTET ═══════════════════════════════════════════════ */
+
+function riggaOrderbar() {
+  const bar = $('#orderbar');
+  const mal = $('#bestall');
+  if (!bar || !mal) return;
+  new IntersectionObserver(
+    ([post]) => bar.setAttribute('data-undan', String(post.isIntersecting)),
+    // Först när en rejäl del av sektionen syns — annars blinkar fältet
+    // förbi vid varje passage.
+    { threshold: 0.35 }
+  ).observe(mal);
+}
+
 function riggaStickers() {
   // Varje MÄRKE observeras, inte sektionen det ligger i. Sektionerna är
   // 1800 till 2900 px höga, så en sektion räknas som synlig långt efter
@@ -647,6 +661,7 @@ fyllKontakt();
 byggSignaturer();
 byggMeny();
 riggaStickers();
+riggaOrderbar();
 riggaMatpanel();
 riggaScroll();
 riggaLenis();

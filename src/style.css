@@ -1779,18 +1779,40 @@ input:focus-visible {
 
 /* ═══ 8 · BESTÄLL ═════════════════════════════════════════════ */
 
-/* Inte längre centrerad — rubriken går ut ur spalten åt höger och
-   bilden hänger utanför kanten. Centrering hade ätit upp båda. */
+/* Text och bild bredvid varandra i stället för staplade. Staplat
+   blev sektionen 1392 px hög, och rubriken låg utanför vyn när
+   knappen syntes — man såg aldrig sektionens delar samtidigt.
+
+   Axelbrottet ligger i att högerspalten går ut ur sidan, inte i att
+   rubriken klipps av. En rubrik som klipps mitt i ordet läser som
+   ett fel, inte som ett grepp — det är skillnaden mot förlagan, där
+   det som går utanför kanten är ett ordmärke man redan läst. */
 .bestall__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 5rem);
   text-align: start;
 }
 
-.bestall__inner .ingress {
-  max-width: 38ch;
+.bestall__text .ingress {
+  max-width: 34ch;
+}
+
+.bestall__bild {
+  border-radius: 0.6rem 0 0 0.6rem;
 }
 
 .bestall {
   overflow: hidden;
+}
+
+@media (max-width: 860px) {
+  .bestall__inner {
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 8vw, 3.5rem);
+  }
+  .bestall__bild { border-radius: 0.6rem 0 0 0.6rem; }
 }
 
 /* ═══ 9 · FOOTER ══════════════════════════════════════════════ */
@@ -1845,7 +1867,22 @@ input:focus-visible {
 
 /* ═══ FAST BESTÄLLNINGSFÄLT ═══════════════════════════════════ */
 
+/* Det fasta fältet är en genväg till beställningen. När målet
+   självt är på skärmen finns två köpknappar samtidigt — genvägen
+   viker undan för destinationen. */
+/* visibility och pointer-events måste följa med. Enbart translate
+   flyttar fältet ur bild men lämnar det i tabbordningen — en
+   tangentbordsanvändare hamnade på en osynlig knapp nedanför vyn och
+   tappade fokus ur sikte. visibility tas ur flödet först när
+   förflyttningen är klar, så uttåget syns. */
+.orderbar[data-undan='true'] {
+  translate: 0 100%;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .orderbar {
+  transition: translate 280ms var(--ut), visibility 280ms;
   position: fixed;
   inset-block-end: 0;
   inset-inline: 0;
