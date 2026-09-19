@@ -150,8 +150,8 @@ function fyllKontakt() {
     satt(sel, (el) => (el.href = kontakt.bestall));
   }
 
+  // Bara en gång. Listan stod ordagrant lika i foten också.
   fyllTider($('#hitta-tider'));
-  fyllTider($('#foot-tider'));
 }
 
 /* ═══ 5 · SIGNATURBURGARNA — DRAGSPELSGALLERI ════════════════════
@@ -292,10 +292,13 @@ function byggSignaturer() {
 }
 
 /* ═══ 6 · MENYN ══════════════════════════════════════════════════
-   Listan är en lista. Rätter som har ett foto får en markör och kan
-   fällas ut; raden blir då en mörk lucka i det ljusa blocket. Ett
-   öppet i taget per kategori, precis som dragspelets kort, och
-   första rätten med bild står öppen från start.
+   Listan är en lista. Rätter som har ett foto får en markör och
+   visar bilden under raden. Exakt ett foto står öppet per kategori,
+   precis som dragspelets kort visar exakt ett motiv, och första
+   rätten med bild står öppen från start.
+
+   Med mus räcker det att peka, efter en fördröjning på 180 ms. Med
+   finger trycker man. Se kommentaren vid pointermove nedan.
 
    Samma rörelselag som dragspelet: 220 ms och samma kurva. Höjden
    animeras med grid-template-rows 0fr → 1fr, vilket går att övergå
@@ -393,23 +396,69 @@ function byggMeny() {
     delete im.dataset.kalla;
   };
 
+  /* Raden stängs aldrig — en kategori visar alltid exakt ett foto,
+     och att peka på en rad flyttar bara vilket. Ett läge där ingen
+     bild syns fanns det inget skäl att kunna hamna i. */
   const oppna = (li) => {
-    const lista = li.closest('.ratter');
-    for (const annan of $$('.ratt--bild[data-oppen="true"]', lista)) {
-      if (annan === li) continue;
+    if (!li || li.dataset.oppen === 'true') return;
+    for (const annan of $$('.ratt--bild[data-oppen="true"]', li.closest('.ratter'))) {
       annan.dataset.oppen = 'false';
       annan.querySelector('.ratt__knapp').setAttribute('aria-expanded', 'false');
     }
-    const nu = li.dataset.oppen !== 'true';
-    li.dataset.oppen = String(nu);
-    li.querySelector('.ratt__knapp').setAttribute('aria-expanded', String(nu));
-    if (nu) ladda(li);
+    li.dataset.oppen = 'true';
+    li.querySelector('.ratt__knapp').setAttribute('aria-expanded', 'true');
+    ladda(li);
   };
 
+  // Tryck öppnar på alla enheter. På pekskärm är det hela styrningen.
   paneler.addEventListener('click', (e) => {
     const knapp = e.target.closest('.ratt__knapp');
     if (knapp) oppna(knapp.closest('.ratt--bild'));
   });
+
+  // Tangentbordet får ingen fördröjning. Den finns för att skydda mot
+  // en pekare som råkar passera; ett fokus är alltid avsiktligt.
+  paneler.addEventListener('focusin', (e) => {
+    const knapp = e.target.closest?.('.ratt__knapp');
+    if (knapp) oppna(knapp.closest('.ratt--bild'));
+  });
+
+  /* Med mus styrs menyn genom att peka, inte genom att klicka. Ett
+     klick för att se ett foto är ett steg för mycket när man bara
+     skummar en lista.
+
+     Fördröjningen är nödvändig, inte en finess. Utan den vecklar
+     varje rad man drar pekaren förbi ut sig, och listan hoppar. 180
+     ms är längre än en snabb passage över en rad och kortare än en
+     paus — raden öppnar sig när musen stannar.
+
+     Den ligger på pointermove och inte på pointerover med flit. När
+     en rad öppnas stängs en annan, och stod den ovanför glider hela
+     listan uppåt under en stillastående pekare. Det utlöser
+     pointerover på nästa rad, som öppnar sig, som flyttar listan
+     igen — en kedja som springer nedåt av sig själv. pointermove
+     utlöses inte av att innehåll flyttar sig, bara av att handen
+     gör det. */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const DROJ = 180;
+    let timer = 0;
+    let senaste = null;
+
+    paneler.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const li = e.target.closest?.('.ratt--bild');
+      if (li === senaste) return;
+      senaste = li;
+      clearTimeout(timer);
+      if (!li || li.dataset.oppen === 'true') return;
+      timer = setTimeout(() => oppna(li), DROJ);
+    });
+
+    paneler.addEventListener('pointerleave', () => {
+      clearTimeout(timer);
+      senaste = null;
+    });
+  }
 
   // De rader som står öppna från start behöver sin bild direkt.
   $$('.ratt--bild[data-oppen="true"]', paneler).forEach(ladda);

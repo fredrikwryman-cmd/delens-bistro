@@ -102,9 +102,12 @@
             <span class="hero__fill" data-reveal>Bistro</span>
           </h1>
 
-          <span class="sticker" style="--r: -9deg; --s-top: 18%; --s-left: 6%">Smashad</span>
-          <span class="sticker" style="--r: 8deg; --s-top: 30%; --s-right: 7%; animation-delay: -3s">
-            Sedan 2017
+          <span class="sticker sticker--etikett sticker--amber sticker--a"
+                style="--r: -9deg; --s-top: 18%; --s-left: 6%">Smashad</span>
+          <span class="sticker sticker--sigill sticker--ben sticker--vand sticker--b"
+                style="--r: 8deg; --s-top: 28%; --s-right: 6%; animation-delay: -3s">
+            <span class="mk__stor">2017</span>
+            <span class="mk__liten">sedan</span>
           </span>
 
           <div class="hero__copy hero__copy--v">
@@ -123,11 +126,10 @@
       </section>
 
       <!-- ═══ 2 · ÖPPET NU — kol ═══════════════════════════════════ -->
-      <section class="sec sec--tat sec--kol status" id="status" style="--wave-fill: var(--kol)">
-        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-          <path class="wave__body" d="M0,48 C240,8 480,84 720,52 C960,20 1200,76 1440,36 L1440,0 L0,0 Z" />
-          <path class="wave__edge" d="M0,48 C240,8 480,84 720,52 C960,20 1200,76 1440,36" />
-        </svg>
+      <section class="sec sec--tat sec--kol status" id="status">
+        <!-- Svart mot kol: fyra procents ljushetsskillnad. En våg syns
+             inte i det steget, bara dess amber-kant. Skarv i stället. -->
+        <span class="skarv" aria-hidden="true"></span>
         <div class="status__inner">
           <p class="status__now" id="status-now">
             <span class="status__dot" id="status-dot"></span>
@@ -146,7 +148,8 @@
         <div class="wrap rebrand__inner">
           <!-- Märket daterar bytet. Rubriken går i trappa i stället för
                att stapla rakt — första axelbrottet. -->
-          <span class="sticker" style="--r: 6deg; --s-top: 7%; --s-right: 8%">Januari 2026</span>
+          <span class="sticker sticker--etikett sticker--ben"
+                style="--r: 6deg; --s-top: 7%; --s-right: 8%">Januari 2026</span>
           <h2 class="rubrik rubrik--stor rubrik--trappa" data-reveal>
             <span class="rubrik__rad">Från</span>
             <span class="rubrik__rad">Brutal Burgers</span>
@@ -207,8 +210,11 @@
             <!-- Märket ligger INUTI det sticky spåret. Utanför rullade det
                  bort efter 460 px medan scenen det uttalar sig om satt
                  kvar i 2880 px — ett påstående utan sitt motiv. -->
-            <span class="sticker sticker--i-scen"
-                  style="--r: -7deg; --s-top: 14%; --s-left: 6%">100 % nötkött</span>
+            <span class="sticker sticker--i-scen sticker--sigill sticker--amber"
+                  style="--r: -7deg; --s-top: 14%; --s-left: 6%">
+              <span class="mk__stor">100 %</span>
+              <span class="mk__liten">nötkött</span>
+            </span>
             <!-- Rubriken i fyra rader. Lagren vävs in mellan raderna. -->
             <h2 class="lager__rubrik" aria-label="Varje lager handlagt">
               <span class="lager__rad" data-z="1">Varje</span>
@@ -261,15 +267,22 @@
       </section>
 
       <!-- ═══ 5 · SIGNATURBURGARNA — kol ═══════════════════════════ -->
-      <section class="sec sec--normal sec--kol signatur" id="signatur" style="--wave-fill: var(--kol)">
-        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-          <path class="wave__body" d="M0,36 C280,76 520,4 760,44 C1000,84 1230,16 1440,52 L1440,0 L0,0 Z" />
-          <path class="wave__edge" d="M0,36 C280,76 520,4 760,44 C1000,84 1230,16 1440,52" />
-        </svg>
+      <section class="sec sec--normal sec--kol signatur" id="signatur">
+        <!-- Svart mot kol: fyra procents ljushetsskillnad. En våg syns
+             inte i det steget, bara dess amber-kant. Skarv i stället. -->
+        <span class="skarv" aria-hidden="true"></span>
         <div class="wrap">
           <!-- Andra axelbrottet: ingressen ligger mot höger kant i stället
                för under rubriken, så raden inte blir en linjal. -->
-          <span class="sticker" style="--r: -5deg; --s-top: 12%; --s-right: 9%">5 av 68</span>
+          <!-- Sigillet är bredare än pillret det ersatte och lade sig
+               över ingressens löpande text. Flyttat till gallerets övre
+               vänstra hörn: där finns bara kortkant, och ett märke som
+               går över en kant läser som påklistrat. -->
+          <span class="sticker sticker--sigill sticker--ben sticker--c"
+                style="--r: -5deg; --s-top: 23%; --s-left: 6%">
+            <span class="mk__stor">5</span>
+            <span class="mk__liten">av 68</span>
+          </span>
           <div class="signatur__topp">
             <h2 class="rubrik" data-reveal>Fem som får stå för sig själva</h2>
             <p class="ingress ingress--hoger">
@@ -359,7 +372,8 @@
         <!-- Fjärde axelbrottet, och det största: sektionen var helt
              centrerad. Rubriken går nu ut ur spalten åt höger och bilden
              hänger utanför kanten. -->
-        <span class="sticker" style="--r: 7deg; --s-top: 14%; --s-left: 5%">Handlagt</span>
+        <span class="sticker sticker--etikett sticker--amber sticker--d"
+              style="--r: 7deg; --s-top: 14%; --s-left: 5%">Handlagt</span>
         <div class="wrap bestall__inner">
           <div class="bestall__text">
             <h2 class="rubrik rubrik--stor" data-reveal>Beställ online</h2>
@@ -374,11 +388,10 @@
     </main>
 
     <!-- ═══ 9 · FOOTER — kol ═══════════════════════════════════════ -->
-    <footer class="sec sec--tat sec--kol foot" id="foot" style="--wave-fill: var(--kol)">
-      <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-        <path class="wave__body" d="M0,48 C240,88 500,16 740,52 C980,88 1210,24 1440,48 L1440,0 L0,0 Z" />
-        <path class="wave__edge" d="M0,48 C240,88 500,16 740,52 C980,88 1210,24 1440,48" />
-      </svg>
+    <footer class="sec sec--tat sec--kol foot" id="foot">
+      <!-- Svart mot kol: fyra procents ljushetsskillnad. En våg syns
+           inte i det steget, bara dess amber-kant. Skarv i stället. -->
+      <span class="skarv" aria-hidden="true"></span>
 
       <!-- Utspridda ingrediensurklipp, som CRAV:s footer. -->
       <span class="foot__strossel" style="--x: 8%; --r: -12deg">
@@ -394,8 +407,12 @@
           <p id="foot-adress"></p>
           <p><a class="lank" id="foot-tel" href="#"></a></p>
         </div>
-        <ul class="tider tider--foot" id="foot-tider"></ul>
         <div>
+          <!-- Hela veckan stod ordagrant två gånger, här och i Hitta hit.
+               Öppettiderna hör hemma där adressen och kartlänken står —
+               det är där man är när man undrar om det är öppet. Vad som
+               gäller just nu säger statusraden och det fasta fältet. -->
+          <p><a class="lank" href="#hitta">Öppettider</a></p>
           <p><a class="lank" id="foot-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
           <p><a class="lank" id="foot-epost" href="#"></a></p>
         </div>

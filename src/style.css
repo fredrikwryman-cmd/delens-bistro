@@ -57,6 +57,10 @@
   --t-xxxl: clamp(3.4rem, 0.2rem + 16.5vw, 15rem);
 
   --lh-xs: 1.45;   --ls-xs: 0.09em;
+  /* Spärren hör till graden och till versalläget. --ls-xs är satt
+     för versala mikroetiketter; löpande gemen text i samma grad vill
+     ha en aning positiv spärr, inte en etiketts fyrdubbla. */
+  --ls-xs-gemen: 0.012em;
   --lh-s: 1.55;    --ls-s: 0.005em;
   --lh-m: 1.35;    --ls-m: 0em;
   --lh-l: 1.15;    --ls-l: -0.01em;
@@ -231,6 +235,38 @@ a {
   vector-effect: non-scaling-stroke;
 }
 
+/* ── Skarven, där tonerna ligger nära varandra ─────────────────── */
+
+/* Svart mot kol är fyra procents skillnad i ljushet. Vågens silhuett
+   gick inte att se alls i det steget — kvar blev bara amber-kanten,
+   ett streck utan form, som läste som ett misstag.
+
+   Färgordningen löser det inte. Tre sektioner måste vara mörka av
+   bildskäl (hero, lagerscenen, signaturgalleriet), två av dem ligger
+   intill varandra, och det ljusa blocket finns bara en gång. Var
+   färgerna än läggs blir minst tre av nio skarvar mörkt mot mörkt.
+
+   Alltså byts greppet i stället för färgen, och regeln blir: en våg
+   är ett snitt mellan två tydligt skilda toner. Ligger tonerna nära
+   finns inget snitt att göra — då är ljuset hela händelsen. Den
+   ljusare sektionen börjar i skugga från den som ligger över och
+   stiger ur den. Ingen linje, ingen amber, ingen form.              */
+
+.skarv {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: clamp(72px, 9vw, 132px);
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0.62),
+    rgb(0 0 0 / 0.26) 38%,
+    rgb(0 0 0 / 0) 100%
+  );
+}
+
 /* ── Typografi ─────────────────────────────────────────────────── */
 
 .rubrik {
@@ -288,23 +324,58 @@ a {
   will-change: transform, opacity;
 }
 
-/* ── Klistermärken ─────────────────────────────────────────────── */
+/* ── Klistermärken ───────────────────────────────────────────────── */
+
+/* Ett amber-piller med versaltext är en etikett — något som är tryckt
+   i ytan. Ett klistermärke ligger PÅ den. Tre saker skiljer dem åt:
+   en stansad form som inte är ett piller, en ritad kontur innanför
+   kanten, och en marginal av bärmaterialet utanför konturen. Plus en
+   tjocklek, som kastar en tät skugga strax under.
+
+   Två former bär alla sex märkena.
+
+     SIGILLET är runt och sätter ett tal eller ett kort ord stort med
+     en bildtext under ett hårstreck. Innerringen är streckad — det
+     är stämpelns kännetecken. Används där märket daterar eller
+     räknar: 2017, 100 %, 5 av 68.
+
+     ETIKETTEN är rektangulär med stansade hörn och bär ett enda ord
+     innanför en ritad ram. Används där märket påstår något om
+     hantverket: smashad, handlagt, januari 2026.
+
+   Stanskanten är gemensam. Bärmaterialet är off-white, samma i båda
+   formerna: på ett amber märke syns det som en vit kant runt om, på
+   ett off-white märke smälter det ihop med märket självt och gör det
+   bara större — vilket är precis vad en stans gör. Alla sex står på
+   mörka sektioner, inget märke ligger på det ljusa menyblocket, så
+   den off-white marginalen läser överallt.                          */
 
 .sticker {
   position: absolute;
   z-index: 6;
-  padding: 0.45rem 0.9rem;
-  background: var(--amber);
-  color: var(--svart);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: var(--mk-fyll);
+  color: var(--mk-ink);
   font-weight: 800;
-  font-size: var(--t-s);
-  line-height: var(--lh-s);
-  letter-spacing: var(--ls-s);
   text-transform: uppercase;
-  border-radius: 999px;
   white-space: nowrap;
+  /* Ett märke är dekor. Det ligger över kortkanter och rubriker och
+     får aldrig fånga en klickning som var avsedd för det under. */
+  pointer-events: none;
+  /* Bärmaterialets marginal, och tjockleken. Skuggan sitter tätt och
+     strax under: märket ligger på ytan, det svävar inte över den. */
+  box-shadow:
+    0 0 0 5px var(--offwhite),
+    0 7px 16px -6px rgb(0 0 0 / 0.75);
   animation: wobbla 6s var(--ut) infinite;
 }
+
+/* Bläck och fyllning. Amber mot svart ger 8,9:1, off-white mot
+   djuprött 10,3:1 — båda långt över kravet. */
+.sticker--amber { --mk-fyll: var(--amber);    --mk-ink: var(--svart); }
+.sticker--ben   { --mk-fyll: var(--offwhite); --mk-ink: var(--rod); }
 
 /* --r måste sättas per märke. Var den osatt föll keyframen tillbaka
    på -9deg för båda, och b:s deklarerade 8deg skrevs över av
@@ -319,19 +390,99 @@ a {
   inset-inline-end: var(--s-right, auto);
 }
 
+/* ── Sigillet ──────────────────────────────────────────────────── */
+
+.sticker--sigill {
+  width: clamp(5rem, 8vw, 6.8rem);
+  aspect-ratio: 1;
+  padding: 0.3rem;
+  border-radius: 999px;
+}
+
+.sticker--sigill::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1.5px dashed currentColor;
+  border-radius: inherit;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Etiketten ─────────────────────────────────────────────────── */
+
+.sticker--etikett {
+  padding: 0.55rem 1.05rem;
+  border-radius: 0.3rem;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  letter-spacing: var(--ls-s);
+}
+
+.sticker--etikett::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1.5px solid currentColor;
+  border-radius: 0.14rem;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ── Sigillets två rader ───────────────────────────────────────── */
+
+.mk__stor {
+  font-size: var(--t-m);
+  line-height: 1;
+  letter-spacing: var(--ls-m);
+}
+
+/* Hårstrecket är lika brett som bildtexten och inte som märket —
+   en stämpel drar sin linje under orden, inte tvärs över formen. */
+.mk__liten {
+  margin-block-start: 0.24rem;
+  padding-block-start: 0.24rem;
+  border-block-start: 1px solid currentColor;
+  font-size: var(--t-xs);
+  line-height: 1;
+  letter-spacing: var(--ls-xs);
+  opacity: 0.85;
+}
+
+/* "2017 / SEDAN" läses baklänges. Vänd ordningen där bildtexten hör
+   hemma före talet — då står hårstrecket över i stället för under,
+   och sigillet läser "sedan 2017". */
+.sticker--vand .mk__liten {
+  order: -1;
+  margin-block: 0 0.24rem;
+  padding-block: 0 0.24rem;
+  border-block-start: 0;
+  border-block-end: 1px solid currentColor;
+}
+
 @keyframes wobbla {
   0%, 100% { rotate: var(--r); }
   50%      { rotate: calc(var(--r) + 3deg); }
 }
 
 /* Löpande rörelse utanför vyn är bortkastad. Märkena står stilla tills
-   hero är synlig. */
+   sektionen de uttalar sig om är synlig. */
 .sticker {
   animation-play-state: paused;
 }
 
 .sticker[data-synlig='true'] {
   animation-play-state: running;
+}
+
+/* Rotationen är hela poängen med ett klistermärke: någon har satt dit
+   det för hand. Vid reducerad rörelse behålls lutningen, det är
+   vaggningen som tas bort. */
+@media (prefers-reduced-motion: reduce) {
+  .sticker {
+    animation: none;
+    rotate: var(--r);
+  }
 }
 
 /* ── Knappar ───────────────────────────────────────────────────── */
@@ -718,6 +869,23 @@ input:focus-visible {
 
   .sticker--a { inset-block-start: 9%; inset-inline-start: 3%; }
   .sticker--b { inset-block-start: 9%; inset-inline-end: 3%; }
+
+  /* Staplat flyttar ingressen ned i sigillets läge, och galleriets
+     kort lägger sina namn och priser i vänsterkanten. Märket byter
+     sida: höger om korten är bara motiv. */
+  .sticker--c {
+    inset-block-start: 26%;
+    inset-inline-start: auto;
+    inset-inline-end: 5%;
+  }
+
+  /* Samma sak i beställsektionen: staplat lägger märket över
+     BESTÄLL och rubriken läser "ÄLL ONLINE". Byter sida hit också,
+     där raderna slutar och ytan är tom. */
+  .sticker--d {
+    inset-inline-start: auto;
+    inset-inline-end: 4%;
+  }
 
   .nav__links {
     gap: 0.75rem;
@@ -1492,11 +1660,18 @@ input:focus-visible {
   gap: 0.7rem;
 }
 
+/* Hierarkin fanns inte: namn och pris stod på samma grad och
+   ingredienserna ett steg under. En meny läses genom att ögat hoppar
+   mellan rättnamn — då måste namnet vara det enda som syns när man
+   skummar. Namnet går till --t-l, graden som stod reserverad för
+   just det här, priset ligger kvar på --t-m och ingredienserna går
+   ned till --t-xs. Tre grader i stället för två, och spannet mellan
+   det största och det minsta är nu nästan 3:1. */
 .ratt__namn {
   font-weight: 800;
-  font-size: var(--t-m);
-  line-height: var(--lh-m);
-  letter-spacing: var(--ls-m);
+  font-size: var(--t-l);
+  line-height: var(--lh-l);
+  letter-spacing: var(--ls-l);
   text-transform: uppercase;
 }
 
@@ -1509,7 +1684,7 @@ input:focus-visible {
   font-size: var(--t-xs);
   line-height: var(--lh-xs);
   letter-spacing: var(--ls-xs);
-  vertical-align: 0.15em;
+  vertical-align: 0.35em;
 }
 
 .ratt__prickar {
@@ -1525,105 +1700,59 @@ input:focus-visible {
   letter-spacing: var(--ls-m);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  transition: color 220ms var(--ut);
 }
 
+/* Spärren hör till graden OCH till versalläget. --ls-xs är 0,09em
+   och satt för versala mikroetiketter — på löpande gemen text i
+   samma grad blir den fyra gånger för vid och orden faller isär.
+   Liten text vill ha en aning positiv spärr, inte en etiketts. */
 .ratt__innehall {
   display: block;
-  margin: 0.25rem 0 0;
-  max-width: 54ch;
-  font-size: var(--t-s);
-  line-height: var(--lh-s);
-  letter-spacing: var(--ls-s);
+  margin: 0.3rem 0 0;
+  max-width: 58ch;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs-gemen);
   color: var(--mork-text-svag);
-  transition: color 220ms var(--ut);
 }
 
-/* Markören säger att raden har ett foto. Rader utan foto har ingen,
-   så frånvaron berättar i sig vad som är en rätt och vad som är ett
-   tillbehör. */
+/* Markören säger två saker: att raden har ett foto, och vilken rad
+   som visar sitt. Rader utan foto har ingen, så frånvaron berättar i
+   sig vad som är en rätt och vad som är ett tillbehör.
+
+   Den var ett plus som roterade till ett minus. Raden stängs inte
+   längre — en kategori visar alltid exakt ett foto — och då ljög
+   minustecknet om en stängning som inte finns. En punkt som tänds
+   påstår bara det som är sant. */
 .ratt__markor {
   flex: 0 0 auto;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 0.55rem;
+  height: 0.55rem;
   align-self: center;
-  border: 1px solid rgb(20 20 20 / 0.25);
   border-radius: 999px;
-  position: relative;
+  background: rgb(20 20 20 / 0.22);
   transition:
-    background 220ms var(--ut),
-    border-color 220ms var(--ut),
-    rotate 220ms var(--ut);
-}
-
-.ratt__markor::before,
-.ratt__markor::after {
-  content: '';
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  width: 0.46rem;
-  height: 1.5px;
-  background: currentColor;
-  border-radius: 2px;
-  translate: -50% -50%;
-}
-
-.ratt__markor::after {
-  rotate: 90deg;
-  transition: opacity 220ms var(--ut);
+    background-color 220ms var(--ut),
+    scale 220ms var(--ut);
 }
 
 .ratt--bild[data-oppen='true'] .ratt__markor {
-  rotate: 180deg;
   background: var(--amber);
-  border-color: var(--amber);
-}
-
-.ratt--bild[data-oppen='true'] .ratt__markor::after {
-  opacity: 0;
+  scale: 1.6;
 }
 
 /* ── Luckan ────────────────────────────────────────────────────── */
 
-/* Insteget är konstant på alla rader med bild, kompenserat med
-   negativ marginal så texten står kvar i spaltens kant. Utan det
-   skulle padding och margin behöva animeras när luckan öppnas, och
-   då kördes tre layoutanimationer samtidigt på samma element — plus
-   ett sidledshopp i texten om de i stället snäppte.
+/* Den öppna raden låg i en svart kort med rundade hörn, insteg och
+   egen marginal. Kortet var en ram runt raden, och en ram runt en
+   rad i en lista säger att raden är en annan sorts sak än sina
+   grannar — vilket den inte är. Den visar bara sitt foto.
 
-   Bakgrunden går från rgb(14 14 14 / 0) och inte från transparent.
-   Övergång till och från transparent interpolerar via genomskinligt
-   svart och grumlar mellanlägena. */
-.ratt--bild {
-  padding-inline: clamp(0.9rem, 3vw, 1.4rem);
-  margin-inline: calc(clamp(0.9rem, 3vw, 1.4rem) * -1);
-  border-radius: 0.9rem;
-  background: rgb(14 14 14 / 0);
-  transition: background 220ms var(--ut);
-}
-
-.ratt--bild[data-oppen='true'] {
-  background: rgb(14 14 14 / 1);
-  color: var(--offwhite);
-  border-block-end-color: transparent;
-}
-
-.ratt--bild[data-oppen='true'] .ratt__pris {
-  color: var(--amber);
-}
-
-.ratt--bild[data-oppen='true'] .ratt__innehall {
-  color: rgb(242 235 224 / 0.75);
-}
-
-.ratt--bild[data-oppen='true'] .ratt__prickar {
-  border-block-end-color: rgb(242 235 224 / 0.25);
-}
-
-.ratt--bild[data-oppen='true'] .ratt__markor {
-  color: var(--svart);
-}
+   Bilden har redan sin egen mörka ruta, och den räcker. Med kortet
+   borta försvinner också tre saker på köpet: en bakgrundsövergång
+   varje gång raden öppnades, insteget som behövde kompenseras med
+   negativ marginal för att texten inte skulle hoppa i sidled, och
+   priset i amber mot off-white — 1,8:1, underkänt.                 */
 
 /* 0fr → 1fr går att övergå. height: auto gör det inte. */
 .ratt__lucka {
@@ -1683,9 +1812,15 @@ input:focus-visible {
   border-radius: 0.4rem;
 }
 
+/* Luckan står KVAR på sina 220 ms här, med flit. Reducerad rörelse
+   betyder mildare, inte ingen — och en rad som snäpper upp 435 px i
+   ett enda bildrutehopp under en pekare som bara vilar på den är det
+   hårdaste utfallet av alla, inte det mildaste. Höjden är dessutom
+   inte den sortens rörelse som stör: inget parallaxlager, ingen
+   förflyttning över skärmen, bara innehåll som får plats.
+
+   Markörens skalning är däremot ren dekor och nollställs. */
 @media (prefers-reduced-motion: reduce) {
-  .ratt--bild,
-  .ratt__lucka,
   .ratt__markor,
   .lucka__media img,
   .lucka__media .ph {
