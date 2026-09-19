@@ -1103,26 +1103,63 @@ input:focus-visible {
   }
 }
 
-/* ═══ 6 · HELA MENYN — enda ljusa blocket ═════════════════════ */
+/* ═══ 6 · HELA MENYN — enda ljusa blocket ═════════════════════
+   En meny läses uppifrån och ned, inte i kolumner. Listan är därför
+   en smal spalt i mitten i stället för det treradiga rutnät som låg
+   här förut — det läste som ett kalkylark.
+
+   Rätter med foto kan fällas ut. Den öppna raden blir en mörk lucka
+   i det ljusa blocket: bilderna är fotade mot nästan svart och skär
+   sig mot off-white, så i stället för att tvinga ihop dem får bilden
+   sin egen grund. Amber är underkänt som text mot off-white men
+   utmärkt mot svart, så priset får gå i amber först när luckan är
+   öppen.                                                            */
 
 .meny__flikar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-block-end: clamp(1.8rem, 4vw, 2.8rem);
+  gap: 0.4rem;
+  margin-block-end: clamp(2rem, 4vw, 3rem);
+  /* Vågrät rulle i stället för radbrytning. Fem flikar på två rader
+     ser ut som ett misstag; en rulle ser ut som ett val. */
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding-block-end: 0.3rem;
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+}
+
+.meny__flikar::-webkit-scrollbar {
+  display: none;
 }
 
 .flik {
-  padding: 0.5rem 1rem;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  padding: 0.6rem 1.1rem;
   background: transparent;
-  border: 1px solid rgb(20 20 20 / 0.22);
+  border: 1px solid rgb(20 20 20 / 0.18);
   border-radius: 999px;
   color: var(--mork-text);
-  font: 700 0.8rem/1 var(--font);
-  letter-spacing: 0.05em;
+  font: 800 0.78rem/1 var(--font);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background 160ms var(--ut), color 160ms var(--ut);
+  transition:
+    background 160ms var(--ut),
+    border-color 160ms var(--ut),
+    color 160ms var(--ut);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .flik:hover:not([aria-selected='true']) {
+    border-color: rgb(20 20 20 / 0.45);
+  }
+}
+
+.flik:active {
+  transform: scale(0.97);
 }
 
 .flik[aria-selected='true'] {
@@ -1132,73 +1169,269 @@ input:focus-visible {
   color: var(--svart);
 }
 
-.meny__panel[hidden] { display: none; }
+.meny__panel[hidden] {
+  display: none;
+}
 
 .meny__underrubrik {
-  margin: 0 0 1.2rem;
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
+  max-width: 46rem;
+  margin: 0 auto 1.4rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mork-text-svag);
 }
 
 .ratter {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
-  gap: 0 clamp(2rem, 5vw, 4rem);
-  margin: 0;
+  max-width: 46rem;
+  margin: 0 auto;
   padding: 0;
   list-style: none;
 }
 
+/* ── Raden ─────────────────────────────────────────────────────── */
+
 .ratt {
-  padding-block: 0.9rem;
-  border-block-end: 1px solid rgb(20 20 20 / 0.12);
+  border-block-end: 1px solid rgb(20 20 20 / 0.1);
+}
+
+.ratt:last-child {
+  border-block-end: 0;
+}
+
+.ratt > .ratt__rad,
+.ratt > .ratt__innehall,
+.ratt__knapp {
+  padding-block: 1.05rem;
+}
+
+.ratt > .ratt__rad {
+  padding-block-end: 0.2rem;
+}
+
+.ratt > .ratt__innehall {
+  padding-block-start: 0;
+}
+
+.ratt__knapp {
+  display: block;
+  width: 100%;
+  padding-inline: 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
 .ratt__rad {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
+  gap: 0.7rem;
 }
 
 .ratt__namn {
   font-weight: 800;
-  font-size: 1rem;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  letter-spacing: 0.005em;
   text-transform: uppercase;
-  letter-spacing: 0.01em;
 }
 
-.ratt__prickar {
-  flex: 1;
-  border-block-end: 1px dotted rgb(20 20 20 / 0.28);
-  translate: 0 -0.25em;
-}
-
-.ratt__pris {
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  color: var(--mork-text);
-}
-
-.ratt__innehall {
-  margin: 0.2rem 0 0;
-  font-size: 0.85rem;
-  color: var(--mork-text-svag);
-}
-
-.ratt--signatur .ratt__namn::after {
-  content: 'signatur';
+.ratt__signatur {
   margin-inline-start: 0.5rem;
-  padding: 0.12rem 0.45rem;
+  padding: 0.14rem 0.5rem;
   background: var(--amber);
   color: var(--svart);
   border-radius: 999px;
   font-size: 0.6rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   vertical-align: 0.15em;
 }
+
+.ratt__prickar {
+  flex: 1;
+  border-block-end: 1px dotted rgb(20 20 20 / 0.3);
+  translate: 0 -0.3em;
+}
+
+.ratt__pris {
+  font-weight: 800;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: color 220ms var(--ut);
+}
+
+.ratt__innehall {
+  display: block;
+  margin: 0.25rem 0 0;
+  max-width: 54ch;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--mork-text-svag);
+  transition: color 220ms var(--ut);
+}
+
+/* Markören säger att raden har ett foto. Rader utan foto har ingen,
+   så frånvaron berättar i sig vad som är en rätt och vad som är ett
+   tillbehör. */
+.ratt__markor {
+  flex: 0 0 auto;
+  width: 1.55rem;
+  height: 1.55rem;
+  align-self: center;
+  border: 1px solid rgb(20 20 20 / 0.25);
+  border-radius: 999px;
+  position: relative;
+  transition:
+    background 220ms var(--ut),
+    border-color 220ms var(--ut),
+    rotate 220ms var(--ut);
+}
+
+.ratt__markor::before,
+.ratt__markor::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  width: 0.46rem;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+  translate: -50% -50%;
+}
+
+.ratt__markor::after {
+  rotate: 90deg;
+  transition: opacity 220ms var(--ut);
+}
+
+.ratt--bild[data-oppen='true'] .ratt__markor {
+  rotate: 180deg;
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.ratt--bild[data-oppen='true'] .ratt__markor::after {
+  opacity: 0;
+}
+
+/* ── Luckan ────────────────────────────────────────────────────── */
+
+/* Insteget är konstant på alla rader med bild, kompenserat med
+   negativ marginal så texten står kvar i spaltens kant. Utan det
+   skulle padding och margin behöva animeras när luckan öppnas, och
+   då kördes tre layoutanimationer samtidigt på samma element — plus
+   ett sidledshopp i texten om de i stället snäppte.
+
+   Bakgrunden går från rgb(14 14 14 / 0) och inte från transparent.
+   Övergång till och från transparent interpolerar via genomskinligt
+   svart och grumlar mellanlägena. */
+.ratt--bild {
+  padding-inline: clamp(0.9rem, 3vw, 1.4rem);
+  margin-inline: calc(clamp(0.9rem, 3vw, 1.4rem) * -1);
+  border-radius: 0.9rem;
+  background: rgb(14 14 14 / 0);
+  transition: background 220ms var(--ut);
+}
+
+.ratt--bild[data-oppen='true'] {
+  background: rgb(14 14 14 / 1);
+  color: var(--offwhite);
+  border-block-end-color: transparent;
+}
+
+.ratt--bild[data-oppen='true'] .ratt__pris {
+  color: var(--amber);
+}
+
+.ratt--bild[data-oppen='true'] .ratt__innehall {
+  color: rgb(242 235 224 / 0.75);
+}
+
+.ratt--bild[data-oppen='true'] .ratt__prickar {
+  border-block-end-color: rgb(242 235 224 / 0.25);
+}
+
+.ratt--bild[data-oppen='true'] .ratt__markor {
+  color: var(--svart);
+}
+
+/* 0fr → 1fr går att övergå. height: auto gör det inte. */
+.ratt__lucka {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms var(--ut);
+}
+
+.ratt--bild[data-oppen='true'] .ratt__lucka {
+  grid-template-rows: 1fr;
+}
+
+.lucka__inre {
+  overflow: hidden;
+}
+
+.lucka__media {
+  display: block;
+  margin-block: 0.15rem 1.15rem;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: #171717;
+}
+
+/* På bred skärm blir 4:3 en bild som tar halva vyn. Bredare format
+   håller höjden nere utan att bilden krymper i sidled. */
+@media (min-width: 700px) {
+  .lucka__media {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* Bilden ligger still och beskärs av behållaren som växer — den
+   skalas inte. Samma grepp som dragspelets mediaruta. */
+.lucka__media img,
+.lucka__media .ph {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: auto;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  opacity: 0;
+  transition: opacity 220ms var(--ut) 40ms;
+}
+
+.ratt--bild[data-oppen='true'] .lucka__media img,
+.ratt--bild[data-oppen='true'] .lucka__media .ph {
+  opacity: 1;
+}
+
+.ratt__knapp:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  border-radius: 0.4rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ratt--bild,
+  .ratt__lucka,
+  .ratt__markor,
+  .lucka__media img,
+  .lucka__media .ph {
+    transition-duration: 0.01ms !important;
+  }
+  .lucka__media img,
+  .lucka__media .ph {
+    transition: opacity 0.15s linear !important;
+  }
+}
+
 
 /* ═══ 7 · HITTA HIT ═══════════════════════════════════════════ */
 

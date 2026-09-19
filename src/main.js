@@ -291,7 +291,23 @@ function byggSignaturer() {
   fingerlage.addEventListener('change', sattHjalp);
 }
 
-/* ═══ 6 · MENYN ══════════════════════════════════════════════════ */
+/* ═══ 6 · MENYN ══════════════════════════════════════════════════
+   Listan är en lista. Rätter som har ett foto får en markör och kan
+   fällas ut; raden blir då en mörk lucka i det ljusa blocket. Ett
+   öppet i taget per kategori, precis som dragspelets kort, och
+   första rätten med bild står öppen från start.
+
+   Samma rörelselag som dragspelet: 220 ms och samma kurva. Höjden
+   animeras med grid-template-rows 0fr → 1fr, vilket går att övergå
+   till skillnad från height: auto. Bilden veckas fram genom att
+   behållaren växer och beskär — den skalas inte.
+
+   Bilderna hämtas först när raden öppnas. 33 rätter har foto; laddade
+   de alla på en gång vore menyn tyngre än resten av sajten.         */
+
+/** Signaturburgarna delar filer med dragspelet, resten är egna. */
+const bildvag = (id) =>
+  id.startsWith('C') ? `/bilder/signatur/${id}.webp` : `/bilder/meny/${id}.webp`;
 
 function byggMeny() {
   const flikar = $('#meny-flikar');
@@ -309,29 +325,96 @@ function byggMeny() {
     .join('');
 
   paneler.innerHTML = kategorier
-    .map(
-      (k, i) => `
-      <div class="meny__panel" role="tabpanel" id="panel-${k.id}"
-           aria-labelledby="flik-${k.id}" ${i === 0 ? '' : 'hidden'}>
-        ${k.underrubrik ? `<p class="meny__underrubrik">${k.underrubrik}</p>` : ''}
-        <ul class="ratter">
-          ${k.ratter
-            .map(
-              (r) => `
-            <li class="ratt${r.signatur ? ' ratt--signatur' : ''}">
-              <div class="ratt__rad">
-                <span class="ratt__namn">${r.namn}</span>
-                <span class="ratt__prickar"></span>
-                <span class="ratt__pris">${r.pris} kr</span>
+    .map((k, ki) => {
+      // Första rätten med bild står öppen när kategorin visas.
+      const forstaMedBild = k.ratter.findIndex((r) => r.bild);
+
+      const rader = k.ratter
+        .map((r, ri) => {
+          const pris = `<span class="ratt__pris">${r.pris} kr</span>`;
+          const namn = `<span class="ratt__namn">${r.namn}${
+            r.signatur ? '<span class="ratt__signatur">signatur</span>' : ''
+          }</span>`;
+          const innehall = r.innehall
+            ? `<span class="ratt__innehall">${r.innehall}</span>`
+            : '';
+
+          if (!r.bild) {
+            return `
+            <li class="ratt">
+              <span class="ratt__rad">
+                ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${pris}
+              </span>
+              ${innehall}
+            </li>`;
+          }
+
+          const luckaId = `lucka-${k.id}-${ri}`;
+          const oppen = ri === forstaMedBild;
+          const media = r.bild.startsWith('C')
+            ? `<img class="lucka__bild" data-kalla="${bildvag(r.bild)}" alt="${r.namn}"
+                    width="1000" height="1339" decoding="async" />`
+            : `<span class="ph" data-id="${r.bild}" data-spec="1000 × 1339"></span>`;
+
+          return `
+            <li class="ratt ratt--bild" data-oppen="${oppen}">
+              <button class="ratt__knapp" type="button"
+                      aria-expanded="${oppen}" aria-controls="${luckaId}">
+                <span class="ratt__rad">
+                  ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${pris}
+                  <span class="ratt__markor" aria-hidden="true"></span>
+                </span>
+                ${innehall}
+              </button>
+              <div class="ratt__lucka" id="${luckaId}">
+                <div class="lucka__inre">
+                  <span class="lucka__media">${media}</span>
+                </div>
               </div>
-              ${r.innehall ? `<p class="ratt__innehall">${r.innehall}</p>` : ''}
-            </li>`
-            )
-            .join('')}
-        </ul>
-      </div>`
-    )
+            </li>`;
+        })
+        .join('');
+
+      return `
+      <div class="meny__panel" role="tabpanel" id="panel-${k.id}"
+           aria-labelledby="flik-${k.id}" ${ki === 0 ? '' : 'hidden'}>
+        ${k.underrubrik ? `<p class="meny__underrubrik">${k.underrubrik}</p>` : ''}
+        <ul class="ratter">${rader}</ul>
+      </div>`;
+    })
     .join('');
+
+  /* ── Utfällningen ───────────────────────────────────────────── */
+
+  const ladda = (li) => {
+    const im = li.querySelector('.lucka__bild[data-kalla]');
+    if (!im) return;
+    im.src = im.dataset.kalla;
+    delete im.dataset.kalla;
+  };
+
+  const oppna = (li) => {
+    const lista = li.closest('.ratter');
+    for (const annan of $$('.ratt--bild[data-oppen="true"]', lista)) {
+      if (annan === li) continue;
+      annan.dataset.oppen = 'false';
+      annan.querySelector('.ratt__knapp').setAttribute('aria-expanded', 'false');
+    }
+    const nu = li.dataset.oppen !== 'true';
+    li.dataset.oppen = String(nu);
+    li.querySelector('.ratt__knapp').setAttribute('aria-expanded', String(nu));
+    if (nu) ladda(li);
+  };
+
+  paneler.addEventListener('click', (e) => {
+    const knapp = e.target.closest('.ratt__knapp');
+    if (knapp) oppna(knapp.closest('.ratt--bild'));
+  });
+
+  // De rader som står öppna från start behöver sin bild direkt.
+  $$('.ratt--bild[data-oppen="true"]', paneler).forEach(ladda);
+
+  /* ── Flikarna ───────────────────────────────────────────────── */
 
   const knappar = $$('.flik', flikar);
 
@@ -340,10 +423,12 @@ function byggMeny() {
       const vald = b.id === `flik-${id}`;
       b.setAttribute('aria-selected', String(vald));
       b.tabIndex = vald ? 0 : -1;
+      if (vald) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     });
     $$('.meny__panel', paneler).forEach((p) => {
       p.hidden = p.id !== `panel-${id}`;
     });
+    $$(`#panel-${id} .ratt--bild[data-oppen="true"]`, paneler).forEach(ladda);
   };
 
   flikar.addEventListener('click', (e) => {
