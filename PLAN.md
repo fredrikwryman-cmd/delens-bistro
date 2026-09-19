@@ -408,10 +408,19 @@ skrikig Modak är.
 |---|---|
 | Hero-lockupen: "DELENS" i kontur + "BISTRO" fylld | Sajtens enda rena varumärkesutrop. Här ska typen skrika |
 | Lagersektionens rubrik, fyra rader | Typen **är** konstverket — lagren vävs igenom raderna, och utan en fet form läser inte z-index-växlingen som djup |
+| Finalens rad: "Välkommen till Delens Bistro" | Sidans sista mening, under märket som just byggts ihop. Tillagd 2026-09-19 på Fredriks beslut |
 
-**Ingen annanstans.** Varje ny rubrik utgår från Mouse Memoirs. Vill
-man ge Titan One ett tredje ställe ska ett av de två ovan lämna ifrån
-sig sitt — antalet ligger fast på två.
+**ANTALET ÄR OMFÖRHANDLAT FRÅN TVÅ TILL TRE.** Regeln stod tidigare
+att ett tredje ställe krävde att ett av de två första lämnade ifrån
+sig sitt. Fredrik beslutade annat, och då är det tre.
+
+Invändningen står kvar och är värd att veta om någon vill gå tillbaka:
+finalens rad sitter under loggan, alltså under sajtens tyngsta
+varumärkesutrop, och två feta former i samma vy konkurrerar. Raden i
+Mouse Memoirs hade låtit märket vara ensamt om att skrika. Det är en
+rad i stilmallen att ändra tillbaka — `.final__rad { font-family }`.
+
+**Ingen fjärde plats.** Varje ny rubrik utgår från Mouse Memoirs.
 
 ### Var Mouse Memoirs står
 

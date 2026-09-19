@@ -568,7 +568,7 @@
            Loggan är aria-hidden. Raden under säger samma sak i text,
            och "Delens Bistro. Välkommen till Delens Bistro" är inte
            en bättre upplevelse för den som lyssnar. -->
-      <section class="sec sec--vid sec--svart final" id="final">
+      <section class="sec sec--svart final" id="final">
         <div class="wrap final__inner">
           <svg class="final__logga" viewBox="0 0 277 268" aria-hidden="true" focusable="false">
             <g class="final__del" style="--i: 0" id="dark-disc" fill="#0e0602"><path id="dark-disc-path" fill-rule="evenodd" d="M113.000,249.036 C81.090,241.782 54.370,221.750 38.206,192.963 C33.619,184.793 28.302,170.183 26.544,160.920 C25.614,156.014 25.000,147.223 25.000,138.797 C25.000,121.924 27.280,109.330 32.683,96.357 C37.192,85.531 42.479,76.661 49.743,67.737 C60.164,54.935 72.605,45.043 87.751,37.517 C92.667,35.074 98.897,32.547 101.595,31.901 C104.293,31.254 108.650,30.158 111.277,29.465 L116.053,28.203 L118.645,31.602 C120.811,34.441 121.878,35.000 125.132,35.000 C127.274,35.000 129.935,35.563 131.044,36.250 C132.705,37.280 133.225,37.237 133.989,36.008 C134.564,35.083 134.553,34.153 133.958,33.558 C133.431,33.031 133.052,30.553 133.116,28.050 C133.180,25.548 133.438,24.288 133.689,25.250 C134.055,26.649 135.249,27.000 139.640,27.000 L145.134,27.000 L141.567,31.353 C139.605,33.747 138.000,36.174 138.000,36.746 C138.000,38.551 141.222,39.109 142.895,37.595 C144.072,36.530 144.988,36.414 146.323,37.161 C149.310,38.833 152.714,37.254 156.327,32.523 C158.199,30.071 159.952,28.286 160.223,28.556 C160.493,28.827 164.041,29.733 168.107,30.569 C172.173,31.405 179.100,33.738 183.500,35.753 C193.841,40.489 205.868,48.342 213.788,55.530 C221.418,62.454 231.501,75.188 236.332,84.000 C241.721,93.829 246.780,107.799 248.479,117.538 C250.669,130.097 250.461,149.924 248.014,161.934 C243.745,182.880 233.410,202.272 218.382,217.530 C203.858,232.276 186.344,242.448 165.500,248.243 C160.070,249.753 154.351,250.277 140.000,250.579 C124.347,250.908 120.192,250.671 113.000,249.036 Z"/></g>
@@ -685,6 +685,37 @@
           </ul>
         </div>
       </div>
+      <!-- BYGGKREDITEN. Fyra hörnmarkeringar som flyttar utåt och två
+           lådor som glider ut över och under — mekaniken är beskriven,
+           inte kopierad: originalkomponenten (Uiverse, dexter-st) fanns
+           inte att läsa när den här byggdes. Hue-rotationen som låg i
+           originalets hover är utelämnad; den är gjord för en gulgrön
+           utgångsfärg och hade vridit sajtens amber mot brunt.
+
+           TILLGÄNGLIGA NAMNET STÅR SEPARAT. Länkens synliga text är
+           "Webbdesign" i vila, och en länk som bara heter så säger
+           ingenting om vart den går. Den riktiga meningen ligger dold
+           för ögat och läses upp i stället; allt det rörliga är
+           aria-hidden.
+
+           UTAN HOVER VISAS SLUTLÄGET DIREKT. På en telefon finns ingen
+           hover att avslöja något med, och då hade knappen stått kvar
+           som ordet "Webbdesign" med en länk till en sajt den inte
+           nämner. Se stilmallen. -->
+      <a class="byggd" href="https://aimstudios.se" target="_blank" rel="noopener">
+        <span class="visuellt-dold">Byggd av AiM Studios — aimstudios.se</span>
+        <span class="byggd__lada byggd__lada--upp" aria-hidden="true">Byggd av</span>
+        <span class="byggd__mitt" aria-hidden="true">
+          <span class="byggd__vila">Webbdesign</span>
+          <span class="byggd__aktiv">AiM Studios</span>
+        </span>
+        <span class="byggd__lada byggd__lada--ner" aria-hidden="true">aimstudios.se</span>
+        <span class="byggd__horn byggd__horn--nv" aria-hidden="true"></span>
+        <span class="byggd__horn byggd__horn--no" aria-hidden="true"></span>
+        <span class="byggd__horn byggd__horn--sv" aria-hidden="true"></span>
+        <span class="byggd__horn byggd__horn--so" aria-hidden="true"></span>
+      </a>
+
       <p class="foot__not">
         Ett visningsprojekt av AiM Studios. Inte Delens Bistros officiella
         webbplats.

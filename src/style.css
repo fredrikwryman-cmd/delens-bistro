@@ -2273,27 +2273,113 @@ input:focus-visible {
 
 /* Märket monteras av sina egna delar och sidan skriver under. Skälen
    till svart botten och till att den mörka skivan inte syns står i
-   uppmärkningen. */
+   uppmärkningen.
+
+   ALL TIMING LIGGER HÄR, i fem tal. Sekvensen är lång nog att man
+   ska kunna ändra takten utan att leta i tre filer.
+
+   TAKTEN ÄR SATT AV ATT VARJE DEL SKA HINNA LANDA. Med 90 ms
+   förskjutning mot 360 ms varaktighet var upp till fyra delar i
+   luften samtidigt — ögat såg en klump röra sig, inte åtta delar
+   sätta sig. Nu är förskjutningen 380 ms mot 480 ms varaktighet:
+   nästa del lämnar först när den förra är 79 procent framme. Det
+   räcker för att läsa varje landning som en egen händelse och är
+   ändå inte en paus mellan dem.
+
+     8 delar   7 × 380 + 480  = 3 140 ms tills märket står
+     25 bokstäver  24 × 38 + 300  = 1 212 ms för raden
+     totalt                       ≈ 4 350 ms
+
+   4,3 sekunder är längre än laddskärmens 1 800, och det är rätt här.
+   Laddskärmen står MELLAN besökaren och innehållet — den ska ge sig.
+   Finalen står efter allt innehåll och tar ingenting ifrån någon. */
+
+/* EN SKÄRM, INTE MER. Sektionen var 979 px hög på en 900 px vy, och
+   då hamnade raden under beställningsfältet: man såg märket byggas
+   färdigt och missade meningen som är hela poängen. Med 100svh och
+   centrerat innehåll står märket och raden alltid i samma vy.
+
+   svh och inte vh: på en telefon krymper vh när adressfältet fälls
+   ut, och en sektion som är högre än skärmen är precis det här
+   felet igen.
+
+   Paddningen är egen och mindre än sec--vid:s. Luften kommer nu från
+   att sektionen är en helskärm, inte från paddning ovanpå den. */
+.final {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  padding-block: clamp(3rem, 8vw, 5rem);
+
+  --del-tid: 480ms;
+  --del-steg: 380ms;
+  --marke-klart: 3140ms;
+  --bokstav-tid: 300ms;
+  --bokstav-steg: 38ms;
+}
 
 .final__inner {
   display: grid;
   justify-items: center;
-  gap: clamp(1.25rem, 3vw, 2rem);
+  gap: clamp(1.5rem, 4vw, 3rem);
   text-align: center;
 }
 
+/* 512 px mot tidigare 280. Märket ska äga sektionen, inte ligga i
+   den som en detalj — och en logga som byggs bit för bit måste vara
+   stor nog att delarna går att se landa var för sig. 44vw håller den
+   dominerande hela vägen ned; 13rem är golvet på en smal telefon. */
 .final__logga {
-  width: clamp(11rem, 30vw, 17.5rem);
+  /* Bredden begränsas av BÅDE vyns bredd och dess höjd. 44vw gör
+     märket dominerande på en bred skärm, men på en låg skärm är det
+     höjden som tar slut först: vid 620 px vyhöjd sköt ett 512 px
+     märke ned raden under beställningsfältet, och då missar man
+     meningen som är hela poängen.
+
+     Höjdtaket DRAR IFRÅN i stället för att skala. En andel av
+     vyhöjden hade tagit lika mycket från desktop som från en låg
+     skärm — 58svh gav 512 px vid 900 men klämde ändå inte in raden
+     vid 500. 18rem är det som ska rymmas UNDER märket och är lika
+     stort oavsett vy: beställningsfältets 80 px, raden, gapet och
+     paddningen. Det som blir kvar får märket ta.
+
+       900 px vy   min(512, 612) = 512   desktop orört
+       620 px vy   min(512, 332) = 332
+       500 px vy   min(512, 212) = 212
+
+     max(9rem, ...) är GOLVET, och det behövs. Avdraget har ingen
+     undre gräns av sig självt: vid 300 px vyhöjd blev 100svh − 18rem
+     tolv pixlar, och märket ritades som en prick. Ett märke som
+     spiller ut ur en 300 px hög webbläsarruta är ett litet fel; ett
+     märke som försvinner är ett stort. Golvet gör det första till det
+     enda som kan hända. */
+  width: min(clamp(13rem, 44vw, 32rem), max(9rem, calc(100svh - 18rem)));
   height: auto;
 }
 
 .final__rad {
   margin: 0;
-  max-width: 24ch;
+  max-width: 100%;
+  /* TITAN ONE, sajtens tredje och sista ställe. Se PLAN.md 13 —
+     antalet stod låst vid två och är omförhandlat till tre. */
+  font-family: var(--font-display);
+  font-weight: var(--font-display-vikt);
   font-size: var(--t-m);
   line-height: var(--lh-m);
   letter-spacing: var(--ls-m);
   color: var(--offwhite);
+}
+
+/* Ordet håller ihop. Bokstäverna är inline-block, och en radbrytning
+   får ske mellan två inline-block — utan nowrap hade "Välkommen"
+   kunnat brytas mitt i på en smal skärm. Mellanrummen mellan orden är
+   riktiga textnoder, så raden bryts där den ska. */
+.final__ord {
+  white-space: nowrap;
+}
+
+.final__bokstav {
+  display: inline-block;
 }
 
 /* UTGÅNGSLÄGET SÄTTS AV JS, inte här. Ett data-attribut som bara
@@ -2309,24 +2395,15 @@ input:focus-visible {
    märkets mitt som origo hade hela loggan blåsts upp inifrån; med
    varje dels egen mitt sätter sig varje element på sin plats och
    stannar där. transform-box: fill-box krävs — utan den ligger
-   origo i SVG-rutans hörn och delarna svingar in från vänster.
-
-   90 ms förskjutning och 360 ms per del: sista delen landar på
-   7 × 90 + 360 = 990 ms, raden 260 ms efter det. 1 250 ms totalt,
-   alltså under laddskärmens 1 800. Finalen får inte väga mer än
-   öppningen.
-
-   360 ms är längre än en knapptryckning får ta, och det är rätt
-   här: det här är sidans enda rörelse som ses EN gång per besök.
-   Det är i den änden av frekvensskalan man får kosta på sig något. */
+   origo i SVG-rutans hörn och delarna svingar in från vänster. */
 .final__del {
   transform-box: fill-box;
   transform-origin: center;
 }
 
 .final[data-bygger='kor'] .final__del {
-  animation: del-pa-plats 360ms var(--ut) both;
-  animation-delay: calc(var(--i) * 90ms);
+  animation: del-pa-plats var(--del-tid) var(--ut) both;
+  animation-delay: calc(var(--i) * var(--del-steg));
 }
 
 @keyframes del-pa-plats {
@@ -2343,12 +2420,30 @@ input:focus-visible {
   }
 }
 
+/* Raden som helhet tänds i samma ögonblick som första bokstaven —
+   den bär inget eget intåg, bara sina bokstäver. */
 .final[data-bygger='kor'] .final__rad {
-  animation: rad-fram 260ms var(--ut) 990ms both;
+  animation: rad-tand 1ms linear var(--marke-klart) both;
 }
 
-@keyframes rad-fram {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes rad-tand {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* BOKSTÄVERNA STIGER, delarna föll. Det är med flit: märket MONTERAS
+   av delar som läggs på plats uppifrån, raden SKRIVS. Två olika
+   handlingar ska inte se likadana ut, och riktningen är det billigaste
+   sättet att säga vilken som är vilken. */
+.final[data-bygger='kor'] .final__bokstav {
+  animation: bokstav-fram var(--bokstav-tid) var(--ut) both;
+  animation-delay: calc(
+    var(--marke-klart) + var(--i) * var(--bokstav-steg)
+  );
+}
+
+@keyframes bokstav-fram {
+  from { opacity: 0; transform: translateY(0.3em); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -2508,6 +2603,204 @@ input:focus-visible {
   line-height: var(--lh-s);
   letter-spacing: var(--ls-s);
   color: rgb(242 235 224 / 0.35);
+}
+
+/* ── Byggkrediten ──────────────────────────────────────────────── */
+
+/* Fyra hörnmarkeringar och två lådor. Mekaniken är byggd ur en
+   beskrivning av en Uiverse-komponent av dexter-st, inte kopierad ur
+   den — originalets CSS fanns inte att läsa. Hue-rotationen i
+   originalets hover är medvetet utelämnad: den är gjord för en gulgrön
+   utgångsfärg och vrider amber mot brunt.
+
+   Amber tills vidare; Fredrik återkommer med exakt kod. Två tal styr
+   hela formen, så en ändring av färg eller vandring är en rad. */
+.byggd {
+  --byggd-vandring: 6px;
+  --byggd-farg: var(--amber);
+
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: max-content;
+  margin: clamp(2rem, 5vw, 3rem) auto 0;
+  padding: 0.7rem 1.6rem;
+  color: var(--byggd-farg);
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
+  text-decoration: none;
+  transition: transform 160ms var(--ut);
+}
+
+/* VERSALER PÅ ETIKETTERNA, INTE PÅ NAMNET. "Byggd av", "Webbdesign"
+   och adressen är mikroetiketter och ska stå i versaler — spärren
+   --ls-xs är satt för just det. AiM Studios är ett egennamn med
+   avsiktligt blandad skrivning, och uppercase hade gjort det till AIM
+   STUDIOS. Samma sak som att ändra namnet; se footerraden, som gick i
+   samma fälla. Gemen text får gemenspärren i stället. */
+.byggd__lada,
+.byggd__vila {
+  text-transform: uppercase;
+}
+
+.byggd__aktiv {
+  letter-spacing: var(--ls-xs-gemen);
+}
+
+/* Mitten byter ord. De två orden ligger i samma ruta och växlar
+   plats — utan stapling hade knappen bytt bredd mitt i hovern och
+   hörnen hoppat med. */
+.byggd__mitt {
+  display: grid;
+  place-items: center;
+}
+
+.byggd__vila,
+.byggd__aktiv {
+  grid-area: 1 / 1;
+  transition:
+    opacity 180ms var(--ut),
+    transform 180ms var(--ut);
+}
+
+.byggd__aktiv {
+  opacity: 0;
+  transform: translateY(0.35em);
+  letter-spacing: var(--ls-xs-gemen);
+}
+
+/* Lådorna ligger bakom knappen och glider ut. transform och opacity,
+   inget annat — inset skulle ha kostat en omlayout per bildruta. */
+.byggd__lada {
+  position: absolute;
+  inset-inline: 0;
+  padding: 0.25rem 0;
+  background: var(--byggd-farg);
+  color: var(--svart);
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  text-align: center;
+  opacity: 0;
+  z-index: -1;
+  transition:
+    opacity 200ms var(--ut),
+    transform 200ms var(--ut);
+}
+
+.byggd__lada--upp {
+  inset-block-end: 100%;
+  transform: translateY(70%);
+}
+
+.byggd__lada--ner {
+  inset-block-start: 100%;
+  transform: translateY(-70%);
+}
+
+/* Hörnen är två kanter var, inte fyra rutor. En ruta med border hade
+   ritat en hel ram; det här ritar bara vinkeln. */
+.byggd__horn {
+  position: absolute;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid var(--byggd-farg);
+  transition: transform 200ms var(--ut);
+}
+
+.byggd__horn--nv {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.byggd__horn--no {
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  border-width: 2px 2px 0 0;
+}
+
+.byggd__horn--sv {
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  border-width: 0 0 2px 2px;
+}
+
+.byggd__horn--so {
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  border-width: 0 2px 2px 0;
+}
+
+/* Nedtryckningen ligger utanför hover-grinden: den gäller fingret
+   lika mycket som muspekaren. */
+.byggd:active {
+  transform: scale(0.97);
+}
+
+.byggd:focus-visible {
+  outline: 2px solid var(--byggd-farg);
+  outline-offset: 6px;
+}
+
+/* SLUTLÄGET ÄR UTGÅNGSLÄGET NÄR DET INTE FINNS NÅGON HOVER. På en
+   telefon finns ingen pekare att avslöja med, och en knapp som står
+   kvar som ordet "Webbdesign" säger ingenting om vart den leder.
+   Utan hover visas därför lådorna och namnet direkt. */
+@media not all and (hover: hover) and (pointer: fine) {
+  .byggd {
+    margin-block: clamp(3.5rem, 8vw, 4.5rem) 2.5rem;
+  }
+
+  .byggd__lada {
+    opacity: 1;
+    transform: none;
+  }
+
+  .byggd__vila {
+    opacity: 0;
+  }
+
+  .byggd__aktiv {
+    opacity: 1;
+    transform: none;
+  }
+
+  .byggd__horn--nv { transform: translate(calc(var(--byggd-vandring) * -1), calc(var(--byggd-vandring) * -1)); }
+  .byggd__horn--no { transform: translate(var(--byggd-vandring), calc(var(--byggd-vandring) * -1)); }
+  .byggd__horn--sv { transform: translate(calc(var(--byggd-vandring) * -1), var(--byggd-vandring)); }
+  .byggd__horn--so { transform: translate(var(--byggd-vandring), var(--byggd-vandring)); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .byggd:hover .byggd__lada,
+  .byggd:focus-visible .byggd__lada {
+    opacity: 1;
+    transform: none;
+  }
+
+  .byggd:hover .byggd__vila,
+  .byggd:focus-visible .byggd__vila {
+    opacity: 0;
+    transform: translateY(-0.35em);
+  }
+
+  .byggd:hover .byggd__aktiv,
+  .byggd:focus-visible .byggd__aktiv {
+    opacity: 1;
+    transform: none;
+  }
+
+  .byggd:hover .byggd__horn--nv,
+  .byggd:focus-visible .byggd__horn--nv { transform: translate(calc(var(--byggd-vandring) * -1), calc(var(--byggd-vandring) * -1)); }
+  .byggd:hover .byggd__horn--no,
+  .byggd:focus-visible .byggd__horn--no { transform: translate(var(--byggd-vandring), calc(var(--byggd-vandring) * -1)); }
+  .byggd:hover .byggd__horn--sv,
+  .byggd:focus-visible .byggd__horn--sv { transform: translate(calc(var(--byggd-vandring) * -1), var(--byggd-vandring)); }
+  .byggd:hover .byggd__horn--so,
+  .byggd:focus-visible .byggd__horn--so { transform: translate(var(--byggd-vandring), var(--byggd-vandring)); }
 }
 
 /* ═══ FAST BESTÄLLNINGSFÄLT ═══════════════════════════════════ */
@@ -3139,6 +3432,16 @@ input:focus-visible {
     display: none;
   }
 
+  /* BYGGKREDITEN: tillstånden står kvar, rörelsen tas bort. Hörnen
+     vandrar inte och lådorna glider inte — de tänds. Ett ord som
+     byter plats är information, att det glider dit är dekor. */
+  .byggd__horn,
+  .byggd__lada,
+  .byggd__vila,
+  .byggd__aktiv {
+    transform: none !important;
+  }
+
   /* FINALEN: färdig logga, ingen montering. Delarna hålls synliga
      och hela blocket tonas in en gång på 200 ms. Monteringen är
      rörelse, men märket och hälsningen är innehåll — det senare
@@ -3146,7 +3449,8 @@ input:focus-visible {
   .final[data-bygger='vantar'] .final__del,
   .final[data-bygger='vantar'] .final__rad,
   .final[data-bygger='kor'] .final__del,
-  .final[data-bygger='kor'] .final__rad {
+  .final[data-bygger='kor'] .final__rad,
+  .final[data-bygger='kor'] .final__bokstav {
     opacity: 1;
     animation: none;
     transform: none;

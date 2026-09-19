@@ -1773,9 +1773,59 @@ function riggaScroll() {
    gången — och det här är sidans sista ögonblick, inte en kontroll
    man återvänder till.                                            */
 
+/**
+ * Delar raden i ord och ord i bokstäver.
+ *
+ * TVÅ NIVÅER, INTE EN. Bara bokstäver hade räckt för animationen men
+ * inte för radbrytningen: en radbrytning får ske mellan två
+ * inline-block, så "Välkommen" hade kunnat brytas mitt i på en smal
+ * skärm. Orden håller ihop sina bokstäver, mellanrummen mellan orden
+ * är riktiga textnoder, och raden bryts där svenskan säger.
+ *
+ * DEN RIKTIGA TEXTEN LIGGER KVAR, dold för ögat men läsbar för
+ * skärmläsare och sidsökning. Bokstavsspannen är aria-hidden — en
+ * text som delats i 25 element läses i värsta fall upp bokstav för
+ * bokstav, och "V-Ä-L-K-O-M-M-E-N" är inte en hälsning.
+ */
+function delaRadIBokstaver(rad) {
+  const text = rad.textContent.trim();
+  rad.textContent = '';
+
+  const dold = document.createElement('span');
+  dold.className = 'visuellt-dold';
+  dold.textContent = text;
+  rad.appendChild(dold);
+
+  const bygge = document.createElement('span');
+  bygge.setAttribute('aria-hidden', 'true');
+
+  const ord = text.split(' ');
+  let i = 0;
+  ord.forEach((o, oi) => {
+    const span = document.createElement('span');
+    span.className = 'final__ord';
+    for (const tecken of o) {
+      const b = document.createElement('span');
+      b.className = 'final__bokstav';
+      b.style.setProperty('--i', i++);
+      b.textContent = tecken;
+      span.appendChild(b);
+    }
+    bygge.appendChild(span);
+    if (oi < ord.length - 1) bygge.appendChild(document.createTextNode(' '));
+  });
+
+  rad.appendChild(bygge);
+  return i;
+}
+
 function riggaFinal() {
   const sek = $('#final');
   if (!sek) return;
+
+  // Vid reducerad rörelse delas raden inte alls. Den står som den
+  // står i uppmärkningen och tonas in med resten av blocket.
+  if (!reducerad.matches) delaRadIBokstaver($('.final__rad', sek));
 
   sek.setAttribute('data-bygger', 'vantar');
 
@@ -1785,10 +1835,20 @@ function riggaFinal() {
       io.disconnect();
       sek.setAttribute('data-bygger', 'kor');
     },
-    // Märket ska ha kommit upp en bit i vyn innan det börjar byggas,
-    // annars startar sekvensen medan sektionen fortfarande är en rand
-    // längst ned på skärmen.
-    { rootMargin: '0px 0px -10% 0px', threshold: 0.25 }
+    /* SEKVENSEN ÄR 4,3 SEKUNDER LÅNG, och då räcker det inte att
+       sektionen nätt och jämnt kommit in i vyn — då hinner den
+       spelas färdigt medan besökaren fortfarande scrollar förbi.
+
+       -40 % i underkant betyder att märket börjar byggas först när
+       sektionens överkant passerat 60 procent av skärmhöjden, alltså
+       när den fyller en dryg tredjedel av vyn.
+
+       threshold 0 och inte ett tal, med flit. Ett tröskelvärde mäts
+       mot SEKTIONENS höjd, och den här sektionen är högre än en låg
+       vy: vid 560 px vyhöjd kom man aldrig upp i 25 procent av den.
+       Noll mäter bara om något alls är inne i den krympta rutan, och
+       det går att uppfylla oavsett hur hög sektionen är. */
+    { rootMargin: '0px 0px -40% 0px', threshold: 0 }
   );
   io.observe(sek);
 }
