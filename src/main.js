@@ -175,7 +175,11 @@ const DRAGSPEL = {
   expandRatio: 0.52,
   standardIndex: 2,
   parallax: 0.5,
-  mediafaktor: 1.22,
+  // Förlagan har 1.22. Nedskruvad eftersom mediarutan annars blir
+  // bredare än den behöver och tvingar fram mer vertikal beskärning
+  // av porträttbilderna. 1.08 räcker för att inaktiva kort ska beskära
+  // i stället för att klämma, och för parallaxen.
+  mediafaktor: 1.08,
   gap: 10
 };
 
@@ -199,7 +203,8 @@ function byggSignaturer() {
            aria-label="${b.namn}, ${b.pris} kr">
         <span class="dragspel__ram">
           <span class="dragspel__media">
-            <span class="ph" data-id="${b.id}" data-spec="1200 × 1200 · PNG α"></span>
+            <img src="/bilder/signatur/${b.id}.webp" alt="${b.namn}"
+                 width="1000" height="1339" loading="lazy" decoding="async" />
           </span>
           <span class="dragspel__sloja" aria-hidden="true"></span>
         </span>

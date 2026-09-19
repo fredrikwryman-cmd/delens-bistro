@@ -830,7 +830,12 @@ input:focus-visible {
   display: flex;
   gap: var(--gap);
   width: 100%;
-  height: clamp(320px, 42vw, 460px);
+  /* Högre än förlagans 460 px. Burgarbilderna är porträtt 0,75 och
+     mediarutan beskär med object-fit: cover — en låg, liggande ruta
+     klippte bort både bullens topp och botten på det aktiva kortet.
+     Vid den här höjden blir rutan ungefär kvadratisk och ~75 procent
+     av bildhöjden syns, vilket rymmer hela burgaren. */
+  height: clamp(420px, 50vw, 660px);
   perspective: 1400px;
   perspective-origin: 50% 50%;
 }
@@ -1030,8 +1035,11 @@ input:focus-visible {
     transition: height var(--tid) var(--kurva);
   }
 
+  /* Nästan kvadratisk, av samma skäl som höjden på desktop: en låg
+     ruta beskär bort bullens topp ur porträttbilderna. Vid den här
+     höjden syns ~78 procent av bildhöjden. */
   .dragspel__kort[data-aktiv='true'] {
-    height: clamp(260px, 62vw, 380px);
+    height: clamp(320px, 92vw, 460px);
   }
 
   .dragspel__media {
