@@ -67,10 +67,14 @@
         <span class="ph ph--inline" style="--ar: 885 / 951" data-id="F4" data-spec="SVG"></span>
         <span class="nav__wordmark">Delens Bistro</span>
       </a>
+      <!-- Två staplade rader per länk. Den undre är identisk och ligger
+           exakt en radhöjd ned; vid hover rullar paret upp så att kopian
+           tar den övres plats. Kopian är aria-hidden — skärmläsaren ska
+           inte läsa varje länk två gånger. -->
       <nav class="nav__links" aria-label="Huvudmeny">
-        <a href="#meny">Meny</a>
-        <a href="#signatur">Signaturer</a>
-        <a href="#hitta">Hitta hit</a>
+        <a href="#meny"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></a>
+        <a href="#signatur"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></a>
+        <a href="#hitta"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></a>
       </nav>
     </header>
 
@@ -110,10 +114,14 @@
                börjar 293 px ned. Negativ topp lyfter alltså klockan UPP
                ur rubrikblocket, till ytan ovanför högerspaltens text.
                Med positiv topp låg den över "Centralvägen 3 …". -->
-          <img class="sticker sticker--hero" src="/bilder/marken/delens-klocka.webp"
-               alt="Klistermärke: en väckarklocka håller upp en banderoll med texten Sedan 2017"
-               width="400" height="500" decoding="async"
-               style="--r: 7deg; --s-top: -16%; --s-right: 4%; --mk-bredd: 12rem" />
+          <span class="sticker sticker--hero"
+                style="--r: 7deg; --s-top: -16%; --s-right: 4%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-klocka.webp')">
+            <img class="sticker__blad" src="/bilder/marken/delens-klocka.webp"
+                 alt="Klistermärke: en väckarklocka håller upp en banderoll med texten Sedan 2017"
+                 width="400" height="500" decoding="async" />
+            <span class="sticker__flarp" aria-hidden="true"></span>
+            <span class="sticker__glans" aria-hidden="true"></span>
+          </span>
 
           <div class="hero__copy hero__copy--v">
             <p>
@@ -159,14 +167,17 @@
             <span class="rubrik__rad">till Delens Bistro</span>
           </h2>
           <div class="rebrand__grid">
+            <!-- Sidans enda längre brödtext. Ord för ord vore fel här:
+                 ögat läser klart innan sista ordet kommit fram. Raderna
+                 avslöjas i stället bakom en mask, förskjutna 60 ms. -->
             <div class="rebrand__text">
-              <p>
+              <p data-rader>
                 Hakan Delen drev Väsby kolgrill på Centralvägen i nästan tio år.
                 I januari 2026 tog han klivet över gatan och köpte Brutal
                 Burgers av Emil Haglund — en gammal kompanjon, från tiden då de
                 drev Runby krog ihop.
               </p>
-              <p>
+              <p data-rader>
                 Väggarna målades om, möblerna fräschades upp, skylten byttes.
                 Och den tjocka pucken fick ge plats åt
                 <span class="understruket">smashen<svg class="kritstreck kritstreck--under" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C42,3 72,12 106,6 C140,1 170,11 197,5" /></svg></span>
@@ -174,7 +185,7 @@
                 mot het plåt tills kanterna blir frasiga och karamelliserade.
                 Hemmagjord smet, hundra procent svenskt nötkött.
               </p>
-              <p>
+              <p data-rader>
                 Emil sålde stället. Sedan ställde han sig kvar vid plåten,
                 tillsammans med Hakan och hans pappa Ömer.
               </p>
@@ -188,10 +199,14 @@
                      som dessutom är precis vad det påstår. Det är mindre än
                      de andra tre med flit: ju mer som hänger utanför kortet,
                      desto mer av det röda tappas mot väggen bakom. -->
-                <img class="sticker sticker--smash" src="/bilder/marken/delens-smash.webp"
-                     alt="Klistermärke: en stekspade smashar en biff, med ordet Smashad"
-                     width="400" height="428" loading="lazy" decoding="async"
-                     style="--r: -8deg; --s-top: -7%; --s-left: -7%; --mk-bredd: 8rem" />
+                <span class="sticker sticker--smash"
+                      style="--r: -8deg; --s-top: -7%; --s-left: -7%; --mk-bredd: 8rem; --mk-bild: url('/bilder/marken/delens-smash.webp')">
+                  <img class="sticker__blad" src="/bilder/marken/delens-smash.webp"
+                       alt="Klistermärke: en stekspade smashar en biff, med ordet Smashad"
+                       width="400" height="428" loading="lazy" decoding="async" />
+                  <span class="sticker__flarp" aria-hidden="true"></span>
+                  <span class="sticker__glans" aria-hidden="true"></span>
+                </span>
                 <span class="kort__etikett">Smashmomentet</span>
               </div>
               <div class="kort kort--lut-b">
@@ -223,10 +238,14 @@
             <!-- Märket ligger INUTI det sticky spåret. Utanför rullade det
                  bort efter 460 px medan scenen det uttalar sig om satt
                  kvar i 2880 px — ett påstående utan sitt motiv. -->
-            <img class="sticker" src="/bilder/marken/delens-not.webp"
-                 alt="Klistermärke: en biff håller upp en rosett med texten 100 % nötkött"
-                 width="400" height="417" loading="lazy" decoding="async"
-                 style="--r: -7deg; --s-top: 11%; --s-left: 4%; --mk-bredd: 12rem" />
+            <span class="sticker"
+                  style="--r: -7deg; --s-top: 11%; --s-left: 4%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-not.webp')">
+              <img class="sticker__blad" src="/bilder/marken/delens-not.webp"
+                   alt="Klistermärke: en biff håller upp en rosett med texten 100 % nötkött"
+                   width="400" height="417" loading="lazy" decoding="async" />
+              <span class="sticker__flarp" aria-hidden="true"></span>
+              <span class="sticker__glans" aria-hidden="true"></span>
+            </span>
             <!-- Rubriken i fyra rader. Lagren vävs in mellan raderna. -->
             <h2 class="lager__rubrik" aria-label="Varje lager handlagt">
               <span class="lager__rad" data-z="1">Varje</span>
@@ -383,10 +402,14 @@
         <!-- Kocken räcker fram brickan, och står därför bredvid knappen som
              gör samma sak. Uppe i vänstra hörnet låg han över rubriken och
              BESTÄLL klipptes — samma fel som redan rättats en gång här. -->
-        <img class="sticker sticker--bestall" src="/bilder/marken/delens-kock.webp"
-             alt="Klistermärke: en kock håller upp en bricka med burgare och pommes"
-             width="400" height="429" loading="lazy" decoding="async"
-             style="--r: 7deg; --s-top: 60%; --s-left: 27%; --mk-bredd: 12rem" />
+        <span class="sticker sticker--bestall"
+              style="--r: 7deg; --s-top: 60%; --s-left: 27%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-kock.webp')">
+          <img class="sticker__blad" src="/bilder/marken/delens-kock.webp"
+               alt="Klistermärke: en kock håller upp en bricka med burgare och pommes"
+               width="400" height="429" loading="lazy" decoding="async" />
+          <span class="sticker__flarp" aria-hidden="true"></span>
+          <span class="sticker__glans" aria-hidden="true"></span>
+        </span>
         <div class="wrap bestall__inner">
           <div class="bestall__text">
             <h2 class="rubrik rubrik--stor" data-reveal>Beställ online</h2>
@@ -406,13 +429,19 @@
            inte i det steget, bara dess amber-kant. Skarv i stället. -->
       <span class="skarv" aria-hidden="true"></span>
 
-      <!-- Utspridda ingrediensurklipp, som CRAV:s footer. -->
-      <span class="foot__strossel" style="--x: 8%; --r: -12deg">
-        <span class="ph" style="--ar: 1 / 1" data-id="A4" data-spec="sallad"></span>
-      </span>
-      <span class="foot__strossel" style="--x: 78%; --r: 14deg">
-        <span class="ph" style="--ar: 1 / 1" data-id="A2" data-spec="ost"></span>
-      </span>
+      <!-- Jongleringen. Tre märken kastas i båge, förskjutna 0,55 s.
+           Det är de märken som redan står på sidan — de ligger i cachen,
+           så numret kostar noll extra byte. De vilande maskotarna hade
+           kostat 129 kB för samma rörelse.
+
+           Märkena går att gripa mitt i flykten och kasta i väg; se
+           tröghetskastet i main.js. Därför pointer-events auto på dem
+           trots att behållaren är genomsläpplig. -->
+      <div class="jonglering" id="jonglering" aria-hidden="true">
+        <img class="jongl kastbar" src="/bilder/marken/delens-not.webp" alt="" width="400" height="417" loading="lazy" decoding="async" />
+        <img class="jongl kastbar" src="/bilder/marken/delens-smash.webp" alt="" width="400" height="428" loading="lazy" decoding="async" />
+        <img class="jongl kastbar" src="/bilder/marken/delens-kock.webp" alt="" width="400" height="429" loading="lazy" decoding="async" />
+      </div>
 
       <div class="wrap foot__inner">
         <div>

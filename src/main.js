@@ -10,6 +10,7 @@ import { animate, stagger } from 'animejs';
 import { kategorier, signaturer, oppettider, kontakt } from './data/menu.js';
 
 const reducerad = matchMedia('(prefers-reduced-motion: reduce)');
+const pekareMedHover = matchMedia('(hover: hover) and (pointer: fine)');
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -50,6 +51,8 @@ function startaLaddskarm() {
       setTimeout(() => {
         text.textContent = rad;
         if (delar[i]) delar[i].setAttribute('data-syns', 'true');
+        // Sista lagret landar: hela stapeln stukas och reser sig.
+        if (i === laddEtapper.length - 1) setTimeout(stukaStapeln, 300);
       }, steg * i);
     });
 
@@ -607,6 +610,845 @@ function riggaStickers() {
   marken.forEach((m) => io.observe(m));
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   CRAV:S RÖRELSE
+   Inventerad på cravburgers.shop, byggd om i egen kod. Stilarna
+   ligger i style.css under samma rubriker.
+
+   ALLT SCROLLSTYRT LIGGER I DET BEFINTLIGA VARVET. Sidan har ett
+   requestAnimationFrame-varv och ska fortsätta ha ett. Varje ny
+   effekt som behöver en bildruta registrerar sig i varvSteg nedan
+   i stället för att starta ett eget varv.
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Funktioner som körs en gång per bildruta, av riggaScroll. */
+const varvSteg = [];
+
+/** Är fliken dold? Då ska ingenting röra sig. */
+let flikenDold = document.visibilityState === 'hidden';
+document.addEventListener('visibilitychange', () => {
+  flikenDold = document.visibilityState === 'hidden';
+});
+
+/** Exponentiell utjämning som är oberoende av bildrutetakt.
+ *  halveringstid = tiden det tar för avståndet att halveras. */
+const mjuka = (nu, mal, halveringstid, dt) =>
+  mal + (nu - mal) * Math.pow(0.5, dt / halveringstid);
+
+/* ═══ 1 · HJÄLTEBURGAREN ═════════════════════════════════════════
+   Entré först, flyt sedan. Samma element kan inte bära båda: entrén
+   skalar och vrider, flytet förskjuter, och en transform skriver
+   över en annan. Entrén ligger därför på .hero__burger och flytet
+   på bilden inuti.
+
+   Flytet startar när entrén landat och inte tidigare, annars slåss
+   de om samma yta under inflygningens sista halvsekund.            */
+
+function riggaHeroburgare() {
+  const burgare = $('.hero__burger');
+  if (!burgare) return;
+
+  burgare.setAttribute('data-entre', 'vantar');
+
+  return () => {
+    // Två bildrutor så att utgångsläget hinner målas innan övergången.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        burgare.setAttribute('data-entre', 'gar');
+        if (reducerad.matches) return;
+        setTimeout(() => burgare.setAttribute('data-flyt', 'true'), 1500);
+      })
+    );
+
+    // Löpande rörelse utanför vyn är bortkastad.
+    new IntersectionObserver(
+      ([post]) => {
+        burgare.style.setProperty(
+          'animation-play-state',
+          post.isIntersecting ? 'running' : 'paused'
+        );
+        const bild = burgare.querySelector('picture');
+        if (bild) {
+          bild.style.animationPlayState = post.isIntersecting
+            ? 'running'
+            : 'paused';
+        }
+      },
+      { threshold: 0 }
+    ).observe(burgare);
+  };
+}
+
+/* ═══ 2 · GELÉVÅGEN ══════════════════════════════════════════════
+   Vågavdelarna är statiska SVG-banor. Nu lever kontrollpunkterna:
+   tre oscillatorer med olika period — 1 s, 2 s och 1,8 s —
+   förskjutna 0, 0,3 och 0,6 s, precis som förlagan. Olika perioder
+   är hela poängen; samma period på alla tre ger en våg som guppar i
+   takt och läser som en flagga, inte som gelé.
+
+   Banans d skrivs om per bildruta. Det är den enda egenskapen här
+   som inte går på GPU:n, och det finns ingen transform-motsvarighet
+   till att flytta en kontrollpunkt. Kostnaden hålls nere av att
+   bara vågar i vyn räknas om, och av att d bara skrivs när värdet
+   faktiskt ändrats.
+
+   Ovanpå det ligger scrubben: vågen tänjs mot 1,5 på desktop och
+   1,2 på mobil när sektionen närmar sig.                          */
+
+const VAG = {
+  perioder: [1000, 2000, 1800],
+  forskjutning: [0, 300, 600],
+  utslag: 9,
+  skalaMax: () => (window.innerWidth < 720 ? 1.2 : 1.5)
+};
+
+function riggaVagor() {
+  const vagor = $$('.wave');
+  if (!vagor.length) return;
+
+  const spar = vagor.map((svg) => {
+    const kropp = svg.querySelector('.wave__body');
+    const kant = svg.querySelector('.wave__edge');
+    // Kantens bana är kroppens utan det avslutande L-hörnet.
+    const bana = kant ? kant.getAttribute('d') : '';
+    // Plocka ut varje talpar ur C-kommandona.
+    const tal = bana.match(/-?\d+(\.\d+)?/g);
+    return {
+      svg,
+      kropp,
+      kant,
+      bana,
+      tal: tal ? tal.map(Number) : null,
+      inne: false,
+      sist: ''
+    };
+  });
+
+  const io = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        const s = spar.find((x) => x.svg === p.target);
+        if (s) s.inne = p.isIntersecting;
+      }
+    },
+    { rootMargin: '20% 0px' }
+  );
+  vagor.forEach((v) => io.observe(v));
+
+  varvSteg.push((nu) => {
+    if (reducerad.matches || flikenDold) return;
+
+    // Alla mätningar först, alla skrivningar sedan. Låg rekt-läsningen
+    // efter skrivningen av d tvingade webbläsaren till en ny layout
+    // mitt i varvet, en gång per våg — fem framtvingade layouter per
+    // bildruta för en effekt som inte ens behöver dem samtidigt.
+    const narhet = new Map();
+    for (const s of spar) {
+      if (!s.inne || !s.tal) continue;
+      const r = s.svg.getBoundingClientRect();
+      narhet.set(s, 1 - Math.min(1, Math.abs(r.top) / window.innerHeight));
+    }
+
+    for (const s of spar) {
+      if (!s.inne || !s.tal) continue;
+
+      // Varannan y-koordinat i banan är en kontrollpunkt att vagga.
+      const tal = s.tal.slice();
+      let knut = 0;
+      for (let i = 1; i < tal.length; i += 2) {
+        const k = knut % 3;
+        const fas =
+          ((nu + VAG.forskjutning[k]) / VAG.perioder[k]) * Math.PI * 2;
+        tal[i] = s.tal[i] + Math.sin(fas) * VAG.utslag;
+        knut++;
+      }
+
+      let n = 0;
+      const d = s.bana.replace(/-?\d+(\.\d+)?/g, () => tal[n++].toFixed(1));
+      if (d === s.sist) continue;
+      s.sist = d;
+
+      if (s.kant) s.kant.setAttribute('d', d);
+      if (s.kropp) {
+        s.kropp.setAttribute(
+          'd',
+          d + ` L${tal[tal.length - 2] > 0 ? 1440 : 1440},0 L0,0 Z`
+        );
+      }
+
+      // Scrubben: hur nära är sektionens överkant? Mätt ovan.
+      const skala = 1 + (narhet.get(s) || 0) * (VAG.skalaMax() - 1);
+      s.svg.style.setProperty('--vag-skala', skala.toFixed(3));
+    }
+  });
+}
+
+/* ═══ 3 · KLISTERMÄRKENAS AVSKALNING ═════════════════════════════
+   Förlaga: React Bits "Sticker Peel". Bladet klipps av på nedre
+   vänstra hörnet, flärpen är hörnet vikt tillbaka över vecket, och
+   glansen är en ljusreflex som följer pekaren.
+
+   Avskalningen drivs av hur långt märket passerat vyns mitt. Den
+   går bara EN väg per passage: skalar man av ett klistermärke sätts
+   det inte tillbaka av sig självt. Att låta flärpen vika sig fram
+   och tillbaka när man scrollar upp och ned hade läst som en
+   trasig animation, inte som en avskalning.                        */
+
+function riggaAvskalning() {
+  const marken = $$('.sticker');
+  if (!marken.length) return;
+
+  const spar = marken.map((m) => ({ m, inne: false, max: 0 }));
+
+  const io = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        const s = spar.find((x) => x.m === p.target);
+        if (s) s.inne = p.isIntersecting;
+      }
+    },
+    { rootMargin: '10% 0px' }
+  );
+  marken.forEach((m) => io.observe(m));
+
+  varvSteg.push(() => {
+    if (reducerad.matches || flikenDold) return;
+    const h = window.innerHeight;
+
+    for (const s of spar) {
+      if (!s.inne) continue;
+      const r = s.m.getBoundingClientRect();
+      const mitt = r.top + r.height / 2;
+      // 0 vid vyns mitt, 1 när märket nått en fjärdedel upp.
+      const gatt = Math.min(1, Math.max(0, (h * 0.5 - mitt) / (h * 0.28)));
+      if (gatt <= s.max) continue;
+      s.max = gatt;
+      s.m.style.setProperty('--skal', gatt.toFixed(3));
+    }
+  });
+}
+
+/* ═══ 11 · BLICKEN ═══════════════════════════════════════════════
+   MASKOTARNAS ÖGON GÅR INTE ATT FLYTTA. De är inmålade i en
+   rasterbild, och att lägga en ny pupill ovanpå den gamla ger två
+   pupiller, inte en som följer. Jag mätte upp bilderna för att se
+   om ögonen gick att hitta programmatiskt och fylla över: klockan
+   gav två rena, symmetriska träffar, de tre andra gav noll eller
+   brus. Ett gäng där ett märke följer blicken och tre stirrar rakt
+   fram läser som ett fel, inte som en effekt.
+
+   Det som byggts i stället är samma avsikt med de medel bilden
+   tillåter: märket LUTAR mot pekaren, med utjämning, inte
+   direktmappning. Vill du ha riktig pupillföljning behöver ögonen
+   levereras som egna genomskinliga lager ovanpå ansiktet, eller
+   maskotarna ritas som SVG.                                        */
+
+const BLICK_HALVERING = 130; // ms — motsvarar ungefär 0,4 s power3
+
+function riggaBlick() {
+  if (!pekareMedHover.matches) return;
+  const marken = $$('.sticker');
+  if (!marken.length) return;
+
+  let malX = 0;
+  let malY = 0;
+  let x = 0;
+  let y = 0;
+
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      if (e.pointerType !== 'mouse') return;
+      malX = (e.clientX / window.innerWidth) * 2 - 1;
+      malY = (e.clientY / window.innerHeight) * 2 - 1;
+    },
+    { passive: true }
+  );
+
+  varvSteg.push((nu, dt) => {
+    if (reducerad.matches || flikenDold) return;
+    x = mjuka(x, malX, BLICK_HALVERING, dt);
+    y = mjuka(y, malY, BLICK_HALVERING, dt);
+    for (const m of marken) {
+      m.style.setProperty('--blick-x', x.toFixed(3));
+      m.style.setProperty('--blick-y', y.toFixed(3));
+    }
+  });
+}
+
+/** Glansen följer pekaren över det enskilda märket. */
+function riggaGlans() {
+  if (!pekareMedHover.matches) return;
+
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      if (e.pointerType !== 'mouse' || reducerad.matches) return;
+      for (const m of $$('.sticker')) {
+        const r = m.getBoundingClientRect();
+        const inne =
+          e.clientX > r.left - 120 &&
+          e.clientX < r.right + 120 &&
+          e.clientY > r.top - 120 &&
+          e.clientY < r.bottom + 120;
+        m.style.setProperty('--glans', inne ? '1' : '0');
+        if (!inne) continue;
+        m.style.setProperty(
+          '--gx',
+          (((e.clientX - r.left) / r.width) * 100).toFixed(1) + '%'
+        );
+        m.style.setProperty(
+          '--gy',
+          (((e.clientY - r.top) / r.height) * 100).toFixed(1) + '%'
+        );
+      }
+    },
+    { passive: true }
+  );
+}
+
+/* ═══ 4 · FOOTERJONGLERINGEN ═════════════════════════════════════
+   Tre märken i båge. Apex 38–60 vh, 0,9–1,3 s upp med power2.out,
+   nedvägen 1,15–1,5 gånger så lång med power2.in, 220–600 graders
+   rotation och drift i x. Förskjutning 0,55 s mellan märkena.
+
+   Asymmetrin upp/ned är det som gör kastet trovärdigt: uppåt
+   bromsar det in mot apex, nedåt accelererar det. Lika lång väg i
+   båda riktningarna läser som en studsboll i sirap.
+
+   12 · TRÖGHETSKAST. Ett märke går att gripa mitt i flykten. Vid
+   släpp ärver det pekarens hastighet gånger 30 och rotationen
+   pekarens delta gånger 2, och bromsas med resistance 150 tills det
+   faller tillbaka in i numret.                                     */
+
+const JONGL = {
+  apexMin: 0.38,
+  apexMax: 0.6,
+  uppMin: 900,
+  uppMax: 1300,
+  nedFaktorMin: 1.15,
+  nedFaktorMax: 1.5,
+  vridMin: 220,
+  vridMax: 600,
+  driftMax: 0.34,
+  stagger: 550,
+  kastFart: 30,
+  kastVrid: 2,
+  motstand: 150
+};
+
+const slump = (a, b) => a + Math.random() * (b - a);
+const ut2 = (t) => 1 - (1 - t) * (1 - t); // power2.out
+const in2 = (t) => t * t; // power2.in
+
+function riggaJonglering() {
+  const scen = $('#jonglering');
+  if (!scen) return;
+  const marken = $$('.jongl', scen);
+  if (!marken.length) return;
+
+  const nyttKast = (m, i, nu) => ({
+    m,
+    start: nu + i * JONGL.stagger,
+    upp: slump(JONGL.uppMin, JONGL.uppMax),
+    ned: 0,
+    apex: slump(JONGL.apexMin, JONGL.apexMax),
+    x0: slump(0.12, 0.82),
+    drift: slump(-JONGL.driftMax, JONGL.driftMax),
+    vrid: slump(JONGL.vridMin, JONGL.vridMax) * (Math.random() < 0.5 ? -1 : 1),
+    grepp: null,
+    fri: null
+  });
+
+  let kast = marken.map((m, i) => nyttKast(m, i, performance.now()));
+  kast.forEach((k) => (k.ned = k.upp * slump(JONGL.nedFaktorMin, JONGL.nedFaktorMax)));
+
+  let inne = false;
+  new IntersectionObserver(
+    ([p]) => {
+      inne = p.isIntersecting;
+      // Numret startar om när footern kommer i vy, annars står
+      // märkena still i en godtycklig punkt av bågen.
+      if (inne) {
+        const nu = performance.now();
+        kast.forEach((k, i) => {
+          if (k.grepp || k.fri) return;
+          k.start = nu + i * JONGL.stagger;
+        });
+      }
+    },
+    { threshold: 0 }
+  ).observe(scen);
+
+  /* ── Greppet ─────────────────────────────────────────────────── */
+
+  for (const m of marken) {
+    m.addEventListener('pointerdown', (e) => {
+      const k = kast.find((x) => x.m === m);
+      if (!k) return;
+      try {
+        m.setPointerCapture(e.pointerId);
+      } catch {
+        /* Utan capture tappas dragningen när pekaren lämnar märket,
+           men greppet ska fungera ändå. */
+      }
+      m.setAttribute('data-grepp', 'true');
+      const r = m.getBoundingClientRect();
+      const s = scen.getBoundingClientRect();
+      k.fri = null;
+      k.grepp = {
+        // Respektera var i märket man tog tag.
+        dx: e.clientX - r.left - r.width / 2,
+        dy: e.clientY - r.top - r.height / 2,
+        x: e.clientX - s.left,
+        y: e.clientY - s.top,
+        vx: 0,
+        vy: 0,
+        vrid: 0,
+        vinkel: 0,
+        sistX: e.clientX,
+        sistY: e.clientY
+      };
+    });
+
+    m.addEventListener('pointermove', (e) => {
+      const k = kast.find((x) => x.m === m);
+      if (!k || !k.grepp) return;
+      const s = scen.getBoundingClientRect();
+      const g = k.grepp;
+      g.vx = e.clientX - g.sistX;
+      g.vy = e.clientY - g.sistY;
+      g.sistX = e.clientX;
+      g.sistY = e.clientY;
+      g.x = e.clientX - s.left;
+      g.y = e.clientY - s.top;
+      g.vinkel += g.vx * JONGL.kastVrid;
+    });
+
+    const slapp = (e) => {
+      const k = kast.find((x) => x.m === m);
+      if (!k || !k.grepp) return;
+      const g = k.grepp;
+      m.removeAttribute('data-grepp');
+      try {
+        m.releasePointerCapture(e.pointerId);
+      } catch {
+        /* pekaren kan redan vara släppt */
+      }
+      k.grepp = null;
+      // Kastet ärver handens hastighet och bromsas in.
+      k.fri = {
+        x: g.x,
+        y: g.y,
+        vx: g.vx * JONGL.kastFart,
+        vy: g.vy * JONGL.kastFart,
+        vinkel: g.vinkel,
+        vridFart: g.vx * JONGL.kastVrid * 20
+      };
+    };
+    m.addEventListener('pointerup', slapp);
+    m.addEventListener('pointercancel', slapp);
+  }
+
+  varvSteg.push((nu, dt) => {
+    if (reducerad.matches || flikenDold) return;
+    // Ett märke som hålls eller är i fritt fall ritas alltid. Bara
+    // själva numret pausas utanför vyn — annars fryser det man håller
+    // i handen så fort observatören blinkar.
+    const nagotIHanden = kast.some((k) => k.grepp || k.fri);
+    if (!inne && !nagotIHanden) return;
+
+    const s = scen.getBoundingClientRect();
+    const h = s.height || 1;
+    const b = s.width || 1;
+    const vh = window.innerHeight;
+
+    for (const k of kast) {
+      const m = k.m;
+      if (!inne && !k.grepp && !k.fri) continue;
+
+      if (k.grepp) {
+        const g = k.grepp;
+        m.style.transform = `translate3d(${(g.x - g.dx).toFixed(1)}px, ${(
+          g.y -
+          h -
+          g.dy
+        ).toFixed(1)}px, 0) rotate(${g.vinkel.toFixed(1)}deg)`;
+        continue;
+      }
+
+      if (k.fri) {
+        const f = k.fri;
+        const steg = dt / 1000;
+        // resistance 150: farten dras ned proportionellt mot sig själv.
+        const broms = Math.max(0, 1 - (JONGL.motstand / 1000) * steg * 6);
+        f.vx *= broms;
+        f.vy *= broms;
+        f.vridFart *= broms;
+        f.vy += 1400 * steg; // tyngdkraft, annars svävar kastet
+        f.x += f.vx * steg;
+        f.y += f.vy * steg;
+        f.vinkel += f.vridFart * steg;
+
+        // Nere igen: tillbaka in i numret.
+        if (f.y > h - 10 && f.vy > 0) {
+          k.fri = null;
+          k.start = nu;
+          k.upp = slump(JONGL.uppMin, JONGL.uppMax);
+          k.ned = k.upp * slump(JONGL.nedFaktorMin, JONGL.nedFaktorMax);
+          k.x0 = Math.min(0.88, Math.max(0.08, f.x / b));
+          continue;
+        }
+        m.style.transform = `translate3d(${f.x.toFixed(1)}px, ${(
+          f.y - h
+        ).toFixed(1)}px, 0) rotate(${f.vinkel.toFixed(1)}deg)`;
+        continue;
+      }
+
+      const gatt = nu - k.start;
+      if (gatt < 0) {
+        m.style.transform = `translate3d(${(k.x0 * b).toFixed(1)}px, 0, 0)`;
+        continue;
+      }
+
+      const varv = k.upp + k.ned;
+      const t = gatt % varv;
+      let hojd;
+      let del;
+      if (t < k.upp) {
+        del = t / k.upp;
+        hojd = ut2(del) * k.apex * vh; // bromsar in mot apex
+      } else {
+        del = (t - k.upp) / k.ned;
+        hojd = (1 - in2(del)) * k.apex * vh; // accelererar nedåt
+      }
+
+      const framsteg = t / varv;
+      const x = (k.x0 + k.drift * framsteg) * b;
+      const vinkel = k.vrid * framsteg;
+
+      m.style.transform = `translate3d(${x.toFixed(1)}px, ${(-hojd).toFixed(
+        1
+      )}px, 0) rotate(${vinkel.toFixed(1)}deg)`;
+    }
+  });
+}
+
+/* ═══ 5 · NAVBAREN VIKER UNDAN ═══════════════════════════════════
+   Tröskeln på 6 px är det som gör skillnaden mellan en list som
+   viker undan och en som fladdrar: utan den räcker en pixels
+   studs i tröghetsscrollen för att vända riktningen.               */
+
+function riggaNav() {
+  const nav = $('#nav');
+  if (!nav) return;
+  let sist = window.scrollY;
+
+  varvSteg.push(() => {
+    const y = window.scrollY;
+    const delta = y - sist;
+    if (Math.abs(delta) < 6) return;
+    sist = y;
+    // Under 40 px är navigationen en del av sidhuvudet och står kvar.
+    nav.setAttribute('data-undan', String(delta > 0 && y > 40));
+  });
+}
+
+/* ═══ 7 · MASKERAD RADAVSLÖJNING ═════════════════════════════════
+   Ord för ord är rätt för en rubrik och fel för ett stycke: ögat
+   hinner läsa klart innan sista ordet kommit fram. Längre stycken
+   avslöjas rad för rad bakom en mask.
+
+   Raderna måste mätas, inte gissas. Varje ord får ett eget span,
+   orden grupperas på offsetTop, och varje grupp läggs i en mask.
+   Vid omritning i ny bredd bryter texten på andra ställen — därför
+   byggs maskerna om vid resize, men bara när bredden faktiskt
+   ändrats.                                                         */
+
+function riggaRadavslojning() {
+  const mal = $$('[data-rader]');
+  if (!mal.length) return;
+
+  /* Stycket byggs om med DOM-flytt, inte med innerHTML. Ett av
+     rebrandstyckena bär ett kritstreck som inline-SVG mitt i en
+     mening; en ombyggnad ur textContent hade tystat bort det utan
+     att någon märkt det förrän strecket var borta.
+
+     Därför: bara textnoder delas i ord, elementbarn lämnas som de
+     är, och raderna byggs genom att FLYTTA noderna in i sina
+     masker. Då överlever allt som stod i stycket. */
+  const bygg = (el) => {
+    if (!el.dataset.original) el.dataset.original = el.innerHTML;
+    else el.innerHTML = el.dataset.original;
+
+    const platta = [];
+    const dela = (nod) => {
+      for (const barn of [...nod.childNodes]) {
+        if (barn.nodeType === Node.TEXT_NODE) {
+          const bitar = barn.textContent.split(/(\s+)/);
+          const frag = document.createDocumentFragment();
+          for (const b of bitar) {
+            if (!b) continue;
+            if (/^\s+$/.test(b)) {
+              frag.append(document.createTextNode(b));
+            } else {
+              const sp = document.createElement('span');
+              sp.className = 'mat-ord';
+              sp.textContent = b;
+              frag.append(sp);
+              platta.push(sp);
+            }
+          }
+          barn.replaceWith(frag);
+        } else if (barn.nodeType === Node.ELEMENT_NODE) {
+          // Elementbarn behålls intakt och räknas som ett ord.
+          platta.push(barn);
+        }
+      }
+    };
+    dela(el);
+
+    // Gruppera på vilken rad varje ord faktiskt hamnade.
+    const rader = [];
+    let toppen = null;
+    for (const o of platta) {
+      const t = o.offsetTop;
+      if (toppen === null || Math.abs(t - toppen) > 4) {
+        toppen = t;
+        rader.push([]);
+      }
+      rader[rader.length - 1].push(o);
+    }
+
+    for (const rad of rader) {
+      const mask = document.createElement('span');
+      mask.className = 'rad-mask';
+      const inre = document.createElement('span');
+      mask.append(inre);
+      rad[0].before(mask);
+      for (const o of rad) {
+        inre.append(o);
+        inre.append(document.createTextNode(' '));
+      }
+    }
+    // Kvarvarande lösa blanksteg mellan maskerna.
+    for (const n of [...el.childNodes]) {
+      if (n.nodeType === Node.TEXT_NODE) n.remove();
+    }
+    return $$('.rad-mask', el);
+  };
+
+  const io = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        if (!p.isIntersecting) continue;
+        io.unobserve(p.target);
+        $$('.rad-mask', p.target).forEach((r, i) => {
+          // stagger .06 mellan raderna
+          r.style.transitionDelay = `${i * 60}ms`;
+          r.querySelector('span').style.transitionDelay = `${i * 60}ms`;
+          r.setAttribute('data-inne', 'true');
+        });
+      }
+    },
+    { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+  );
+
+  mal.forEach((el) => {
+    bygg(el);
+    io.observe(el);
+  });
+
+  let sistBredd = window.innerWidth;
+  window.addEventListener(
+    'resize',
+    () => {
+      if (window.innerWidth === sistBredd) return;
+      sistBredd = window.innerWidth;
+      for (const el of mal) {
+        const varInne = !!el.querySelector('.rad-mask[data-inne="true"]');
+        bygg(el);
+        if (varInne) {
+          $$('.rad-mask', el).forEach((r) =>
+            r.setAttribute('data-inne', 'true')
+          );
+        } else {
+          io.observe(el);
+        }
+      }
+    },
+    { passive: true }
+  );
+}
+
+/* ═══ 8 · MIKROPULS VID BEKRÄFTELSE ══════════════════════════════
+   Pulsen är ett kvitto: den säger att trycket gick fram. Den hör
+   alltså hemma där något faktiskt bekräftas, inte på varje klick.
+   Här: när beställningslänken följs, och när en flik i menyn byts.  */
+
+function pulsa(el) {
+  if (!el || reducerad.matches) return;
+  el.removeAttribute('data-puls');
+  // Tvinga fram en omräkning så att pulsen går att spela om direkt.
+  void el.offsetWidth;
+  el.setAttribute('data-puls', 'true');
+  el.addEventListener(
+    'animationend',
+    () => el.removeAttribute('data-puls'),
+    { once: true }
+  );
+}
+
+function riggaPuls() {
+  for (const sel of ['#bestall-lank', '#orderbar-lank']) {
+    const el = $(sel);
+    if (el) el.addEventListener('click', () => pulsa(el));
+  }
+  const flikar = $('#meny-flikar');
+  if (flikar) {
+    flikar.addEventListener('click', (e) => {
+      const b = e.target.closest('.flik');
+      if (b) pulsa(b);
+    });
+  }
+}
+
+/* ═══ 10 · PEKARKEDJAN ═══════════════════════════════════════════
+   Åtta leder som släpar efter pekaren: ett huvud, fyra
+   ingrediensknutar och tre prickar emellan. Huvudet hinner ikapp
+   snabbt, varje led därefter en gnutta långsammare — det är
+   fördröjningstrappan som gör kedjan till en kedja och inte till
+   åtta punkter i rad.
+
+   CRAV låter systemmarkören ligga kvar under sin kedja, så man ser
+   två pekare. Den döljs här. cursor: none sätts genom en klass på
+   html från JS och inte i stilmallen: slutar skriptet fungera ska
+   markören finnas kvar, och en sida utan synlig pekare är inte en
+   sida man kan använda.
+
+   Aldrig på touch. En kedja som jagar en pekare som inte finns är
+   åtta element som ritas om i onödan.                               */
+
+const KEDJA = {
+  // Halveringstider ur förlagans varaktigheter: head .05s power2.out,
+  // segment .12 + .01·i s power3.out.
+  huvud: 16,
+  segBas: 38,
+  segSteg: 3.2,
+  knutar: ['A1', 'A2', 'A4', 'A5']
+};
+
+function riggaKedja() {
+  if (!pekareMedHover.matches || reducerad.matches) return;
+
+  const scen = document.createElement('div');
+  scen.className = 'kedja';
+  scen.setAttribute('aria-hidden', 'true');
+
+  const leder = [];
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement('span');
+    if (i === 0) {
+      el.className = 'led led--huvud';
+    } else if (i % 2 === 1 && KEDJA.knutar[(i - 1) / 2]) {
+      el.className = 'led led--knut';
+      const bild = document.createElement('img');
+      bild.src = `/bilder/lager/${KEDJA.knutar[(i - 1) / 2]}.webp`;
+      bild.alt = '';
+      bild.decoding = 'async';
+      el.append(bild);
+    } else {
+      el.className = 'led led--prick';
+    }
+    scen.append(el);
+    leder.push({ el, x: -200, y: -200 });
+  }
+  document.body.append(scen);
+  document.documentElement.classList.add('kedja-pa');
+
+  let malX = -200;
+  let malY = -200;
+  let over = false;
+  let avstangd = false;
+
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      if (e.pointerType !== 'mouse') return;
+      malX = e.clientX;
+      malY = e.clientY;
+      const t = e.target;
+      const nu = !!(
+        t &&
+        t.closest &&
+        t.closest('a, button, [role="tab"], .kastbar, .ratt__knapp')
+      );
+      if (nu !== over) {
+        over = nu;
+        scen.setAttribute('data-over', String(over));
+      }
+    },
+    { passive: true }
+  );
+
+  // Ut ur fönstret: kedjan ska inte hänga kvar i en kant.
+  document.addEventListener('pointerleave', () => {
+    malX = -200;
+    malY = -200;
+  });
+
+  /* En dold systemmarkör är ett löfte om att ersättningen duger. Det
+     löftet håller inte för alla: den som förstorat markören i
+     operativsystemets hjälpmedel har gjort det av ett skäl, och en
+     ring på 26 px är inte samma sak. Det går inte att känna av.
+
+     Därför en väg tillbaka som inte kräver att man vet om den:
+     Escape stänger kedjan, och så fort någon rör vid tangentbordet
+     för att navigera — Tab — kommer markören tillbaka och stannar.
+     Den som styr med tangentbord ska aldrig sitta utan pekare. */
+  const slaAv = () => {
+    document.documentElement.classList.remove('kedja-pa');
+    scen.remove();
+    avstangd = true;
+  };
+  window.addEventListener('keydown', (e) => {
+    if (avstangd) return;
+    if (e.key === 'Escape' || e.key === 'Tab') slaAv();
+  });
+
+  varvSteg.push((nu, dt) => {
+    if (flikenDold || avstangd) return;
+    for (let i = 0; i < leder.length; i++) {
+      const led = leder[i];
+      const mx = i === 0 ? malX : leder[i - 1].x;
+      const my = i === 0 ? malY : leder[i - 1].y;
+      const halv = i === 0 ? KEDJA.huvud : KEDJA.segBas + KEDJA.segSteg * i;
+      led.x = mjuka(led.x, mx, halv, dt);
+      led.y = mjuka(led.y, my, halv, dt);
+      led.el.style.transform = `translate3d(${led.x.toFixed(
+        1
+      )}px, ${led.y.toFixed(1)}px, 0)`;
+    }
+  });
+}
+
+/* ═══ 13 · LADDSKÄRMENS STUK ═════════════════════════════════════
+   Varje lager faller in och stukas vid nedslaget; stapeln som
+   helhet stukas när sista lagret landat. Taket på 1,8 s och
+   överhoppningen vid återbesök står kvar — fysiken får plats inuti
+   den budgeten, den förlänger den inte.                            */
+
+function stukaStapeln() {
+  const stack = $('.loader__stack');
+  if (!stack || reducerad.matches) return;
+  stack.setAttribute('data-stuk', 'true');
+  stack.addEventListener(
+    'animationend',
+    () => stack.removeAttribute('data-stuk'),
+    { once: true }
+  );
+}
+
 /* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
 
 const scenLage = {
@@ -653,9 +1495,15 @@ function riggaScroll() {
     matUppdatera(progress);
   };
 
-  // Ett varv för allt scrollstyrt.
-  const varv = () => {
+  // Ett varv för allt scrollstyrt OCH för all löpande rörelse. Varje
+  // ny effekt registrerar sig i varvSteg i stället för att starta ett
+  // eget varv — åtta rAF-loopar hade konkurrerat om samma bildruta.
+  let forra = performance.now();
+  const varv = (nu) => {
+    const dt = Math.min(64, nu - forra); // hoppa inte vid flikbyte
+    forra = nu;
     rita();
+    for (const steg of varvSteg) steg(nu, dt);
     requestAnimationFrame(varv);
   };
 
@@ -712,11 +1560,12 @@ function riggaLenis() {
   // Exponeras under bygget så rörelsen går att hoppa till exakta lägen.
   // Tas bort tillsammans med avstämningspanelen.
   window.__lenis = lenis;
-  const varv = (t) => {
-    lenis.raf(t);
-    requestAnimationFrame(varv);
-  };
-  requestAnimationFrame(varv);
+  // Lenis körde ett eget rAF-varv vid sidan av sajtens. Två varv som
+  // båda vill äga bildrutan är ett varv för mycket, och det var Lenis
+  // varv som avgjorde när scrollvärdet var färdigt — alltså läste
+  // sajtens varv ibland ett halvuppdaterat läge. Nu ligger den först
+  // i det enda varvet.
+  varvSteg.unshift((nu) => lenis.raf(nu));
 }
 
 /* ═══ START ══════════════════════════════════════════════════════ */
@@ -728,8 +1577,21 @@ byggMeny();
 forberedStickers();
 riggaOrderbar();
 riggaMatpanel();
-riggaScroll();
+
+// Momenten registrerar sina varvsteg FÖRE riggaScroll, som startar
+// varvet. Registreras de efter kör första bildrutan utan dem.
+riggaVagor();
+riggaAvskalning();
+riggaBlick();
+riggaGlans();
+riggaJonglering();
+riggaNav();
+riggaKedja();
+riggaPuls();
+const slappHeroburgaren = riggaHeroburgare();
+
 riggaLenis();
+riggaScroll();
 
 // Öppettidsstatusen räknas om varje minut.
 setInterval(fyllStatus, 60_000);
@@ -745,5 +1607,8 @@ setInterval(fyllStatus, 60_000);
 // ögonblick.
 startaLaddskarm().then(() => {
   riggaAvslojning();
+  riggaRadavslojning();
   riggaStickers();
+  // Hjälteburgarens entré hör till samma ögonblick som rubrikens ord.
+  if (slappHeroburgaren) slappHeroburgaren();
 });

@@ -370,11 +370,7 @@ a {
   /* Ett märke är dekor. Det ligger över rubriker och kortkanter och
      får aldrig fånga en klickning som var avsedd för det under. */
   pointer-events: none;
-  /* Skuggan följer alfakanalen och alltså silhuetten, inte en
-     rektangel. På ett urklipp är dropshadow det enda som ger
-     tjocklek — och på den djupröda ytan mörknar den dessutom
-     underlaget just där maskotens röda möter det. */
-  filter: drop-shadow(0 0.7rem 1.1rem rgb(0 0 0 / 0.55));
+  line-height: 0;
   rotate: var(--r);
 
   /* Placeringen sätts där märket står, inte här. Ett märke är alltid
@@ -1955,10 +1951,16 @@ input:focus-visible {
    tangentbordsanvändare hamnade på en osynlig knapp nedanför vyn och
    tappade fokus ur sikte. visibility tas ur flödet först när
    förflyttningen är klar, så uttåget syns. */
+/* Uttåg och intåg är olika långa med flit. Att fältet viker undan är
+   ett systemsvar på att man nått målet — det ska snäppa bort, 180 ms.
+   Att det kommer tillbaka är svaret på att man lämnat målet och kan
+   behöva genvägen igen — det får ta 280 ms och glida in. Lika lång
+   tid åt båda hållen läser som en skjutdörr. */
 .orderbar[data-undan='true'] {
   translate: 0 100%;
   visibility: hidden;
   pointer-events: none;
+  transition: translate 180ms var(--ut), visibility 180ms;
 }
 
 .orderbar {
@@ -2020,4 +2022,443 @@ input:focus-visible {
 
   .lager__bit { transform: none !important; }
   .lager__scen { transform: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CRAV:S RÖRELSE
+   Inventerad på cravburgers.shop och byggd om i egen kod. Allt här
+   följer samma tre villkor som resten av sajten:
+
+     · bara transform, opacity och filter animeras
+     · ingenting rör sig utanför vyn
+     · prefers-reduced-motion tar bort förflyttning, aldrig innehåll
+
+   Tre av momenten är LÖPANDE rörelse — hjälteburgaren, gelévågen
+   och footerns jonglering. Sidan hade noll oändliga animationer
+   efter förra omgången och har tre nu. Det är ett medvetet byte:
+   de pausas alla utanför vyn och vid dold flik, men Speed Index
+   blir bimodalt igen och går inte att jämföra mot tidigare mätning.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1 · HJÄLTEBURGAREN FLYTER ─────────────────────────────────── */
+
+/* Entrén ligger på .hero__burger och flytet på bilden inuti. Samma
+   element kan inte bära båda: entrén skalar och vrider, flytet
+   förskjuter, och en transform skriver över en annan. */
+
+.hero__burger[data-entre='vantar'] {
+  opacity: 0;
+  transform: translateY(100px) scale(0.5) rotate(-5deg);
+}
+
+.hero__burger[data-entre='gar'] {
+  opacity: 1;
+  transform: none;
+  /* back.out(1.5): överskjutningen är poängen — burgaren landar och
+     studsar en gnutta förbi innan den sätter sig. */
+  transition:
+    opacity 700ms var(--ut),
+    transform 1500ms cubic-bezier(0.34, 1.46, 0.64, 1);
+}
+
+/* Flytet startar först när entrén landat, annars kämpar de om samma
+   yta i slutet av inflygningen. */
+.hero__burger[data-flyt='true'] picture {
+  animation: flyt 2500ms ease-in-out infinite alternate;
+}
+
+@keyframes flyt {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-15px); }
+}
+
+/* ── 2 · GELÉVÅGEN ─────────────────────────────────────────────── */
+
+/* Kontrollpunkterna skrivs om från scrollvarvet, inte härifrån — en
+   path-d går inte att uttrycka i CSS. Det som ligger här är
+   scrubben: vågen tänjs på höjden när sektionen närmar sig. */
+
+.wave {
+  transform-origin: 50% 0;
+  transform: scaleY(var(--vag-skala, 1));
+}
+
+/* ── 3 · KLISTERMÄRKENAS AVSKALNING ────────────────────────────── */
+
+/* Förlaga: React Bits "Sticker Peel". Mekaniken är portad, geometrin
+   är inte det — och det är hela poängen med den här rutan.
+
+   FÖRLAGANS PEEL VIKER ETT HÖRN. Den utgår från ett fyrkantigt
+   märke: klipp av nedre vänstra hörnet längs en 45-graders linje och
+   vik triangeln bakåt. Provbyggt rakt av på våra märken blev det en
+   vit kil mitt över maskotens fötter. Skälet är att våra märken är
+   STANSADE EFTER SILUETTEN. Bilden är en genomskinlig ruta med en
+   figur i; rutans hörn är tomt, och ett hörn som inte finns går inte
+   att vika. Klippet skar rakt genom ett ben.
+
+   Det som viker sig här är i stället en VÅGRÄT REMSA av siluetten.
+   Flärpen är en kopia av märket, klippt till allt under vecket,
+   speglad kring vecklinjen och tvättad till limsidans blanka vita.
+   Den behåller alltså siluetten: viker man upp underkanten på en
+   stansad dekal är det fötterna man ser baksidan av, inte en
+   triangel. scaleY -0,92 i stället för -1 ger förkortningen av en
+   flärp som lutar mot betraktaren.
+
+   --skal går 0 till 1 och skrivs från scrollvarvet.               */
+
+/* Vecket, räknat uppifrån. Vid --skal 0 ligger det på underkanten. */
+.sticker {
+  --veck: calc(100% - var(--skal, 0) * 21%);
+}
+
+.sticker__blad {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Skuggan följer alfakanalen och alltså silhuetten, inte en
+     rektangel. På ett urklipp är dropshadow det enda som ger
+     tjocklek — och på den djupröda ytan mörknar den dessutom
+     underlaget just där maskotens röda möter det. */
+  filter: drop-shadow(0 0.7rem 1.1rem rgb(0 0 0 / 0.55));
+  /* Allt under vecket ritas av flärpen i stället. */
+  clip-path: inset(0 0 calc(100% - var(--veck)) 0);
+  /* Blicken: märket lutar mot pekaren. Se avsnitt 11 i main.js. */
+  translate: calc(var(--blick-x, 0) * 4px) calc(var(--blick-y, 0) * 4px);
+}
+
+.sticker__flarp {
+  position: absolute;
+  inset: 0;
+  background-image: var(--mk-bild);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  /* Remsan under vecket, speglad kring vecklinjen. */
+  clip-path: inset(var(--veck) 0 0 0);
+  transform-origin: 50% var(--veck);
+  transform: scaleY(-0.92);
+  /* Limsidan är blank och vit, inte en spegling av trycket. */
+  filter: grayscale(1) brightness(2.6) drop-shadow(0 -3px 6px rgb(0 0 0 / 0.6));
+  opacity: var(--skal, 0);
+  pointer-events: none;
+}
+
+/* Glansen maskas med märkets egen alfa, annars lyser en rektangel
+   utanför silhuetten. */
+.sticker__glans {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--glans, 0);
+  background: radial-gradient(
+    circle at var(--gx, 50%) var(--gy, 50%),
+    rgb(255 255 255 / 0.55),
+    rgb(255 255 255 / 0) 58%
+  );
+  mask-image: var(--mk-bild);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: var(--mk-bild);
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mix-blend-mode: screen;
+  transition: opacity 240ms var(--ut);
+}
+
+/* ── 4 · FOOTERJONGLERINGEN ────────────────────────────────────── */
+
+.jonglering {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.jongl {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  width: clamp(54px, 7vw, 92px);
+  height: auto;
+  /* Kastet skrivs som en enda transform från varvet. Griper man tag i
+     ett märke tar dragningen över samma egenskap. */
+  will-change: transform;
+  pointer-events: auto;
+  cursor: grab;
+  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.5));
+}
+
+.jongl[data-grepp='true'] {
+  cursor: grabbing;
+}
+
+/* ── 5 · NAVBAREN VIKER UNDAN ──────────────────────────────────── */
+
+/* Vid nedscroll är navigationen i vägen för det man scrollar mot.
+   Vid uppscroll är den det man är på väg tillbaka till. Under 40 px
+   står den alltid kvar — där är den en del av sidhuvudet, inte en
+   flytande list. */
+
+.nav {
+  transition:
+    background 260ms var(--ut),
+    transform 300ms var(--ut);
+}
+
+.nav[data-undan='true'] {
+  transform: translateY(-100%);
+}
+
+/* ── 6 · TEXTRULLE PÅ NAVLÄNKARNA ──────────────────────────────── */
+
+.nav__links a {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.rulle {
+  display: block;
+  transition: transform 280ms var(--ut);
+}
+
+.rulle--under {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  color: var(--amber);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav__links a:hover .rulle {
+    transform: translateY(-100%);
+  }
+}
+
+/* Tryckåterkoppling på allt som går att trycka på. Utan den känns
+   gränssnittet som att det inte hörde efter. */
+/* .lank står inte med. Den är display: inline, och transform gäller
+   inte för icke-ersatta inline-element — regeln hade varit död kod.
+   Att göra om brödtextlänkar till inline-block för att få trycket
+   hade brutit radbrytningen mitt i meningar, vilket är ett sämre
+   byte än att avstå. Länkarna har sin färgövergång i stället. */
+.knapp,
+.flik,
+.nav__links a,
+.ratt__knapp {
+  transition: transform 140ms var(--ut);
+}
+
+.knapp:active,
+.flik:active,
+.nav__links a:active,
+.ratt__knapp:active {
+  transform: scale(0.97);
+}
+
+/* ── 7 · MASKERAD RADAVSLÖJNING ────────────────────────────────── */
+
+/* Ord för ord är rätt för en rubrik på fem ord och fel för ett stycke
+   på fyrtio: ögat hinner läsa klart innan sista ordet kommit fram,
+   och då blir avslöjningen en broms. Längre stycken avslöjas rad för
+   rad i stället, bakom en mask. */
+
+.rad-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.rad-mask > span {
+  display: block;
+  transform: translateY(105%);
+  opacity: 0;
+  transition:
+    transform 600ms var(--ut),
+    opacity 600ms var(--ut);
+}
+
+.rad-mask[data-inne='true'] > span {
+  transform: none;
+  opacity: 1;
+}
+
+/* ── 8 · MIKROPULS VID BEKRÄFTELSE ─────────────────────────────── */
+
+/* back.out(2) i en keyframe: uppslaget går förbi målet och sätter
+   sig. En ren scale-upp-och-ned läser som en studs i gummi; den här
+   läser som ett kvitto. */
+
+@keyframes puls {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.05); }
+  70%  { transform: scale(0.995); }
+  100% { transform: scale(1); }
+}
+
+[data-puls='true'] {
+  animation: puls 200ms cubic-bezier(0.34, 1.8, 0.64, 1);
+}
+
+/* ── 10 · PEKARKEDJAN ──────────────────────────────────────────── */
+
+/* Åtta leder som släpar efter pekaren, fyra av dem ingredienser.
+   CRAV låter systemmarkören ligga kvar under sin kedja, så man ser
+   två pekare. cursor: none sätts från JS och inte härifrån — slutar
+   skriptet fungera ska markören finnas kvar. */
+
+.kedja-pa,
+.kedja-pa a,
+.kedja-pa button,
+.kedja-pa [role='tab'] {
+  cursor: none;
+}
+
+.kedja {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  pointer-events: none;
+}
+
+.led {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  will-change: transform;
+}
+
+/* Huvudet är en ring, inte en prick: den lägger sig runt det man
+   pekar på i stället för att täcka det. */
+.led--huvud {
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 2px solid var(--amber);
+  border-radius: 999px;
+  transition:
+    width 180ms var(--ut),
+    height 180ms var(--ut),
+    margin 180ms var(--ut),
+    background-color 180ms var(--ut);
+}
+
+.kedja[data-over='true'] .led--huvud {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  background: rgb(232 163 61 / 0.16);
+}
+
+.led--knut {
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+}
+
+.led--knut img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.led--prick {
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 999px;
+  background: rgb(232 163 61 / 0.55);
+}
+
+/* ── 12 · TRÖGHETSKAST ─────────────────────────────────────────── */
+
+.kastbar {
+  touch-action: none;
+}
+
+/* ── 13 · LADDSKÄRMENS FYSIK ───────────────────────────────────── */
+
+/* Lagren föll in med en ren opacity-och-glid. Nu faller de, och
+   stapeln stukas vid nedslaget innan den reser sig — tre steg, för
+   två läser som en studsboll och fyra som gelé. */
+
+.loader__stack {
+  transform-origin: 50% 100%;
+}
+
+.loader__part[data-syns='true'] {
+  animation: bit-faller 520ms cubic-bezier(0.45, 0, 0.35, 1) forwards;
+}
+
+@keyframes bit-faller {
+  from { opacity: 0; transform: translateY(-120px) scaleY(1.14) scaleX(0.92); }
+  60%  { opacity: 1; transform: translateY(0) scaleY(0.88) scaleX(1.06); }
+  82%  { transform: translateY(0) scaleY(1.03) scaleX(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.loader__stack[data-stuk='true'] {
+  animation: stuk 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes stuk {
+  0%   { transform: scaleY(1) scaleX(1); }
+  35%  { transform: scaleY(0.88) scaleX(1.06); }
+  65%  { transform: scaleY(1.03) scaleX(0.98); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
+/* ── REDUCERAD RÖRELSE ─────────────────────────────────────────── */
+
+/* Allt som är förflyttning tas bort. Det som bär betydelse — märkets
+   lutning, navbarens läge, textens närvaro — står kvar. */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__burger[data-flyt='true'] picture,
+  .loader__part[data-syns='true'],
+  .loader__stack[data-stuk='true'],
+  [data-puls='true'] {
+    animation: none;
+  }
+
+  .hero__burger[data-entre='vantar'] {
+    opacity: 0;
+    transform: none;
+  }
+
+  .hero__burger[data-entre='gar'] {
+    transition: opacity 250ms linear;
+  }
+
+  .wave {
+    transform: none;
+  }
+
+  .sticker__blad {
+    clip-path: none;
+    translate: none;
+  }
+
+  .sticker__flarp,
+  .sticker__glans,
+  .jonglering,
+  .kedja {
+    display: none;
+  }
+
+  .rad-mask > span {
+    transform: none;
+    transition: opacity 250ms linear;
+  }
+
+  .knapp:active,
+  .flik:active,
+  .nav__links a:active,
+  .ratt__knapp:active {
+    transform: none;
+  }
+
+  .nav__links a:hover .rulle {
+    transform: none;
+  }
 }
