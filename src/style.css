@@ -773,27 +773,56 @@ input:focus-visible {
   text-transform: uppercase;
 
   /* Hero-lockupen är sajtens enda rena varumärkesutrop och det enda
-     stället där typen får gå förbi skalans översta steg. Faktorn
-     ligger HÄR, på lockupen, och inte i skalan: de sju stegen styr
-     resten av sidan och ska inte rubbas av att en sektion vill
-     skrika högre.
+     stället där typen får gå förbi skalans översta steg. Graden ligger
+     HÄR, på lockupen, och inte i skalan: de sju stegen styr resten av
+     sidan och ska inte rubbas av att en sektion vill skrika högre.
 
-     Att i stället lyfta BISTRO ett helt steg, från xxl till xxxl,
-     provades först. Då blev raden 240 px, la sig över burgaren och
-     täckte båda brödtextspalterna — lockupen åt upp sektionen den
-     skulle inleda. Faktorn låter båda raderna växa och behåller
-     samtidigt förhållandet dem emellan. */
-  --lockup: 1.2;
+     LOCKUPEN HAR EN EGEN KURVA, inte skalans översta steg gånger en
+     faktor. En multiplikator skalar båda ändarna samtidigt: 1,5 hade
+     gett de 360 px som var målet på desktop, men också 101 px på en
+     390 px skärm — och där spänner DELENS 375 px av 358 tillgängliga.
+     Kurvan sätts i stället av de två lägen som faktiskt ska stämma,
+     91 px vid 390 och 360 vid 1490, och interpolerar däremellan.
+
+     Båda raderna hänger i samma variabel, så förhållandet dem emellan
+     ligger fast när lockupen växer. Att lyfta BISTRO ett eget steg,
+     från xxl till xxxl, provades tidigare: raden blev 240 px, la sig
+     över burgaren och täckte båda brödtextspalterna. */
+  --lockup-stor: clamp(4.5rem, -0.28rem + 24.45vw, 24rem);
+
+  /* RAMEN MÄTS I em, ALDRIG I px.
+     En px-ram är samma tjocklek oavsett grad, alltså ett hårstreck på
+     360 px text och en klump på 91. I em är ramen en andel av
+     bokstavsformen och läser likadant i hela spannet. */
+  --ram-delens: 0.042em;
+  --ram-bistro: 0.058em;
 }
 
+/* PAINT-ORDER ÄR HELA GREPPET HÄR.
+
+   -webkit-text-stroke centrerar stroken på glyfkonturen: halva
+   tjockleken läggs utanför formen och halva INUTI den. Vid ett
+   hårstreck märks det inte. Vid en ram som ska läsa som ritad kontur
+   äter den inre halvan upp bokstaven inifrån — punsarna i E och S
+   snörps ihop och DELENS blir en klump.
+
+   paint-order: stroke fill målar stroken först och fyllningen ovanpå.
+   Ramen växer då bara utåt, formen behålls, och fyllningen når ända
+   ut till sin egen kontur. Det är skillnaden mellan en kontur runt
+   bokstaven och en kontur genom den. */
 .hero__outline {
   display: block;
-  font-size: calc(var(--t-xxxl) * var(--lockup));
+  font-size: var(--lockup-stor);
   line-height: var(--lh-xxxl);
   letter-spacing: var(--ls-xxxl);
   font-weight: var(--font-display-vikt);
-  color: transparent;
-  -webkit-text-stroke: clamp(1px, 0.22vw, 3px) var(--offwhite);
+  /* Djuprött mot svart är 1,59:1 och bär ingen form på egen hand.
+     Det är inte heller meningen: formen bärs av den vita ramen på
+     10,2:1, och fyllningen är den färg ramen omsluter. Samma
+     ordning som i ett tryckt klistermärke. */
+  color: var(--rod);
+  -webkit-text-stroke: var(--ram-delens) var(--offwhite);
+  paint-order: stroke fill;
 }
 
 .hero__fill {
@@ -801,11 +830,19 @@ input:focus-visible {
   position: relative;
   z-index: 5;
   margin-block-start: -0.08em;
-  font-size: calc(var(--t-xxl) * var(--lockup));
+  /* Bunden till DELENS i stället för till skalan, så förhållandet
+     mellan raderna ligger fast när lockupen växer. 0,48 är samma
+     förhållande som xxl mot xxxl hade. */
+  font-size: calc(var(--lockup-stor) * 0.48);
   line-height: var(--lh-xxl);
   letter-spacing: var(--ls-xxl);
   font-weight: var(--font-display-vikt);
   color: var(--amber);
+  /* Tyngre andel än DELENS med flit. Samma em-värde hade gett en
+     absolut tunnare ram på den mindre raden, och då läser lockupen
+     som två olika pennor i stället för en. */
+  -webkit-text-stroke: var(--ram-bistro) var(--offwhite);
+  paint-order: stroke fill;
 }
 
 /* Elementet är ett span inuti h1. Utan display: block blir det inline
