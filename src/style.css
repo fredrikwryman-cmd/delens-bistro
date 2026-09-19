@@ -94,6 +94,10 @@ body {
   background: var(--svart);
   color: var(--offwhite);
   font-family: var(--font);
+  /* Basvikten sätts uttryckligen. De variabla snitten har sin
+     fvar-standard vid axelns tyngsta ände, och utan ett värde här
+     hänger brödtexten på vad webbläsaren råkar välja. */
+  font-weight: 400;
   /* Basgraden måste vara skalans s-steg. Låg den kvar på webbläsarens
      16 px fanns två brödtextgrader sida vid sida — 16 för det som
      ärvde och 17 för det som satte token. Två grader som skiljer en
@@ -2561,4 +2565,149 @@ input:focus-visible {
   .nav__links a:hover .rulle {
     transform: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPSNITTSVÄXLAREN — BYGGVERKTYG
+   Tas bort i ett eget commit när ett snitt är valt, tillsammans med
+   de sex som inte valdes. Ingenting annat i sajten beror på den:
+   växlaren skriver bara om --font, --font-display och
+   --font-display-vikt på :root.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Självhostade snitt (Fontshare) ───────────────────────────── */
+
+/* Alla tre är variabla — en fil täcker hela viktspannet. Hämtade och
+   delmängdade av verktyg/typsnitt.mjs: 49 kB för tre familjer.
+   Webbläsaren laddar ned filen först när ett snitt faktiskt används,
+   så de sex som inte är valda kostar ingenting. */
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/typsnitt/general-sans.woff2') format('woff2');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cabinet Grotesk';
+  src: url('/typsnitt/cabinet-grotesk.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/typsnitt/satoshi.woff2') format('woff2');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Panelen ──────────────────────────────────────────────────── */
+
+/* Avstämningspanelen som satt i lagersektionen var störig av två skäl:
+   den låg mitt i innehållet och den gick inte att fälla ihop. Den här
+   ligger i ett hörn och är en knapp tills man öppnar den. */
+
+.typval {
+  position: fixed;
+  inset-block-end: 6.5rem;
+  inset-inline-start: var(--gutter);
+  z-index: 960;
+  /* Panelens egen text ska ALDRIG byta snitt — då går den inte att
+     läsa medan man bläddrar. Bara namnen i listan sätts i sitt snitt,
+     för det är hela poängen med dem. */
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--offwhite);
+}
+
+.typval__knapp {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: rgb(14 14 14 / 0.92);
+  border: 1px solid var(--linje);
+  border-radius: 999px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.typval__knapp::before {
+  content: 'Aa';
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.typval__lista {
+  position: absolute;
+  inset-block-end: calc(100% + 0.5rem);
+  inset-inline-start: 0;
+  width: 17rem;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  background: rgb(14 14 14 / 0.96);
+  border: 1px solid var(--linje);
+  border-radius: 0.7rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.8);
+}
+
+.typval__lista[hidden] {
+  display: none;
+}
+
+.typval__rad {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  background: none;
+  border: 0;
+  border-radius: 0.45rem;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.typval__rad[aria-checked='true'] {
+  background: rgb(232 163 61 / 0.16);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .typval__rad:hover {
+    background: rgb(242 235 224 / 0.08);
+  }
+}
+
+/* Namnet sätts i sitt eget snitt — det är jämförelsen. Siffran före
+   är tangenten som väljer det. */
+.typval__namn {
+  display: block;
+  font-family: var(--prov);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.typval__roll {
+  display: block;
+  margin-block-start: 0.1rem;
+  font-size: 11px;
+  color: var(--dampad);
+}
+
+.typval__tal {
+  display: inline-block;
+  min-width: 1.1em;
+  color: var(--amber);
+  font-weight: 700;
 }
