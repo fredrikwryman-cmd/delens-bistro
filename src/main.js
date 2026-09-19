@@ -1076,7 +1076,7 @@ function riggaGlans() {
 }
 
 /* ═══ 4 · FOOTERJONGLERINGEN ═════════════════════════════════════
-   Tre märken i båge. Apex 50–78 % av footerns höjd, 0,9–1,3 s upp med power2.out,
+   Tre märken i båge. Apex 44–68 % av footerns höjd, 0,9–1,3 s upp med power2.out,
    nedvägen 1,15–1,5 gånger så lång med power2.in, 220–600 graders
    rotation och drift i x. Förskjutning 0,55 s mellan märkena.
 
@@ -1097,11 +1097,20 @@ const JONGL = {
 
      Scenen är footern, och footern har en minsta höjd i stilmallen.
      Talen nedan är därför ett löfte som inte kan brytas av en ändrad
-     vyhöjd: 0,78 gånger scenen plus bitens egen höjd ryms alltid, så
-     länge scenen är minst 26rem. Vid 68svh på en 900 px skärm blir
-     högsta punkten 477 px i en 612 px hög footer. */
-  apexMin: 0.5,
-  apexMax: 0.78,
+     vyhöjd.
+
+     TAKET SÄNKTES FRÅN 0,78 NÄR BITARNA VÄXTE från 92 till 140 px.
+     Det som ska rymmas är inte bitens bredd utan dess OMSLUTANDE RUTA
+     under rotation, och den är diagonalen: en bit på 140 × 106 mäter
+     176 px när den står på snedden. 0,78 × 612 + 176 blev 653 i en
+     612 px hög footer, alltså klippt igen. 0,68 ger 416 + 176 = 592
+     med tjugo pixlars marginal.
+
+     Bågen blir därmed något lägre än den var. Det är priset för
+     större bitar i samma rum, och det är rätt pris: en stor bit som
+     syns hela vägen slår en liten som går ur bild. */
+  apexMin: 0.44,
+  apexMax: 0.68,
   uppMin: 900,
   uppMax: 1300,
   nedFaktorMin: 1.15,
@@ -1175,9 +1184,20 @@ function riggaJonglering() {
       const s = scen.getBoundingClientRect();
       k.fri = null;
       k.grepp = {
-        // Respektera var i märket man tog tag.
-        dx: e.clientX - r.left - r.width / 2,
-        dy: e.clientY - r.top - r.height / 2,
+        /* Respektera var i märket man tog tag — från dess ÖVRE VÄNSTRA
+           HÖRN, inte från mitten.
+
+           Greppläget ritas som translate3d(g.x - dx, ...), och den
+           translationen flyttar bitens vänsterkant. Med dx mätt från
+           mitten hamnade vänsterkanten där mitten stod, alltså ett
+           hopp på halva bredden i samma ögonblick som man tog tag.
+           Uppmätt 94 px förflyttning vid ett grepp som inte rörde sig
+           alls — och felet växte när bitarna gick från 92 till 140 px.
+
+           Det här är hela skillnaden mellan att hålla i något och att
+           se det rycka till när man rör vid det. */
+        dx: e.clientX - r.left,
+        dy: e.clientY - r.top,
         x: e.clientX - s.left,
         y: e.clientY - s.top,
         vx: 0,
@@ -1185,7 +1205,10 @@ function riggaJonglering() {
         vrid: 0,
         vinkel: 0,
         sistX: e.clientX,
-        sistY: e.clientY
+        sistY: e.clientY,
+        // Startpunkten sparas för klickgenomsläppet, se slapp().
+        startX: e.clientX,
+        startY: e.clientY
       };
     });
 
@@ -1214,10 +1237,46 @@ function riggaJonglering() {
         /* pekaren kan redan vara släppt */
       }
       k.grepp = null;
+
+      /* KLICKGENOMSLÄPP. Bitarna ligger sedan de flyttades framför
+         footerns innehåll ovanpå länkarna, och de tar emot pekaren
+         eftersom de går att gripa. Uppmätt täcker de tillsammans tio
+         procent av footerns länkyta vid varje given tidpunkt — var
+         tionde klick på telefonnumret eller en länk hade alltså kunnat
+         försvinna in i en köttpuck utan att något hände.
+
+         En dragning och ett klick skiljer sig åt i en sak: dragningen
+         rör sig. Flyttade pekaren sig mindre än sex pixlar mellan
+         ned och upp var det ett klick, inte ett kast — och då letas
+         elementet under biten upp och får klicket i stället.
+
+         pointer-events stängs av på biten under uppslagningen,
+         annars hittar elementFromPoint biten själv. */
+      const rorelse = Math.hypot(e.clientX - g.startX, e.clientY - g.startY);
+      if (rorelse < 6) {
+        m.style.pointerEvents = 'none';
+        const under = document.elementFromPoint(e.clientX, e.clientY);
+        m.style.pointerEvents = '';
+        const mal = under && under.closest('a, button');
+        if (mal) mal.click();
+      }
+
+      /* INGEN RETURN EFTER KLICKET. Biten ska släppas som vanligt även
+         när klicket gick vidare — den hade annars varken varit gripen
+         eller fri, och varvet hade ritat den där dess gamla båge råkar
+         vara just då. Uppmätt hopp när den återgick till bågen: 291 px
+         tvärs över footern, i samma ögonblick som länken öppnades.
+
+         Eftersom pekaren inte rörde sig är hastigheten nära noll, så
+         det fria kastet nedan blir ett rent fall från den punkt där
+         handen släppte. Vilket är precis vad som händer när man
+         släpper något man höll stilla. */
+
       // Kastet ärver handens hastighet och bromsas in.
+      // Samma hörnkoordinater som greppet, så släppet inte flyttar biten.
       k.fri = {
-        x: g.x,
-        y: g.y,
+        x: g.x - g.dx,
+        y: g.y - g.dy,
         vx: g.vx * JONGL.kastFart,
         vy: g.vy * JONGL.kastFart,
         vinkel: g.vinkel,
@@ -1244,12 +1303,24 @@ function riggaJonglering() {
       const m = k.m;
       if (!inne && !k.grepp && !k.fri) continue;
 
+      /* KOORDINATERNA RÄKNAS MOT BITENS ÖVRE VÄNSTRA HÖRN, och därför
+         måste bitens EGEN HÖJD med i y-ledet. Biten ligger med
+         inset-block-end: 0, alltså är dess otransformerade överkant
+         redan h − oh ned i scenen; en translation på (y − h) landade
+         den en hel bithöjd för högt. Uppmätt: 91 px ryck i samma
+         ögonblick som man tog tag, och felet växte med bitarna.
+
+         offsetHeight och inte rektangeln: rektangeln är den ROTERADE
+         omslutande rutan och ändras med vinkeln. */
+      const oh = m.offsetHeight;
+
       if (k.grepp) {
         const g = k.grepp;
         m.style.transform = `translate3d(${(g.x - g.dx).toFixed(1)}px, ${(
           g.y -
-          h -
-          g.dy
+          g.dy -
+          h +
+          oh
         ).toFixed(1)}px, 0) rotate(${g.vinkel.toFixed(1)}deg)`;
         continue;
       }
@@ -1267,8 +1338,8 @@ function riggaJonglering() {
         f.y += f.vy * steg;
         f.vinkel += f.vridFart * steg;
 
-        // Nere igen: tillbaka in i numret.
-        if (f.y > h - 10 && f.vy > 0) {
+        // Nere igen: bitens UNDERKANT når scenens botten.
+        if (f.y + oh >= h && f.vy > 0) {
           k.fri = null;
           k.start = nu;
           k.upp = slump(JONGL.uppMin, JONGL.uppMax);
@@ -1277,7 +1348,9 @@ function riggaJonglering() {
           continue;
         }
         m.style.transform = `translate3d(${f.x.toFixed(1)}px, ${(
-          f.y - h
+          f.y -
+          h +
+          oh
         ).toFixed(1)}px, 0) rotate(${f.vinkel.toFixed(1)}deg)`;
         continue;
       }

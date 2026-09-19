@@ -2632,11 +2632,13 @@ input:focus-visible {
   z-index: 2;
   display: grid;
   place-items: center;
-  justify-self: center;
+  /* VÄNSTERSTÄLLD, inte centrerad. Den står i namnblockets spalt under
+     telefonnumret och ska ligga i linje med det — en centrerad knapp i
+     en vänsterställd spalt läser som ett eget block, och det är
+     precis vad den inte ska vara. */
+  justify-self: start;
   width: max-content;
-  /* Sist av allt. Luften ovanför skiljer den från kolofonraden, och
-     under den tar sidan slut. */
-  margin: clamp(1.75rem, 4vw, 2.5rem) auto 0;
+  margin: clamp(1.1rem, 2.5vw, 1.6rem) 0 0;
   padding: 0.7rem 1.6rem;
   color: var(--byggd-farg);
   font-size: var(--t-xs);
@@ -2803,7 +2805,9 @@ input:focus-visible {
    två rader tyst text i en hörnram. */
 @media not all and (hover: hover) and (pointer: fine) {
   .byggd {
-    margin-block: clamp(1.75rem, 4vw, 2.5rem) 0;
+    /* Adressraden hänger under knappen på pekskärm och behöver sin
+       plats innan nästa spalt börjar. */
+    margin-block: clamp(1.1rem, 2.5vw, 1.6rem) 2.75rem;
   }
 
   .byggd__lada--upp {
@@ -3150,19 +3154,34 @@ input:focus-visible {
 
 /* ── 4 · FOOTERJONGLERINGEN ────────────────────────────────────── */
 
+/* ÖVER INNEHÅLLET, inte bakom. Ingredienserna låg på z-index 1 med
+   footerns text på 2 och passerade alltså bakom namnet, länkarna och
+   klockmärket — man såg dem försvinna in i texten och komma ut på
+   andra sidan. Nu passerar de framför allt i footern.
+
+   Behållaren är fortfarande genomsläpplig för pekaren; bara bitarna
+   själva tar emot, eftersom de går att gripa och kasta. Uppmätt
+   täcker de tillsammans TIO PROCENT av footerns länkyta vid varje
+   given tidpunkt, så en bit över en länk skulle ha ätit klicket.
+   Lösningen ligger i main.js: ett klick som inte rört sig släpps
+   igenom till elementet under. Kastet är kvar, länkarna svarar. */
 .jonglering {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 1;
+  z-index: 3;
 }
 
 .jongl {
   position: absolute;
   inset-block-end: 0;
   inset-inline-start: 0;
-  width: clamp(54px, 7vw, 92px);
+  /* 140 px mot tidigare 92. Bitarna ska läsa som mat i luften, och
+     en köttpuck på 92 px över en 1425 px bred footer läste som en
+     prick. Taket hänger ihop med kastets höjd — se JONGL.apexMax i
+     main.js, som sänktes när bitarna växte. */
+  width: clamp(80px, 10.5vw, 140px);
   height: auto;
   /* Kastet skrivs som en enda transform från varvet. Griper man tag i
      ett märke tar dragningen över samma egenskap. */

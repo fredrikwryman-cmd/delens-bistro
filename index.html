@@ -173,7 +173,12 @@
       </section>
 
       <!-- ═══ 2 · ÖPPET NU — kol ═══════════════════════════════════ -->
-      <section class="sec sec--tat sec--kol status" id="status">
+      <!-- SAMMA SVARTA SOM HERON OVANFÖR, alltså ingen toning alls.
+           Remsan gick i kol mot heros svarta — fyra procents
+           ljushetsskillnad — och skuggskarven som låg här fanns bara
+           för att dölja det steget. Utan steg finns ingenting att
+           dölja, och remsan är en enda ton hela vägen ned. -->
+      <section class="sec sec--tat sec--svart status" id="status">
         <!-- Här stod en våg medan hero var djuprött: röd mot kol skiljer
              sig knappt i ljushet men kraftigt i kulör, och då läser
              siluetten. Hero är svart igen, och svart mot kol är fyra
@@ -182,7 +187,6 @@
              Skarv igen, alltså. Regeln är densamma hela vägen: en våg
              är ett snitt mellan två tydligt skilda toner, och där
              tonerna ligger nära är ljuset hela händelsen. -->
-        <span class="skarv" aria-hidden="true"></span>
         <div class="status__inner">
           <p class="status__now" id="status-now">
             <span class="status__dot" id="status-dot"></span>
@@ -193,7 +197,7 @@
       </section>
 
       <!-- ═══ 3 · REBRANDEN — djuprött ═════════════════════════════ -->
-      <section class="sec sec--vid sec--rod rebrand" id="rebrand" style="--wave-fill: var(--kol)">
+      <section class="sec sec--vid sec--rod rebrand" id="rebrand" style="--wave-fill: var(--svart)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,45 C260,8 500,8 740,45 C980,82 1200,82 1440,45 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,45 C260,8 500,8 740,45 C980,82 1200,82 1440,45" />
@@ -280,9 +284,16 @@
           <div class="lager__sticky">
             <!-- Märket ligger INUTI det sticky spåret. Utanför rullade det
                  bort efter 460 px medan scenen det uttalar sig om satt
-                 kvar i 2880 px — ett påstående utan sitt motiv. -->
+                 kvar i 2880 px — ett påstående utan sitt motiv.
+
+                 20 %, INTE 11. Vid 11 % låg märkets överkant på y 88
+                 medan vågens underkant låg på 128 när sektionen kom in
+                 i vy — fyrtio pixlars överlapp, och just i det
+                 ögonblick man tittar. Vågen tänjs dessutom till 1,5
+                 gånger av scrubben, så den når som djupast 135 px in i
+                 sektionen. 20 % lägger märket under det med marginal. -->
             <span class="sticker"
-                  style="--r: -7deg; --s-top: 11%; --s-left: 4%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-not.webp')">
+                  style="--r: -7deg; --s-top: 20%; --s-left: 4%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-not.webp')">
               <img class="sticker__blad" src="/bilder/marken/delens-not.webp"
                    alt="Klistermärke: en biff håller upp en rosett med texten 100 % nötkött"
                    width="400" height="417" loading="lazy" decoding="async" />
@@ -630,6 +641,32 @@
           <p class="foot__namn">Delens Bistro</p>
           <p id="foot-adress"></p>
           <p><a class="lank" id="foot-tel" href="#"></a></p>
+          <!-- BYGGKREDITEN, i namnblocket under telefonnumret.
+
+               Den låg först mitt i footern och sedan sist på sidan.
+               Båda lägena gjorde den till ett eget block med egen
+               luft omkring; här står den i stället som en uppgift
+               bland de andra i vänsterspalten — namn, adress,
+               telefon, byggare. Det är så en kredit läses: som en
+               post i en kolofon, inte som ett anslag.
+
+               Dämpad i vila, amber vid hover och fokus. Ordväxlingen
+               bryggas med ett sudd, hörnen vandrar 6 px, och på
+               pekskärm visas namn och adress utan fyllda lådor.
+               Skälen står vid .byggd i stilmallen. -->
+          <a class="byggd" href="https://aimstudios.se" target="_blank" rel="noopener">
+            <span class="visuellt-dold">Byggd av AiM Studios — aimstudios.se</span>
+            <span class="byggd__lada byggd__lada--upp" aria-hidden="true">Byggd av</span>
+            <span class="byggd__mitt" aria-hidden="true">
+              <span class="byggd__vila">Webbdesign</span>
+              <span class="byggd__aktiv">AiM Studios</span>
+            </span>
+            <span class="byggd__lada byggd__lada--ner" aria-hidden="true">aimstudios.se</span>
+            <span class="byggd__horn byggd__horn--nv" aria-hidden="true"></span>
+            <span class="byggd__horn byggd__horn--no" aria-hidden="true"></span>
+            <span class="byggd__horn byggd__horn--sv" aria-hidden="true"></span>
+            <span class="byggd__horn byggd__horn--so" aria-hidden="true"></span>
+          </a>
           <!-- Ett grundningsår hör hemma i en kolofon, bredvid namnet
                och adressen. Klockan låg i hero tills den sektionen blev
                djupröd; maskotrött mot djuprött är 1,47:1 och märket
@@ -693,46 +730,6 @@
       <p class="foot__not">
         Ett visningsprojekt. Inte Delens Bistros officiella webbplats.
       </p>
-
-      <!-- BYGGKREDITEN, SIDANS SISTA ELEMENT. Den låg tidigare mitt i
-           footern, ovanför kolofonen, på sidans egen mittaxel och i
-           amber — alltså i handlingsfärgen, på innehållets plats. En
-           kredit ska hittas av den som letar efter vem som byggt
-           sajten, inte konkurrera med beställningsknappen. Nu står den
-           sist av allt, där signaturer står, och är dämpad tills någon
-           rör vid den.
-
-           Fyra hörnmarkeringar som flyttar utåt och två lådor som
-           glider ut över och under — mekaniken är beskriven, inte
-           kopierad: originalkomponenten (Uiverse, dexter-st) fanns
-           inte att läsa när den här byggdes. Hue-rotationen som låg i
-           originalets hover är utelämnad; den är gjord för en gulgrön
-           utgångsfärg och hade vridit sajtens amber mot brunt.
-
-           TILLGÄNGLIGA NAMNET STÅR SEPARAT. Länkens synliga text är
-           "Webbdesign" i vila, och en länk som bara heter så säger
-           ingenting om vart den går. Den riktiga meningen ligger dold
-           för ögat och läses upp i stället; allt det rörliga är
-           aria-hidden.
-
-           UTAN HOVER VISAS SLUTLÄGET DIREKT. På en telefon finns ingen
-           hover att avslöja något med, och då hade knappen stått kvar
-           som ordet "Webbdesign" med en länk till en sajt den inte
-           nämner. Se stilmallen. -->
-      <a class="byggd" href="https://aimstudios.se" target="_blank" rel="noopener">
-        <span class="visuellt-dold">Byggd av AiM Studios — aimstudios.se</span>
-        <span class="byggd__lada byggd__lada--upp" aria-hidden="true">Byggd av</span>
-        <span class="byggd__mitt" aria-hidden="true">
-          <span class="byggd__vila">Webbdesign</span>
-          <span class="byggd__aktiv">AiM Studios</span>
-        </span>
-        <span class="byggd__lada byggd__lada--ner" aria-hidden="true">aimstudios.se</span>
-        <span class="byggd__horn byggd__horn--nv" aria-hidden="true"></span>
-        <span class="byggd__horn byggd__horn--no" aria-hidden="true"></span>
-        <span class="byggd__horn byggd__horn--sv" aria-hidden="true"></span>
-        <span class="byggd__horn byggd__horn--so" aria-hidden="true"></span>
-      </a>
-
     </footer>
 
     <!-- ═══ FAST BESTÄLLNINGSFÄLT ══════════════════════════════════ -->
