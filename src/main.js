@@ -132,7 +132,10 @@ function fyllKontakt() {
 
   satt('#hitta-adress', (el) => (el.textContent = kontakt.adress));
   satt('#foot-adress', (el) => (el.textContent = kontakt.adress));
-  satt('#hitta-karta', (el) => (el.href = kartlank));
+  // Både textlänken och kartbilden pekar på samma sökning i Google Maps.
+  for (const sel of ['#hitta-karta', '#hitta-kartlank']) {
+    satt(sel, (el) => (el.href = kartlank));
+  }
 
   for (const sel of ['#hitta-tel', '#foot-tel']) {
     satt(sel, (el) => {

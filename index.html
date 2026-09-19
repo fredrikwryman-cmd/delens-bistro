@@ -342,17 +342,33 @@
         <div class="wrap">
           <h2 class="rubrik" data-reveal>Hitta hit</h2>
 
-          <div class="hitta__rutt" aria-hidden="true">
-            <svg viewBox="0 0 1200 180" preserveAspectRatio="xMidYMid meet">
-              <path
-                id="rutt-linje"
-                d="M40,140 C220,140 260,40 440,40 C620,40 660,140 840,140 C1000,140 1080,70 1160,52"
-                fill="none"
+          <!-- STATISK BILD, INTE INBÄDDAD KARTA. En inbäddad Google-karta
+               laddar Googles skript hos besökaren, sätter kakor och kräver
+               därmed ett samtycke — en kakruta, på en sida vars ärende är
+               en adress och ett telefonnummer. En bild med en länk gör
+               samma nytta och kostar ingen kaka. Integritetspolicyn
+               beskriver sajten så, och det måste fortsätta stämma.
+
+               Brickorna är OpenStreetMaps och attributionen är obligatorisk;
+               den står i bildtexten och inte inbränd i bilden, för inbränd
+               text går inte att läsa av en skärmläsare. -->
+          <figure class="hitta__karta">
+            <a id="hitta-kartlank" href="#" target="_blank" rel="noopener">
+              <img
+                src="/bilder/karta/hitta.webp"
+                alt="Karta över Upplands Väsby centrum med Delens Bistro utmärkt på Centralvägen 3, ett kvarter öster om pendeltågsstationen."
+                width="1200"
+                height="675"
+                loading="lazy"
+                decoding="async"
               />
-            </svg>
-            <span class="hitta__punkt hitta__punkt--start">Upplands Väsby station</span>
-            <span class="hitta__punkt hitta__punkt--slut">Centralvägen 3</span>
-          </div>
+              <span class="hitta__kartknapp">Öppna i Google Maps</span>
+            </a>
+            <figcaption class="bildtext">
+              Kartunderlag © OpenStreetMap. Bilden är statisk — ingenting
+              laddas från Google förrän du klickar.
+            </figcaption>
+          </figure>
 
           <div class="hitta__grid">
             <div class="hitta__block">
@@ -467,6 +483,7 @@
           <p><a class="lank" href="#hitta">Öppettider</a></p>
           <p><a class="lank" id="foot-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
           <p><a class="lank" id="foot-epost" href="#"></a></p>
+          <p><a class="lank" href="/integritetspolicy.html">Integritetspolicy</a></p>
         </div>
       </div>
       <p class="foot__not">

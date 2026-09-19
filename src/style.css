@@ -1768,28 +1768,36 @@ input:focus-visible {
 
 /* ═══ 7 · HITTA HIT ═══════════════════════════════════════════ */
 
-.hitta__rutt {
-  position: relative;
-  margin-block: clamp(1.5rem, 4vw, 3rem) clamp(2rem, 5vw, 3.5rem);
+/* Kartan är en bild med en länk, inte en inbäddning. Se kommentaren i
+   index.html och integritetspolicyn — sajten sätter inga kakor, och det
+   får inte ändras av att någon byter tillbaka till en iframe. */
+.hitta__karta {
+  margin: clamp(1.5rem, 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem);
 }
 
-.hitta__rutt svg {
+.hitta__karta a {
+  position: relative;
+  display: block;
+  border-radius: 0.8rem;
+  overflow: hidden;
+  /* Kartan är mörkt tonad och ligger på djuprött. Utan kanten flyter
+     de ihop i underkanten. */
+  border: 1px solid rgb(242 235 224 / 0.16);
+}
+
+.hitta__karta img {
+  display: block;
   width: 100%;
   height: auto;
+  transition: scale 400ms var(--ut);
 }
 
-#rutt-linje {
-  stroke: var(--amber);
-  stroke-width: 3;
-  stroke-dasharray: 14 12;
-  stroke-linecap: round;
-  opacity: 0.8;
-}
-
-.hitta__punkt {
+.hitta__kartknapp {
   position: absolute;
-  padding: 0.35rem 0.75rem;
-  background: var(--offwhite);
+  inset-block-end: 0.9rem;
+  inset-inline-end: 0.9rem;
+  padding: 0.55rem 1.1rem;
+  background: var(--amber);
   color: var(--svart);
   border-radius: 999px;
   font-size: var(--t-xs);
@@ -1797,11 +1805,25 @@ input:focus-visible {
   letter-spacing: var(--ls-xs);
   font-weight: 800;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
-.hitta__punkt--start { inset-block-end: 8%; inset-inline-start: 0; rotate: -4deg; }
-.hitta__punkt--slut  { inset-block-start: 4%; inset-inline-end: 0; rotate: 4deg; }
+/* Kartan är det enda på sidan man kan klicka sig BORT från sajten med
+   utan att veta om det i förväg. En aning zoom säger att bilden är en
+   knapp, inte en illustration. */
+@media (hover: hover) and (pointer: fine) {
+  .hitta__karta a:hover img {
+    scale: 1.03;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hitta__karta img {
+    transition: none;
+  }
+  .hitta__karta a:hover img {
+    scale: 1;
+  }
+}
 
 .hitta__grid {
   display: grid;
@@ -2394,7 +2416,11 @@ input:focus-visible {
    ingredienserna som släpar efter den. */
 .led--huvud {
   z-index: 2;
-  --pekar-b: 52px;
+  /* 26 px, låst. Halva den förra storleken: en ritad hand är
+     ogenomskinlig över halva sin ruta, och vid 52 px täckte den
+     2095 px² av det man pekade på. Förskjutningen räknas ur bredden,
+     så ankarpunkten i fingertoppen följer med utan att röras. */
+  --pekar-b: 26px;
   width: var(--pekar-b);
   height: auto;
   margin: 0 0 0 calc(var(--pekar-b) * -0.414);
@@ -2710,4 +2736,87 @@ input:focus-visible {
   min-width: 1.1em;
   color: var(--amber);
   font-weight: 700;
+}
+
+/* ═══ DOKUMENTSIDOR ═══════════════════════════════════════════════
+   Integritetspolicyn och det som kommer efter den. En textsida har
+   ett enda jobb — att gå att läsa — så den lånar sajtens palett och
+   typskala men inget av dess rörelse.                              */
+
+.dokument {
+  /* Plats för den fasta navbaren. Startsidan löser det med hero på
+     100svh; en textsida har ingenting som knuffar undan. */
+  padding-block-start: clamp(7rem, 14vw, 10rem);
+}
+
+/* Radlängden är det enda som avgör om en policy blir läst. 62ch ligger
+   i det spann där ögat hittar tillbaka till nästa rad utan att leta —
+   sajtens wrap på 1280 px hade gett över 150 tecken.
+
+   MÅTTET GÄLLER TEXTEN, INTE RUBRIKEN. Först låg det på spalten som
+   helhet, och då sköt h1:an ut 500 px utanför den: "Integritetspolicy"
+   är sjutton tecken och rymdes inte på 62ch i någon displaygrad. Det
+   gav sidan vågrät rullning. En rubrik är inte bunden till brödtextens
+   mått — den får vara så bred den behöver. */
+.dokument__inner > p,
+.dokument__inner > h2 {
+  max-width: 62ch;
+}
+
+/* Sajtens största grad är gjord för hero-lockupen på en helskärm, inte
+   för ett dokument. Ett steg ned rymmer sjutton tecken även på 390 px. */
+.dokument__inner h1 {
+  font-size: var(--t-xl);
+  line-height: var(--lh-xl);
+  letter-spacing: var(--ls-xl);
+}
+
+.dokument__inner h2 {
+  margin-block: clamp(2.5rem, 5vw, 3.5rem) 0.8rem;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
+}
+
+.dokument__inner p {
+  margin-block: 0 1.1rem;
+  color: rgb(242 235 224 / 0.86);
+}
+
+.dokument__inner .ingress {
+  margin-block-end: 2rem;
+  color: var(--offwhite);
+}
+
+.dokument__kontakt {
+  padding: 1.1rem 1.3rem;
+  background: var(--kol);
+  border-radius: 0.7rem;
+  line-height: 1.7;
+}
+
+.dokument__datum {
+  margin-block-start: 2.5rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+  color: var(--dampad);
+}
+
+/* ── Typsnittsväxlaren syns inte ──────────────────────────────────
+   Chippet var en mörk knapp på en mörk sida, nere i ett hörn, med
+   beställningsfältets amber direkt under sig som drog blicken. Det
+   fanns där hela tiden — Fredrik hittade det bara inte. En kontroll
+   som ska hittas ska se ut som en kontroll.                        */
+
+.typval__knapp {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: var(--svart);
+  font-weight: 700;
+}
+
+.typval__knapp::before {
+  color: var(--svart);
 }
