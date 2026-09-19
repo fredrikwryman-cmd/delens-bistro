@@ -309,8 +309,15 @@ a {
 /* --r måste sättas per märke. Var den osatt föll keyframen tillbaka
    på -9deg för båda, och b:s deklarerade 8deg skrevs över av
    animationen — de lutade åt samma håll i stället för mot varandra. */
-.sticker--a { --r: -9deg; inset-block-start: 18%; inset-inline-start: 6%; }
-.sticker--b { --r: 8deg; inset-block-start: 30%; inset-inline-end: 7%; animation-delay: -3s; }
+/* Placeringen sätts där märket står, inte här. Ett märke är alltid
+   ett påstående om något i närheten — då ska läget stå bredvid
+   påståendet och inte i en lista av lägesklasser. */
+.sticker {
+  inset-block-start: var(--s-top, auto);
+  inset-block-end: var(--s-bottom, auto);
+  inset-inline-start: var(--s-left, auto);
+  inset-inline-end: var(--s-right, auto);
+}
 
 @keyframes wobbla {
   0%, 100% { rotate: var(--r); }
@@ -323,7 +330,7 @@ a {
   animation-play-state: paused;
 }
 
-.hero[data-synlig='true'] .sticker {
+.sticker[data-synlig='true'] {
   animation-play-state: running;
 }
 
@@ -367,6 +374,106 @@ button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 3px;
+}
+
+/* ── Egna former ───────────────────────────────────────────────
+   Förlagan har trettio former mot våra nio, och åtta av våra var
+   vågövergångar. Det här är de tre som får bära resten: ett
+   kritstreck som stryker under ett ord, en pil som pekar på något
+   man ska göra, och en prickskur.
+
+   Alla tre är rena linjer i amber — samma penna genom hela sajten. */
+
+.kritstreck {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  /* Utan den här trycks linjen ihop tillsammans med vågen när svg:n
+     sträcks över ett kort ord, och strecket ser ut som en vanlig
+     understrykning i stället för ett dragen penna. */
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+/* Sitter under ordet den stryker under, inte i flödet. */
+.kritstreck--under {
+  position: absolute;
+  inset-block-end: -0.28em;
+  inset-inline: 0;
+  width: 100%;
+  opacity: 0.85;
+}
+
+.understruket {
+  position: relative;
+  display: inline-block;
+}
+
+.pil {
+  position: absolute;
+  width: clamp(72px, 9vw, 130px);
+  height: auto;
+  overflow: visible;
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.prickar {
+  position: absolute;
+  width: clamp(90px, 12vw, 170px);
+  height: auto;
+  fill: var(--amber);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ── Axelbrott ─────────────────────────────────────────────────
+   Sajten låg i ett rutnät och allt var centrerat eller
+   vänsterställt. Förlagan bryter spalten hela tiden. Fyra brott,
+   inte fler — utströsslat blir det brus igen.                    */
+
+/* 1 · Rubriken går i trappa i stället för att stapla rakt. */
+.rubrik--trappa .rubrik__rad:nth-child(2) { padding-inline-start: 0.14em; }
+.rubrik--trappa .rubrik__rad:nth-child(3) { padding-inline-start: 0.28em; }
+
+/* 2 · Rubrik som medvetet går ut ur spalten åt höger. */
+.rubrik--utanfor {
+  width: max-content;
+  max-width: none;
+  /* Den största graden. Vid 115 px rymdes "Beställ online" i spalten
+     och brottet uteblev — en rubrik som ska gå ut ur skärmen måste
+     vara för stor för skärmen. */
+  font-size: var(--t-xxxl);
+  line-height: var(--lh-xxxl);
+  letter-spacing: var(--ls-xxxl);
+}
+
+/* 3 · Bild som hänger utanför högerkanten. */
+/* Hela vägen ut till skärmkanten, inte bara en gutter förbi spalten:
+   spaltens marginal mot vyn plus gutter. */
+.bleed-hoger {
+  /* width: auto krävs. Platshållaren sätter width: 100%, och då gör en
+     negativ marginal ingenting — bredden räknas fortfarande mot
+     föräldern och elementet blir inte bredare. */
+  width: auto;
+  margin-inline-end: calc(
+    (var(--gutter) * -1) - (100vw - min(100vw, var(--wrap))) / 2
+  );
+}
+
+/* 4 · Kolumn som släpps ned ur baslinjen så raden inte blir en linjal. */
+.sank {
+  margin-block-start: clamp(1.5rem, 4vw, 3.5rem);
 }
 
 /* ═══ 0 · LADDSKÄRM ════════════════════════════════════════════ */
@@ -899,6 +1006,46 @@ input:focus-visible {
 
 
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
+
+/* Rubrik och ingress på var sin sida i stället för staplade. Pilen
+   pekar från ingressen ned mot galleriet — den säger med en linje
+   det texten bredvid säger med ord. */
+.signatur__topp {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: clamp(1.5rem, 5vw, 5rem);
+  margin-block-end: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.signatur__topp .rubrik {
+  margin-block-end: 0;
+  max-width: 14ch;
+}
+
+.ingress--hoger {
+  position: relative;
+  margin: 0;
+  max-width: 30ch;
+  text-align: end;
+}
+
+.ingress--hoger .pil {
+  inset-block-start: calc(100% + 0.4rem);
+  inset-inline-end: 12%;
+  rotate: 8deg;
+}
+
+@media (max-width: 760px) {
+  .signatur__topp {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .signatur__topp .rubrik { max-width: none; }
+  .ingress--hoger { text-align: start; max-width: none; }
+  /* Pilen pekar på ett galleri som på mobil ligger någon annanstans. */
+  .ingress--hoger .pil { display: none; }
+}
 
 /* ── Dragspelsgalleri ──────────────────────────────────────────
    Byggt efter React Bits AccordionGallery. Mekaniken är portad, inte
@@ -1632,12 +1779,18 @@ input:focus-visible {
 
 /* ═══ 8 · BESTÄLL ═════════════════════════════════════════════ */
 
+/* Inte längre centrerad — rubriken går ut ur spalten åt höger och
+   bilden hänger utanför kanten. Centrering hade ätit upp båda. */
 .bestall__inner {
-  text-align: center;
+  text-align: start;
 }
 
 .bestall__inner .ingress {
-  margin-inline: auto;
+  max-width: 38ch;
+}
+
+.bestall {
+  overflow: hidden;
 }
 
 /* ═══ 9 · FOOTER ══════════════════════════════════════════════ */

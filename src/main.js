@@ -511,12 +511,21 @@ function riggaAvslojning() {
    Wobblet är dekor och får bara kosta något när det syns.          */
 
 function riggaStickers() {
-  const hero = $('#hero');
-  if (!hero) return;
-  new IntersectionObserver(
-    ([post]) => hero.setAttribute('data-synlig', String(post.isIntersecting)),
+  // Varje MÄRKE observeras, inte sektionen det ligger i. Sektionerna är
+  // 1800 till 2900 px höga, så en sektion räknas som synlig långt efter
+  // att märket rullat ur bild — då wobblade det för ingen.
+  const sektioner = $$('.sticker');
+  if (!sektioner.length) return;
+
+  const io = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        p.target.setAttribute('data-synlig', String(p.isIntersecting));
+      }
+    },
     { threshold: 0 }
-  ).observe(hero);
+  );
+  sektioner.forEach((s) => io.observe(s));
 }
 
 /* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
