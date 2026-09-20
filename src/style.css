@@ -1661,10 +1661,30 @@ input:focus-visible {
     height: var(--sekv-band);
   }
 
+  /* HÖJDEN SÄTTS, den härleds inte ur inset.
+
+     Basregeln ger duken och stillbilden height: 100%. Ett absolut
+     placerat element som har BÅDE top, bottom och height är
+     överbestämt, och då är det bottom som ignoreras — inte height.
+     Med bara inset satt här blev därför bandets överkant rätt medan
+     höjden förblev hela scenens: uppmätt 840,8 px bild med 296,5 px
+     indrag, mot toningens 247,8. Bilden fortsatte alltså långt under
+     toningen, och där toningen tog slut uppstod en hård vågrät skarv
+     med olika delar av burgaren över och under.
+
+     ::after har ingen egen höjd i basen och räknade därför rätt hela
+     tiden — det var just skillnaden mellan de två som gav två band.
+
+     height: auto duger inte heller: för ERSATTA element, alltså img
+     och canvas, används då den inneboende höjden och bottom
+     ignoreras igen. Höjden måste vara ett tal, och bandet är
+     definitionsmässigt --sekv-band högt. */
   .sekvens__duk,
   .sekvens__still,
   .sekvens__scen::after {
-    inset: calc((100% - var(--sekv-band)) / 2) 0;
+    inset-block-start: calc((100% - var(--sekv-band)) / 2);
+    inset-inline: 0;
+    height: var(--sekv-band);
   }
 }
 
