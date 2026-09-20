@@ -1831,6 +1831,60 @@ function riggaScroll() {
   requestAnimationFrame(varv);
 }
 
+/* ═══ FOTONAS ANKOMST ════════════════════════════════════════════
+   Sajtens fem riktiga foton kommer en gång när de först syns. All
+   timing ligger i stilmallen; det här är avtryckaren.
+
+   UTGÅNGSLÄGET SÄTTS HÄRIFRÅN. Attributet står tomt i uppmärkningen,
+   så utan JS matchar ingen av reglerna och fotot står färdigt. Låg
+   maskerat läge i CSS hade en besökare utan JS fått fem tomma rutor
+   där bilderna ska vara.
+
+   Observatören kopplar bort varje foto för sig så fort det kommit
+   fram. Att spela om ankomsten varje gång man scrollar förbi är det
+   som gör scrollutlösta effekter tröttsamma andra gången.
+
+   MENYBILDERNA RÖRS INTE. De har redan sin ankomst när raden öppnas,
+   och de är sidans högfrekventa fall — ett foto byts varje gång någon
+   öppnar en rad. Där ska man dra ned, inte lägga till.            */
+
+function riggaFoton() {
+  const foton = $$('[data-foto]');
+  if (!foton.length) return;
+
+  foton.forEach((f) => f.setAttribute('data-foto', 'vantar'));
+
+  /* Masken öppnas först när bilden GÅR ATT RITA. Fotona är lazy, och
+     en mask som öppnar sig på en bild som inte hunnit fram avslöjar
+     sektionens bakgrund — sedan dyker fotot upp efteråt. Då är
+     ankomsten inte längre en ankomst utan två.
+
+     decode() på en redan hämtad bild löser sig i en mikrouppgift, så
+     i det normala fallet kostar det ingenting. Misslyckas den släpps
+     fotot ändå: en trasig bild är illa, ett foto som aldrig kommer
+     fram är värre. Samma gate som laddskärmens lager har. */
+  const slapp = (ram) => {
+    const bild = $('img', ram);
+    const satt = () => ram.setAttribute('data-foto', 'kommer');
+    if (bild && bild.decode) bild.decode().catch(() => {}).then(satt);
+    else satt();
+  };
+
+  const io = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        if (!p.isIntersecting) continue;
+        io.unobserve(p.target);
+        slapp(p.target);
+      }
+    },
+    // Samma konvention som ord- och radavslöjningen.
+    { rootMargin: '0px 0px -12% 0px', threshold: 0.15 }
+  );
+
+  foton.forEach((f) => io.observe(f));
+}
+
 /* ═══ 5 · FINALEN ════════════════════════════════════════════════
    Märket monteras av sina egna delar när sektionen kommer i vy.
    All timing ligger i stilmallen; det här är bara avtryckaren.
@@ -1957,6 +2011,7 @@ riggaOrderbar();
 // Momenten registrerar sina varvsteg FÖRE riggaScroll, som startar
 // varvet. Registreras de efter kör första bildrutan utan dem.
 riggaVagor();
+riggaFoton();
 riggaFinal();
 riggaAvskalning();
 riggaBlick();

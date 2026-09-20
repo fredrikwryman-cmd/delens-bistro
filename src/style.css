@@ -404,6 +404,85 @@ a {
   will-change: transform, opacity;
 }
 
+/* ── Fotoramar ─────────────────────────────────────────────────── */
+
+/* SAJTENS FEM RIKTIGA FOTON KOMMER EN GÅNG. En mask öppnar sig och
+   bilden sätter sig från en aning över-skala inuti ramen.
+
+   TVÅ ELEMENT KRÄVS, och det är inte en extra div för sakens skull.
+   clip-path räknas i elementets EGET koordinatsystem, före dess
+   transform — låg båda på bilden hade masken skalats med den och
+   följt med i rörelsen i stället för att stå still som en ram. Ramen
+   bär masken, bilden bär skalan.
+
+   ANSIKTENAS GEOMETRI RÖRS ALDRIG. 1,04 med overflow: hidden betyder
+   att bilden är fyra procent mer BESKUREN i början, inte utdragen.
+   Riktiga personer och en riktig lokal tål inte att förvrängas för en
+   effekt.
+
+   340 ms och var(--ut) — sajtens egen kurva. Menybilderna rörs inte:
+   de har redan sin ankomst på 220 ms, och de är sidans högfrekventa
+   fall. Där ska man dra ned, inte lägga till. */
+
+.foto {
+  display: block;
+  overflow: hidden;
+  /* Masken öppnas uppifrån och ned som standard: ett tryck som läggs
+     ned. Riktningen är data, inte en egen regel — se .foto--hoger. */
+  --foto-start: inset(0 0 100% 0);
+}
+
+.foto img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* E1 blöder ut ur skärmen åt höger. Då ska den komma därifrån —
+   samma väg ut som in. */
+.foto--hoger {
+  --foto-start: inset(0 0 0 100%);
+}
+
+/* UTGÅNGSLÄGET SÄTTS AV JS. Attributet står tomt i uppmärkningen, så
+   utan JS matchar varken 'vantar' eller 'kommer' och fotot står
+   färdigt. Samma regel som resten av sajtens ankomster. */
+/* KLIPPET LIGGER PÅ BILDEN, INTE PÅ RAMEN, och det är mätt fram.
+
+   Ett element kan inte observera sig självt medan det är bortklippt:
+   med clip-path på ramen rapporterade IntersectionObserver
+   intersectionRatio 0 och en intersectionRect på noll pixlars höjd —
+   mot 0,958 och 198 px utan klippet. Ankomsten utlöstes alltså aldrig,
+   eftersom tröskeln 0,15 inte kan nås av något som är klippt till
+   ingenting. Ramen står nu oklippt och observeras; bilden bär både
+   masken och skalan.
+
+   Att båda ligger på samma element kostar en detalj: clip-path räknas
+   före transform, så maskens kant skalas med de fyra procenten. Felet
+   är som störst när masken är stängd — alltså när ingenting syns —
+   och noll när den är öppen. Ramens overflow: hidden kapar
+   överskalan oavsett. */
+[data-foto='vantar'] img {
+  clip-path: var(--foto-start);
+  transform: scale(1.04);
+}
+
+[data-foto='kommer'] img {
+  animation: foto-fram 340ms var(--ut) both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+@keyframes foto-fram {
+  from {
+    clip-path: var(--foto-start);
+    transform: scale(1.04);
+  }
+  to {
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+
 /* ── Klistermärken ───────────────────────────────────────────────── */
 
 /* Åtta retromaskotar ersätter de sex märken som byggdes i CSS. De
@@ -1195,9 +1274,32 @@ input:focus-visible {
   align-items: start;
 }
 
+/* 220 ms, inte 300. Övergången stod redan här men utlöstes av
+   ingenting; nu när den används ska den tala sajtens språk, och
+   sajtens hovertid är 220. rotate måste stå med i listan — det är en
+   egen egenskap, inte en del av transform. */
 .kort {
   position: relative;
-  transition: transform 300ms var(--ut);
+  transition:
+    transform 220ms var(--ut),
+    rotate 220ms var(--ut);
+}
+
+/* C · KORTET RÄTAR UPP SIG. Ett tryck man lyfter för att titta
+   närmare på.
+
+   RÄTNINGEN BÄR RÖRELSEN, inte lyftet. Ett kort som bara åker mot
+   betraktaren läser som en knapp, och korten är inte klickbara — de
+   är foton på ett bord. Att vinkeln minskar säger i stället att någon
+   justerar bilden för att se den rakt. Lyftet är fyra pixlar och
+   finns bara för att skuggan ska ha något att falla från. */
+@media (hover: hover) and (pointer: fine) {
+  .rebrand__bilder .kort:hover {
+    transform: translateY(-4px);
+  }
+
+  .rebrand__bilder .kort--lut-a:hover { rotate: -1.5deg; }
+  .rebrand__bilder .kort--lut-b:hover { rotate: 2deg; }
 }
 
 .kort--lut-a { rotate: -3.5deg; }
@@ -3519,6 +3621,41 @@ input:focus-visible {
   .kedja {
     display: none;
   }
+
+  /* FOTONA: masken står öppen direkt och bilden i sin rätta skala.
+     Kvar blir en kort toning, så bilden inte hugger fram. Ett foto som
+     bara är där är inte en mildare version av ett foto som kommer —
+     det är ingen version alls. */
+  [data-foto='vantar'] {
+    opacity: 0;
+  }
+
+  [data-foto='vantar'] img {
+    clip-path: none;
+    transform: none;
+  }
+
+  [data-foto='kommer'] {
+    animation: foto-tona 200ms linear both !important;
+  }
+
+  [data-foto='kommer'] img {
+    animation: none;
+    clip-path: none;
+    transform: none;
+  }
+
+  @keyframes foto-tona {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .rebrand__bilder .kort:hover {
+    transform: none;
+  }
+
+  .rebrand__bilder .kort--lut-a:hover { rotate: -3.5deg; }
+  .rebrand__bilder .kort--lut-b:hover { rotate: 4.5deg; }
 
   /* BYGGKREDITEN: tillstånden står kvar, rörelsen tas bort. Hörnen
      vandrar inte och lådorna glider inte — de tänds. Ett ord som

@@ -242,9 +242,16 @@
             </div>
             <div class="rebrand__bilder">
               <div class="kort kort--lut-a">
-                <img src="/bilder/lokal/E2.webp"
-                     alt="En hand pressar smashpressen mot puckarna på den heta plåten."
-                     width="1200" height="800" loading="lazy" decoding="async" />
+                <!-- Fotona kommer EN gång: en mask öppnar sig och bilden
+                     sätter sig från en aning över-skala inuti ramen. Ansiktenas
+                     geometri rörs aldrig — bilden är bara mer beskuren i
+                     början. Se .foto i stilmallen; --i ger paret sin
+                     förskjutning. -->
+                <span class="foto foto--par" data-foto style="--i: 0">
+                  <img src="/bilder/lokal/E2.webp"
+                       alt="En hand pressar smashpressen mot puckarna på den heta plåten."
+                       width="1200" height="800" loading="lazy" decoding="async" />
+                </span>
                 <!-- Maskotens röda ligger på 1,47:1 mot sektionens djupröda
                      och ingen röd i paletten löser det — skälen står i
                      stilmallen. Märket står därför på kortets mörka yta,
@@ -262,9 +269,11 @@
                 <span class="kort__etikett">Smashmomentet</span>
               </div>
               <div class="kort kort--lut-b">
-                <img src="/bilder/lokal/E3.webp"
-                     alt="Hakan med korsade armar framför baren, i svart t-shirt med restaurangens logotyp."
-                     width="900" height="1201" loading="lazy" decoding="async" />
+                <span class="foto foto--par" data-foto style="--i: 1">
+                  <img src="/bilder/lokal/E3.webp"
+                       alt="Hakan med korsade armar framför baren, i svart t-shirt med restaurangens logotyp."
+                       width="900" height="1201" loading="lazy" decoding="async" />
+                </span>
                 <span class="kort__etikett">Hakan tog över</span>
               </div>
             </div>
@@ -425,9 +434,11 @@
           </div>
 
           <figure class="personal__bild">
-            <img src="/bilder/lokal/E5.webp"
-                 alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
-                 width="1600" height="900" loading="lazy" decoding="async" />
+            <span class="foto" data-foto>
+              <img src="/bilder/lokal/E5.webp"
+                   alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
+                   width="1600" height="900" loading="lazy" decoding="async" />
+            </span>
             <figcaption class="bildtext">
               Från vänster: Ömer Delen, Hakan Delen och Emil Haglund.
             </figcaption>
@@ -511,9 +522,11 @@
               <p><a class="lank" id="hitta-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
             </div>
             <div class="hitta__block hitta__block--bild">
-              <img src="/bilder/lokal/E4.webp"
-                   alt="Delens Bistro på Centralvägen 3: mörk fasad med skylten Fast Food &amp; Bar, uteservering och en vimpel vid entrén."
-                   width="1600" height="900" loading="lazy" decoding="async" />
+              <span class="foto" data-foto>
+                <img src="/bilder/lokal/E4.webp"
+                     alt="Delens Bistro på Centralvägen 3: mörk fasad med skylten Fast Food &amp; Bar, uteservering och en vimpel vid entrén."
+                     width="1600" height="900" loading="lazy" decoding="async" />
+              </span>
               <span class="kort__etikett">Fasaden</span>
             </div>
           </div>
@@ -548,9 +561,13 @@
               Beställ nu
             </a>
           </div>
-          <img class="bestall__bild bleed-hoger" src="/bilder/lokal/E1.webp"
-               alt="Baren hos Delens Bistro: ölpelare, hängande glas och svartguldig marmor."
-               width="1400" height="1051" loading="lazy" decoding="async" />
+          <!-- Masken öppnas FRÅN HÖGER. Bilden är beskuren ut ur skärmen
+               åt det hållet, och då ska den komma därifrån. -->
+          <span class="foto foto--hoger bestall__bild bleed-hoger" data-foto>
+            <img src="/bilder/lokal/E1.webp"
+                 alt="Baren hos Delens Bistro: ölpelare, hängande glas och svartguldig marmor."
+                 width="1400" height="1051" loading="lazy" decoding="async" />
+          </span>
         </div>
       </section>
 
