@@ -842,6 +842,42 @@ const VAG = {
   skalaMax: () => (window.innerWidth < 720 ? 1.2 : 1.5)
 };
 
+/** Hur långt banan dras ut förbi viewBoxen, i användarenheter.
+ *  90 räcker med marginal: rutan är 1440 bred och ritas som mest
+ *  några procent bredare än så, så ändarna hamnar säkert utanför. */
+const FORLANGNING = 90;
+
+/**
+ * Förlänger en vågbana rakt ut genom båda kanterna längs sina egna
+ * tangenter. Se varvsteget i riggaVagor för skälet.
+ *
+ * Banorna har formen M + två C, alltså fjorton tal. Har en bana någon
+ * annan form lämnas den orörd — hellre en bana som ser ut som förut
+ * än en som byggs fel av en gissning om dess uppbyggnad.
+ */
+function forlangBana(d, tal) {
+  if (!tal || tal.length !== 14) return d;
+
+  const [x0, y0, c1x, c1y] = tal;
+  const c5x = tal[10];
+  const c5y = tal[11];
+  const x6 = tal[12];
+  const y6 = tal[13];
+
+  // Math.max skyddar mot division med noll om två punkter skulle
+  // hamna på samma x — då blir riktningen odefinierad.
+  const kv = FORLANGNING / Math.max(1, c1x - x0);
+  const vx = (x0 - FORLANGNING).toFixed(1);
+  const vy = (y0 - kv * (c1y - y0)).toFixed(1);
+
+  const kh = FORLANGNING / Math.max(1, x6 - c5x);
+  const hx = (x6 + FORLANGNING).toFixed(1);
+  const hy = (y6 + kh * (y6 - c5y)).toFixed(1);
+
+  // d börjar med 'M'; resten blir en L in till den gamla startpunkten.
+  return `M${vx},${vy} L${d.slice(1)} L${hx},${hy}`;
+}
+
 function riggaVagor() {
   const vagor = $$('.wave');
   if (!vagor.length) return;
@@ -920,7 +956,32 @@ function riggaVagor() {
       }
 
       let n = 0;
-      const d = s.bana.replace(/-?\d+(\.\d+)?/g, () => tal[n++].toFixed(1));
+      const kurva = s.bana.replace(/-?\d+(\.\d+)?/g, () =>
+        tal[n++].toFixed(1)
+      );
+
+      /* ── BANAN GÅR UT GENOM BÅDA KANTERNA ────────────────────────
+         Källbanorna börjar på x=0 och slutar på x=1440, alltså exakt
+         på viewBoxens kanter, och strecket har raka ändar. Linjen
+         SLUTAR därmed inne i bild i stället för att fortsätta ut ur
+         den, och den avslutningen syns: som en trubbig ände, eller —
+         när vaggningen gör starten brant — som en tunn stump i
+         vänsterkanten. preserveAspectRatio="none" gör det värre,
+         eftersom x och y skalas olika och ändens vinkel följer med.
+
+         Att göra strecket tjockare eller rundat döljer det bara. Det
+         som tar bort felet är att banan aldrig tar slut i bild: här
+         förlängs den FORLANGNING enheter åt vardera hållet innan den
+         ritas, så ändarna hamnar utanför rutan och klipps av vyn.
+
+         FÖRLÄNGNINGEN FÖLJER TANGENTEN, inte vågrätt. Kurvans
+         riktning i änden ges av första respektive sista styrpunkten;
+         en rak bit i samma riktning möter kurvan utan knyck. En
+         vågrät bit hade gett en synlig vinkel just där man tittar.
+
+         Talen läses ur tal[], alltså ur den vaggade banan, så
+         förlängningen följer med i varje läge av rörelsen.        */
+      const d = forlangBana(kurva, tal);
       if (d === s.sist) continue;
       s.sist = d;
 
@@ -928,7 +989,14 @@ function riggaVagor() {
       // Kroppen är kurvan sluten upp till viewBoxens överkant. Ytan
       // som fylls är alltså den OVANFÖR vågen, och den bär grannens
       // färg — det är själva snittet mellan de två sektionerna.
-      if (s.kropp) s.kropp.setAttribute('d', d + ' L1440,0 L0,0 Z');
+      // Hörnen följer den förlängda banan, annars slutar fyllningen
+      // innanför strecket och en kil av fel färg blir kvar i kanten.
+      if (s.kropp) {
+        s.kropp.setAttribute(
+          'd',
+          d + ` L${1440 + FORLANGNING},0 L${-FORLANGNING},0 Z`
+        );
+      }
 
       /* Scrubben: hur nära är sektionens överkant? Mätt ovan.
 
