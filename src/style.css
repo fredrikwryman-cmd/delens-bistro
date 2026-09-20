@@ -1624,6 +1624,48 @@ input:focus-visible {
   .sekvens[data-rorlig='true'] .sekvens__spar {
     height: 200svh;
   }
+
+  /* ── BANDET PÅ STÅENDE TELEFON ──────────────────────────────────
+     Full täckning av vyn kostar för mycket här. En stående telefon är
+     omkring 0,46 bred mot hög; rutan är 1,78. Att fylla höjden betyder
+     att bredden skalas 3,8 gånger förbi skärmen, och kvar syns 26
+     procent av bilden. Neonskylten mäter x 13 till 88 procent, alltså
+     75 procent av bredden — den blev kapad i båda ändar, och utan
+     skylten är det bara en burgare på svart botten.
+
+     Alltså: lägre scen i stället för bredare beskärning. Bandet är
+     lika brett som vyn och 64 procent så högt, vilket ger
+     (1 / 0,64) / (16 / 9) = 87,9 procent av rutans bredd. Skylten
+     ryms med drygt fem procentenheter marginal i vardera änden, och
+     så gör även den bredaste bildrutan i sekvensen, där garneringen
+     flyger ut till 11,9 och 92,7 procent. Höjden beskärs inte alls:
+     hela burgaren syns.
+
+     64 valdes mätt, inte känt. 68 hade gett 82,7 procent och kapat
+     den bredaste rutan; 56 hade visat hela bredden men gjort bandet
+     till en remsa på 218 px. 64 ger 250 px på en 390 px bred telefon.
+
+     BANDET CENTRERAS I SCENEN, SCENEN RÖRS INTE. Scenen är kvar på
+     100svh och klistras som förut, så scrollmappningen i main.js
+     räknar på samma tal som på desktop — den mäter scenens höjd, och
+     hade bandet varit scenen skulle ett klisteravstånd ha behövt
+     räknas bort från framsteget. Här får i stället duken, stillbilden
+     OCH kanttoningen samma indrag, så toningen ligger på bandets
+     kanter och inte på vyns.
+
+     I stilla läge, alltså utan JS och vid reducerad rörelse, är
+     scenen själv 64vw hög. Då blir indraget noll och bandet fyller
+     scenen — samma beskärning i båda lägena. */
+  .sekvens__scen {
+    --sekv-band: 64vw;
+    height: var(--sekv-band);
+  }
+
+  .sekvens__duk,
+  .sekvens__still,
+  .sekvens__scen::after {
+    inset: calc((100% - var(--sekv-band)) / 2) 0;
+  }
 }
 
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
@@ -3017,55 +3059,63 @@ input:focus-visible {
   outline-offset: 6px;
 }
 
-/* SLUTLÄGET ÄR UTGÅNGSLÄGET NÄR DET INTE FINNS NÅGON HOVER. På en
-   telefon finns ingen pekare att avslöja med, och en knapp som står
-   kvar som ordet "Webbdesign" säger ingenting om vart den leder.
-   Utan hover visas därför lådorna och namnet direkt. */
-/* PEKSKÄRMENS VILOLÄGE ÄR TYSTARE ÄN HOVERNS.
+/* PÅ PEKSKÄRM ÄR KREDITEN BARA EN LÄNK.
 
-   En telefon kan inte hovra, så knappen måste visa sitt innehåll
-   direkt — annars står den kvar som ordet "Webbdesign" med en länk
-   till en sajt den inte nämner. Men att visa HOVERLÄGET direkt gav
-   tre fyllda amber-element som stod utfällda hela tiden: uppmätt
-   156 × 132 px, alltså 19 procent av footerns höjd, permanent.
+   Knappen är byggd för en pekare: hörnen vandrar, orden byts med ett
+   sudd, lådorna glider ut. Ingenting av det finns på en telefon, och
+   det som blev kvar var mekanikens SLUTLÄGE utfällt för alltid — två
+   rader text i en hörnram som ingen bett om och som tog plats i
+   kolofonen hela tiden.
 
-   Här visas därför NAMNET OCH ADRESSEN utan fyllning. Lådorna
-   tappar sin bakgrund och tar den dämpade färgen, "Byggd av" utgår
-   helt — det står redan i länkens tillgängliga namn — och kvar blir
-   två rader tyst text i en hörnram. */
+   Här står i stället ordet Webbdesign, och inget annat. Ramen,
+   hörnen, lådorna och namnbytet tas bort, och kvar blir en rad i
+   samma register som uppgifterna omkring: namn, adress, telefon,
+   byggare.
+
+   INVÄNDNINGEN SOM STOD HÄR FÖRUT var att ordet Webbdesign inte
+   säger vart länken leder. Den gäller för ögat men inte för tekniken:
+   länkens tillgängliga namn är hela raden \"Byggd av AiM Studios —
+   aimstudios.se\", satt med .visuellt-dold i uppmärkningen, så en
+   skärmläsare läser upp både vem och vart. Fredrik har vägt kortheten
+   mot tydligheten och valt kortheten. Ändras det tillbaka är det den
+   här regeln som ska bort, inte något i uppmärkningen. */
 @media not all and (hover: hover) and (pointer: fine) {
   .byggd {
-    /* Adressraden hänger under knappen på pekskärm och behöver sin
-       plats innan nästa spalt börjar. */
-    margin-block: clamp(1.1rem, 2.5vw, 1.6rem) 2.75rem;
+    /* Ingen ram i sidled — raden ligger i linje med uppgifterna
+       omkring och ska inte dras in.
+
+       PADDNINGEN I HÖJDLED STÅR KVAR, och det är hela skälet till att
+       den inte nollas rakt av: på pekskärm ÄR den här paddningen
+       träffytan. Utan den blir länken bara sin textrad, omkring 17 px
+       hög, och det är för lite att träffa med ett finger. Med 0,7rem
+       i över- och underkant mäter ytan runt 39 px, nära de 44 som är
+       riktmärket. Luften syns inte — en textlänk har ingen ram som
+       avslöjar var paddningen tar vid. */
+    margin: clamp(1.1rem, 2.5vw, 1.6rem) 0 0;
+    padding: 0.7rem 0;
+    display: block;
+    text-align: start;
   }
 
-  .byggd__lada--upp {
+  /* Allt som hör till mekaniken utgår: de två lådorna, det andra
+     ordet och de fyra hörnen. display: none och inte opacity — ett
+     genomskinligt element tar fortfarande plats, och det var just
+     platsen som var problemet. */
+  .byggd__lada,
+  .byggd__aktiv,
+  .byggd__horn {
     display: none;
   }
 
-  .byggd__lada--ner {
-    opacity: 1;
-    transform: none;
-    background: none;
-    color: var(--byggd-farg);
-    padding-block-start: 0.45rem;
+  .byggd__mitt {
+    display: block;
   }
 
   .byggd__vila {
-    opacity: 0;
-  }
-
-  .byggd__aktiv {
     opacity: 1;
     transform: none;
     filter: none;
   }
-
-  .byggd__horn--nv { transform: translate(calc(var(--byggd-vandring) * -1), calc(var(--byggd-vandring) * -1)); }
-  .byggd__horn--no { transform: translate(var(--byggd-vandring), calc(var(--byggd-vandring) * -1)); }
-  .byggd__horn--sv { transform: translate(calc(var(--byggd-vandring) * -1), var(--byggd-vandring)); }
-  .byggd__horn--so { transform: translate(var(--byggd-vandring), var(--byggd-vandring)); }
 }
 
 @media (hover: hover) and (pointer: fine) {
