@@ -56,12 +56,31 @@ function startaLaddskarm() {
   const fyll = $('#loader-fill');
   const delar = $$('.loader__part');
 
-  const hoppaOver =
-    reducerad.matches || sessionStorage.getItem('delens-sedd') === '1';
+  /* Ingen laddskärm i markupen: sidan ska visas, inte vänta på ett
+     löfte som aldrig löses. */
+  if (!el) return Promise.resolve();
 
-  if (hoppaOver) {
+  /* Sessionsminnet kan KASTA, inte bara sakna värde — privat läge och
+     blockerade kakor ger SecurityError på själva åtkomsten. Förut låg
+     läsningen bar i uttrycket nedan, så ett kast här tog med sig hela
+     startaLaddskarm() och därmed avslöjningen: sidan blev stående
+     bakom en laddskärm som ingen längre räknade ned. Går minnet inte
+     att läsa visas skärmen, vilket är det ofarliga av de två. */
+  const sedd = () => {
+    try {
+      return sessionStorage.getItem('delens-sedd') === '1';
+    } catch {
+      return false;
+    }
+  };
+
+  const doljSkarmen = () => {
     el.setAttribute('data-klar', 'true');
     el.setAttribute('aria-hidden', 'true');
+  };
+
+  if (reducerad.matches || sedd()) {
+    doljSkarmen();
     return Promise.resolve();
   }
 
@@ -69,6 +88,45 @@ function startaLaddskarm() {
     const start = performance.now();
     const steg =
       (LADD_TAK_MS - LADD_SLUTSPEL_MS) / (laddEtapper.length - 1);
+
+    /* ── TAKET ──────────────────────────────────────────────────────
+       Ett tak som inte håller när något går fel är inget tak.
+
+       Nedräkningen låg förut ENBART i rAF-slingan: bredden räknades
+       där, och skärmen släpptes i samma gren som satte bredden till
+       100. Men rAF är ingen klocka. Webbläsaren pausar den helt medan
+       dokumentet är dolt — bakgrundsflik, minimerat fönster, en flik
+       som återställs efter en omstart utan att få fokus. Då kördes
+       tick aldrig en enda gång: stapeln stod på noll, texten stod
+       kvar på markupens "Värmer plåten …", löftet löstes aldrig, och
+       avslöjningen startade aldrig. Sidan gick inte att öppna, och en
+       hård omladdning i samma dolda flik gav samma sak.
+
+       Taket går därför på setTimeout, som tickar vidare också i en
+       dold flik, och släppet är skilt från ritandet. rAF får nu göra
+       en enda sak: måla stapeln medan någon tittar på den. */
+
+    let slappt = false;
+    let tak;
+
+    const slapp = () => {
+      if (slappt) return; // rAF och taket kan båda hinna hit
+      slappt = true;
+      clearTimeout(tak);
+      /* Varje steg står för sig. Ett kast i ett får inte hindra
+         klar() — det är det löftet resten av sidan hänger på. */
+      if (fyll) fyll.style.width = '100%';
+      doljSkarmen();
+      try {
+        sessionStorage.setItem('delens-sedd', '1');
+      } catch {
+        /* Skrivningen är en bekvämlighet: utan den visas skärmen igen
+           vid nästa sidbyte. Det är inte värt att fastna för. */
+      }
+      klar();
+    };
+
+    tak = setTimeout(slapp, LADD_TAK_MS);
 
     /* Lagret släpps när DESS EGEN bild går att rita, inte när
        klockan säger till. Delarna var ritade former förut och fanns i
@@ -92,24 +150,25 @@ function startaLaddskarm() {
 
     laddEtapper.forEach((rad, i) => {
       setTimeout(() => {
-        text.textContent = rad;
+        if (slappt) return; // taket hann före: skärmen är redan borta
+        if (text) text.textContent = rad;
         slappLager(i);
         // Sista lagret landar: hela stapeln stukas och reser sig.
         if (i === laddEtapper.length - 1) setTimeout(stukaStapeln, 300);
       }, steg * i);
     });
 
+    /* Stapeln målas så länge någon kan se den. Slingan äger inte
+       längre släppet, så att den pausas i en dold flik är harmlöst —
+       taket ovan räknar ned ändå. */
     const tick = () => {
+      if (slappt) return;
       const gatt = performance.now() - start;
-      fyll.style.width = Math.min(100, (gatt / LADD_TAK_MS) * 100) + '%';
-      if (gatt < LADD_TAK_MS) {
-        requestAnimationFrame(tick);
-      } else {
-        el.setAttribute('data-klar', 'true');
-        el.setAttribute('aria-hidden', 'true');
-        sessionStorage.setItem('delens-sedd', '1');
-        klar();
+      if (fyll) {
+        fyll.style.width = Math.min(100, (gatt / LADD_TAK_MS) * 100) + '%';
       }
+      if (gatt < LADD_TAK_MS) requestAnimationFrame(tick);
+      else slapp();
     };
     requestAnimationFrame(tick);
   });
