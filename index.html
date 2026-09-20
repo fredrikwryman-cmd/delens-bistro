@@ -321,6 +321,16 @@
                  bred och mer detalj finns inte. -->
             <canvas class="sekvens__duk" id="sekvens-duk" width="1280" height="720"
                     aria-hidden="true"></canvas>
+            <!-- FILMKORNET LIGGER ÖVER DUKEN och under kanttoningen,
+                 alltså tonas det bort i kanterna tillsammans med
+                 bilden. Ordningen är dokumentordningen: scenens
+                 ::after målas sist av allt i sin stackningskontext.
+
+                 Tomt element med flit. Kornet är en yta, inte ett
+                 innehåll — det hör hemma i stilmallen, och en
+                 bakgrundsbild på ett tomt lager rör aldrig duken
+                 under. Se .sekvens__korn och verktyg/korn.mjs. -->
+            <div class="sekvens__korn" aria-hidden="true"></div>
           </div>
         </div>
       </section>

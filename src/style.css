@@ -1500,6 +1500,48 @@ input:focus-visible {
   opacity: 1;
 }
 
+/* FILMKORNET.
+
+   Rutorna är 1280 px, alltså källans tak, men på en bredare vy
+   förstoras de ändå — och WebP vid kvalitet 66 lämnar mjuka fält i
+   rök och neonglöd där banding och blockkanter syns. Ett jämnt brus
+   ger ögat en struktur att läsa, och då läses de mjuka fälten som
+   film i stället för som dålig kvalitet. Se verktyg/korn.mjs för hur
+   rutan görs och varför den har två toner.
+
+   STYRKAN STÅR I EN VARIABEL för att gå att skruva på utan att leta
+   i filen. 0,06 är satt efter ögat: under 0,04 döljer kornet
+   ingenting, över 0,10 lägger det sig som damm över bilden i stället
+   för i den. Reglaget bakom ?korn i main.js skriver samma variabel.
+
+   KORNET ÄR STILLA, och det är ett val. Riktigt filmkorn kokar, och
+   ett lager som hoppar mellan åtta lägen hade bundit kornet till
+   bilden i stället för till skärmen. Men det kräver en oändlig
+   animation över en yta som fyller hela vyn, och då hålls
+   kompositören vaken så länge sidan är öppen — också när sektionen
+   ligger långt utanför vyn. Kravet var att kornet inte får kosta
+   bildrutor, och en stillastående bakgrundsbild kostar noll: den
+   målas en gång och rörs aldrig mer. Vid 0,06 läser den som struktur
+   ändå, eftersom det är BILDEN under som rör sig.
+
+   INGEN mix-blend-mode, av samma skäl. Ett blandningsläge över en duk
+   som fyller vyn tvingar kompositören att läsa tillbaka underlaget
+   varje bildruta, och duken ritas redan varje bildruta. Rutans två
+   toner bär både ljusning och mörkning i alfan, så vanlig
+   genomskinlighet räcker. */
+.sekvens__korn {
+  position: absolute;
+  inset: 0;
+  background-image: url('/bilder/korn/korn.webp');
+  background-repeat: repeat;
+  /* Rutans egna 160 px, alltså i CSS-pixlar. På en skärm med dubbel
+     pixeltäthet blir varje kornpixel två enheter bred — det är rätt:
+     korn som följer pixeltätheten blir osynligt på en tät skärm. */
+  background-size: 160px 160px;
+  opacity: var(--korn-styrka, 0.06);
+  pointer-events: none;
+}
+
 /* KANTERNA TONAS BORT I SEKTIONENS SVARTA.
 
    Bildrutornas bakgrund ÄR nästan sektionens färg — rök mot nära
