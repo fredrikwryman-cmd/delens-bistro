@@ -1885,6 +1885,199 @@ function riggaFoton() {
   foton.forEach((f) => io.observe(f));
 }
 
+/* ═══ FOTOKORTEN — FÖLJNING OCH KAST ═════════════════════════════
+   Sex kort som beter sig som föremål. Ingen knapp, ingen dragning:
+   kortet följer pekaren så fort den är över det, och när pekaren
+   lämnar det kastas det i väg och bromsar in mot sitt viloläge.
+
+   VÄRDENA ÄR CRAV:S, och mekaniken är sajtens egen — samma
+   tröghetskast som ligger i footerns jonglering, kopplat hit:
+
+     fart      30 × pekarens rörelse vid utträdet
+     vridning  2 × kortets grundvinkel, som tak
+     motstånd  150
+
+   FÖLJNINGEN ÄR DÄMPAD, och det är inte en smaksak. Följer kortet
+   pekaren ett mot ett står pekaren stilla i förhållande till kortet —
+   den kan aldrig lämna det, och kastet utlöses aldrig. Med 0,55 glider
+   pekaren ifrån kortet och når till slut kanten. Taket på 64 px finns
+   av samma skäl: utan det kan ett kort dras hur långt som helst från
+   sin plats och tappar sambandet med spalten det hör till.
+
+   VRIDNINGEN FÖLJER FÖRFLYTTNINGEN I SIDLED, inte pekarens hastighet.
+   Ett kort som vrids av farten snurrar okontrollerat vid ett snabbt
+   ryck; ett kort som vrids av var det ligger lutar åt det håll det
+   dragits, vilket är vad ett föremål på ett bord gör. Taket är två
+   gånger grundvinkeln, så ett kort med 3,5 graders viloläge kan luta
+   som mest sju.
+
+   HEMGÅNGEN ÄR EN FJÄDER med dämpning nära kritisk. Ett kort som
+   studsar tillbaka läser som gummi; ett som glider hem läser som
+   papper med friktion mot bordet.
+
+   MOBILEN HAR INGEN HOVER, och det finns ingenting att följa. Där
+   står korten i sin grundlutning med sina rundade hörn och sin
+   skugga — fysiska av form, inte av rörelse. Att lösa det med
+   dragning vore att bygga just det du sa nej till.             */
+
+const KORT = {
+  folj: 0.55,
+  tak: 64,
+  vridTakFaktor: 2,
+  vridPerPx: 0.06,
+  kastFart: 30,
+  motstand: 150,
+  fjaderK: 78,
+  fjaderD: 13
+};
+
+function riggaFotokort() {
+  const kort = $$('.foto');
+  if (!kort.length) return;
+  if (reducerad.matches || !pekareMedHover.matches) return;
+
+  const klamp = (v, max) => Math.max(-max, Math.min(max, v));
+
+  const spar = kort.map((el) => {
+    const lut = parseFloat(getComputedStyle(el).getPropertyValue('--lut')) || 0;
+    return {
+      el,
+      lut,
+      vridTak: Math.max(4, Math.abs(lut) * KORT.vridTakFaktor),
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      inne: false,
+      vila: null,
+      sistX: 0,
+      sistY: 0,
+      dx: 0,
+      dy: 0,
+      sist: ''
+    };
+  });
+
+  /* TRÄFFYTAN ÄR KORTETS VILOLÄGE, INTE KORTET.
+
+     Första bygget lyssnade på pointerenter och pointerleave på kortet
+     självt. Det kan inte fungera: kortet flyttar sig under pekaren,
+     så träffytan rör sig medan man är inne i den. Uppmätt vid en
+     långsam passage tvärs över ett kort — SEX inträden och FEM
+     utträden, alltså fem kast och fem återfångster på en enda
+     rörelse. Kortet skakade i stället för att följa.
+
+     Värre: kortet kunde äta upp pekaren. Flyttar det sig åt samma
+     håll som pekaren är på väg ut täcker det utgången, sista
+     händelsen blir ett INTRÄDE, och då står kortet kvar för alltid.
+     Uppmätt slutläge efter en passage: x = 64, alltså parkerat på
+     klämgränsen utan väg hem.
+
+     Nu ligger lyssnarna på kortets FÖRÄLDER, som står stilla, och
+     träffprovet görs mot kortets viloruta som vi räknar ut själva:
+     nuvarande ruta minus den förflyttning vi lagt på. Rutan lagras i
+     dokumentkoordinater, så den överlever att man scrollar medan man
+     hovrar. Kortet kan då inte påverka sin egen träffyta, och in och
+     ut blir ett av varje. */
+  const slappKort = (k) => {
+    k.inne = false;
+    // Kastet ärver pekarens rörelse i utträdesögonblicket.
+    k.vx = k.dx * KORT.kastFart;
+    k.vy = k.dy * KORT.kastFart;
+  };
+
+  for (const k of spar) {
+    const vard = k.el.parentElement || k.el;
+
+    const matVila = () => {
+      const r = k.el.getBoundingClientRect();
+      k.vila = {
+        l: r.left + window.scrollX - k.x,
+        t: r.top + window.scrollY - k.y,
+        b: r.width,
+        h: r.height
+      };
+    };
+
+    vard.addEventListener('pointerenter', matVila);
+
+    vard.addEventListener('pointermove', (e) => {
+      if (!k.vila) matVila();
+      const px = e.clientX + window.scrollX;
+      const py = e.clientY + window.scrollY;
+      const inne =
+        px >= k.vila.l && px <= k.vila.l + k.vila.b &&
+        py >= k.vila.t && py <= k.vila.t + k.vila.h;
+
+      if (inne && !k.inne) {
+        k.inne = true;
+        k.sistX = e.clientX;
+        k.sistY = e.clientY;
+        k.dx = 0;
+        k.dy = 0;
+        k.el.style.willChange = 'transform';
+        return;
+      }
+      if (!inne) {
+        if (k.inne) slappKort(k);
+        return;
+      }
+
+      k.dx = e.clientX - k.sistX;
+      k.dy = e.clientY - k.sistY;
+      k.sistX = e.clientX;
+      k.sistY = e.clientY;
+      k.x = klamp(k.x + k.dx * KORT.folj, KORT.tak);
+      k.y = klamp(k.y + k.dy * KORT.folj, KORT.tak);
+    });
+
+    vard.addEventListener('pointerleave', () => {
+      if (k.inne) slappKort(k);
+    });
+  }
+
+  varvSteg.push((nu, dt) => {
+    if (flikenDold) return;
+    const steg = Math.min(dt, 34) / 1000;
+
+    for (const k of spar) {
+      if (!k.inne && !k.x && !k.y && !k.vx && !k.vy) {
+        /* Vilande kort ska inte ligga kvar som ett eget lager.
+           will-change tas bort här och inte bara i insomningsgrenen:
+           uppmätt blev den kvar på 'transform' efter en passage,
+           eftersom kortet kunde nå exakt noll utan att passera genom
+           den grenen. Sex kort med varsitt onödigt lager är sex lager
+           för mycket på en sida som redan komponerar mycket. */
+        if (k.el.style.willChange) k.el.style.willChange = '';
+        continue;
+      }
+
+      if (!k.inne) {
+        /* Motståndet drar ned farten, fjädern drar hem kortet. Samma
+           bromsformel som jongleringens fria kast. */
+        const broms = Math.max(0, 1 - (KORT.motstand / 1000) * steg * 6);
+        k.vx = (k.vx + (-KORT.fjaderK * k.x - KORT.fjaderD * k.vx) * steg) * broms;
+        k.vy = (k.vy + (-KORT.fjaderK * k.y - KORT.fjaderD * k.vy) * steg) * broms;
+        k.x += k.vx * steg;
+        k.y += k.vy * steg;
+
+        // Nära nog hemma: lägg ned det exakt och sluta räkna.
+        if (Math.abs(k.x) < 0.2 && Math.abs(k.y) < 0.2 &&
+            Math.abs(k.vx) < 1 && Math.abs(k.vy) < 1) {
+          k.x = 0; k.y = 0; k.vx = 0; k.vy = 0;
+          k.el.style.willChange = '';
+        }
+      }
+
+      const vrid = klamp(k.x * KORT.vridPerPx, k.vridTak);
+      const d = `translate3d(${k.x.toFixed(1)}px, ${k.y.toFixed(1)}px, 0) rotate(${vrid.toFixed(2)}deg)`;
+      if (d === k.sist) continue;
+      k.sist = d;
+      k.el.style.transform = d;
+    }
+  });
+}
+
 /* ═══ 5 · FINALEN ════════════════════════════════════════════════
    Märket monteras av sina egna delar när sektionen kommer i vy.
    All timing ligger i stilmallen; det här är bara avtryckaren.
@@ -2012,6 +2205,7 @@ riggaOrderbar();
 // varvet. Registreras de efter kör första bildrutan utan dem.
 riggaVagor();
 riggaFoton();
+riggaFotokort();
 riggaFinal();
 riggaAvskalning();
 riggaBlick();

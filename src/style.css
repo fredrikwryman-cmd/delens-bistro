@@ -424,9 +424,29 @@ a {
    de har redan sin ankomst på 220 ms, och de är sidans högfrekventa
    fall. Där ska man dra ned, inte lägga till. */
 
+/* FOTONA ÄR KORT, INTE BILDER PÅ EN SIDA.
+
+   Tre saker gör skillnaden, och ingen av dem är rörelsen: en
+   grundlutning, rundade hörn och en skugga. Ett foto som ligger
+   spikrakt i en spalt läser som tryck på papper; samma foto med två
+   graders lutning och en skugga under läser som ett kort någon lagt
+   ned. Rörelsen kommer sedan ovanpå och bekräftar det.
+
+   --lut är kortets viloläge och sätts per kort i uppmärkningen. JS
+   lägger sin förflyttning OVANPÅ den vinkeln, aldrig i stället för
+   den, så ett kort utan JS ligger kvar i sin familj.
+
+   Skuggan är två lager: en tät nära kanten som ger tjocklek, och en
+   vid och svag som ger höjd över underlaget. Ett enda lager läser
+   som en gloria. */
 .foto {
   display: block;
   overflow: hidden;
+  border-radius: 0.7rem;
+  rotate: var(--lut, 0deg);
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 0.34),
+    0 18px 42px rgb(0 0 0 / 0.42);
   /* Masken öppnas uppifrån och ned som standard: ett tryck som läggs
      ned. Riktningen är data, inte en egen regel — se .foto--hoger. */
   --foto-start: inset(0 0 100% 0);
@@ -1274,36 +1294,18 @@ input:focus-visible {
   align-items: start;
 }
 
-/* 220 ms, inte 300. Övergången stod redan här men utlöstes av
-   ingenting; nu när den används ska den tala sajtens språk, och
-   sajtens hovertid är 220. rotate måste stå med i listan — det är en
-   egen egenskap, inte en del av transform. */
+/* Hoverlyftet som låg här är borttaget. Det rätade upp kortet med 220
+   ms när pekaren kom in — en övergång som slogs ut i samma ögonblick
+   som följningen tar över samma egenskaper. Två saker som styr samma
+   transform är en som vinner och en som hackar. */
 .kort {
   position: relative;
-  transition:
-    transform 220ms var(--ut),
-    rotate 220ms var(--ut);
 }
 
-/* C · KORTET RÄTAR UPP SIG. Ett tryck man lyfter för att titta
-   närmare på.
-
-   RÄTNINGEN BÄR RÖRELSEN, inte lyftet. Ett kort som bara åker mot
-   betraktaren läser som en knapp, och korten är inte klickbara — de
-   är foton på ett bord. Att vinkeln minskar säger i stället att någon
-   justerar bilden för att se den rakt. Lyftet är fyra pixlar och
-   finns bara för att skuggan ska ha något att falla från. */
-@media (hover: hover) and (pointer: fine) {
-  .rebrand__bilder .kort:hover {
-    transform: translateY(-4px);
-  }
-
-  .rebrand__bilder .kort--lut-a:hover { rotate: -1.5deg; }
-  .rebrand__bilder .kort--lut-b:hover { rotate: 2deg; }
-}
-
-.kort--lut-a { rotate: -3.5deg; }
-.kort--lut-b { rotate: 4.5deg; margin-block-start: 2.5rem; }
+/* Lutningen ligger på .foto, inte här. Två roterade element i varandra
+   ger en sammansatt vinkel, och då är kortets viloläge inte längre det
+   tal som står i uppmärkningen. */
+.kort--lut-b { margin-block-start: 2.5rem; }
 
 .kort__etikett {
   display: block;
@@ -2355,11 +2357,15 @@ input:focus-visible {
   max-width: 34ch;
 }
 
-.bestall__bild {
-  border-radius: 0.6rem 0 0 0.6rem;
-}
+/* Rundningen låg på två hörn eftersom bilden blödde ut ur skärmen åt
+   höger — de andra två fanns aldrig att se. Nu står kortet innanför
+   spalten och har fyra hörn som alla andra; .foto sätter radien. */
 
 .bestall {
+  /* overflow: hidden står kvar. Den klipper inte längre något blöd,
+     men den hindrar ett kastat kort från att ge sidan vågrät
+     rullning — och ett kort som flyger ut ur sin sektion ska klippas
+     mot sektionens kant, inte skjuta ut sidan. */
   overflow: hidden;
 }
 
@@ -2368,7 +2374,6 @@ input:focus-visible {
     grid-template-columns: 1fr;
     gap: clamp(2rem, 8vw, 3.5rem);
   }
-  .bestall__bild { border-radius: 0.6rem 0 0 0.6rem; }
 }
 
 /* ═══ 10 · FINALEN ════════════════════════════════════════════ */
@@ -3649,13 +3654,6 @@ input:focus-visible {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
-
-  .rebrand__bilder .kort:hover {
-    transform: none;
-  }
-
-  .rebrand__bilder .kort--lut-a:hover { rotate: -3.5deg; }
-  .rebrand__bilder .kort--lut-b:hover { rotate: 4.5deg; }
 
   /* BYGGKREDITEN: tillstånden står kvar, rörelsen tas bort. Hörnen
      vandrar inte och lådorna glider inte — de tänds. Ett ord som

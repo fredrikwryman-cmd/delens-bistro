@@ -247,7 +247,7 @@
                      geometri rörs aldrig — bilden är bara mer beskuren i
                      början. Se .foto i stilmallen; --i ger paret sin
                      förskjutning. -->
-                <span class="foto foto--par" data-foto style="--i: 0">
+                <span class="foto foto--par" data-foto style="--i: 0; --lut: -3.5deg">
                   <img src="/bilder/lokal/E2.webp"
                        alt="En hand pressar smashpressen mot puckarna på den heta plåten."
                        width="1200" height="800" loading="lazy" decoding="async" />
@@ -269,7 +269,7 @@
                 <span class="kort__etikett">Smashmomentet</span>
               </div>
               <div class="kort kort--lut-b">
-                <span class="foto foto--par" data-foto style="--i: 1">
+                <span class="foto foto--par" data-foto style="--i: 1; --lut: 4.5deg">
                   <img src="/bilder/lokal/E3.webp"
                        alt="Hakan med korsade armar framför baren, i svart t-shirt med restaurangens logotyp."
                        width="900" height="1201" loading="lazy" decoding="async" />
@@ -434,7 +434,7 @@
           </div>
 
           <figure class="personal__bild">
-            <span class="foto" data-foto>
+            <span class="foto" data-foto style="--lut: 2deg">
               <img src="/bilder/lokal/E5.webp"
                    alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
                    width="1600" height="900" loading="lazy" decoding="async" />
@@ -455,8 +455,17 @@
 
           <!-- E7: Julia och Emils son i baren. 16:9, samma format som
                gruppbilden ovanför — två bilder i samma sektion som inte
-               har samma form läser som två olika sektioner. Byt ut
-               platshållaren mot en img när fotot finns. -->
+               har samma form läser som två olika sektioner.
+
+               NÄR FOTOT KOMMER ska platshållaren bytas mot samma
+               konstruktion som de fem andra korten:
+
+                 <span class="foto" data-foto style="--lut: 3deg">
+                   <img src="/bilder/lokal/E7.webp" ... />
+                 </span>
+
+               Då får den ankomsten, lutningen, rundningen, skuggan och
+               följningen utan att något mer behöver röras. -->
           <figure class="personal__bild">
             <span class="ph" style="--ar: 16 / 9" data-id="E7" data-spec="2400 × 1350 · JPG"></span>
             <figcaption class="bildtext">
@@ -522,7 +531,7 @@
               <p><a class="lank" id="hitta-fb" href="#" target="_blank" rel="noopener">Facebook</a></p>
             </div>
             <div class="hitta__block hitta__block--bild">
-              <span class="foto" data-foto>
+              <span class="foto" data-foto style="--lut: -2.5deg">
                 <img src="/bilder/lokal/E4.webp"
                      alt="Delens Bistro på Centralvägen 3: mörk fasad med skylten Fast Food &amp; Bar, uteservering och en vimpel vid entrén."
                      width="1600" height="900" loading="lazy" decoding="async" />
@@ -561,9 +570,15 @@
               Beställ nu
             </a>
           </div>
-          <!-- Masken öppnas FRÅN HÖGER. Bilden är beskuren ut ur skärmen
-               åt det hållet, och då ska den komma därifrån. -->
-          <span class="foto foto--hoger bestall__bild bleed-hoger" data-foto>
+          <!-- E1 BLÖDER INTE LÄNGRE. Ett fysiskt kort har fyra hörn, och
+               ett kort som är avklippt mot skärmkanten har tre — den
+               fjärde rundningen fanns aldrig att se, och ett kort som
+               rör sig hade dessutom dragit sin egen snittyta in i bild.
+               Blödet och kortet går inte ihop; kortet vann.
+
+               Masken öppnas fortfarande från höger. Bilden kommer från
+               det håll den tidigare försvann åt. -->
+          <span class="foto foto--hoger bestall__bild" data-foto style="--lut: -2deg">
             <img src="/bilder/lokal/E1.webp"
                  alt="Baren hos Delens Bistro: ölpelare, hängande glas och svartguldig marmor."
                  width="1400" height="1051" loading="lazy" decoding="async" />
