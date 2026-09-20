@@ -2210,14 +2210,36 @@ function riggaSekvens() {
      varje vy. */
   let passagen = 1;
   let klistrat = 0.6;
+  let avstand = 0;
   const mat = () => {
-    passagen = Math.max(1, spar.offsetHeight);
-    /* Andelen av passagen där scenen står klistrad. Scenen är 100svh
-       och spåret 250svh, alltså 0,6 på desktop och 0,5 på mobil där
-       spåret är 200svh. Mätt, inte antaget: svh och innerHeight är
-       inte samma tal när telefonens adressfält växer. */
+    const spårH = spar.offsetHeight;
+
+    /* KLISTERAVSTÅNDET RÄKNAS MED. På desktop klistras scenen i
+       vyns överkant och avståndet är noll. På telefon är scenen bara
+       bandet högt och klistras MITT i vyn, alltså med ett avstånd —
+       och då börjar klistringen när spårets överkant står vid
+       avståndet, inte vid noll.
+
+       Utan den här termen blev de första avstånd-pixlarna av spåret
+       en död zon: framsteget räknades negativt och klämdes till noll,
+       så ruta 1 stod still medan man scrollade. Det är samma frusna
+       parti som en gång fanns i slutet av spåret, och det ska inte
+       tillbaka i andra änden.
+
+       Avståndet läses ur stilmallen i stället för att räknas om här.
+       Ett tal som står på två ställen är ett tal som glider isär. */
+    avstand = scen ? parseFloat(getComputedStyle(scen).insetBlockStart) || 0 : 0;
+
+    /* Hela passagen: från att scenen börjar klistras till att spåret
+       lämnat skärmen. Spårets höjd plus avståndet. */
+    passagen = Math.max(1, spårH + avstand);
+
+    /* Andelen av passagen där scenen står klistrad. Klistringen är
+       spårets höjd minus scenens, oavsett avstånd. Mätt, inte
+       antaget: svh och innerHeight är inte samma tal när telefonens
+       adressfält växer. */
     const h = scen ? scen.offsetHeight : window.innerHeight;
-    klistrat = Math.max(0.05, Math.min(0.95, (passagen - h) / passagen));
+    klistrat = Math.max(0.05, Math.min(0.95, (spårH - h) / passagen));
   };
   mat();
   window.addEventListener('resize', mat, { passive: true });
@@ -2259,7 +2281,7 @@ function riggaSekvens() {
        följer ögat scenens rörelse, inte burgarens bygge, och en
        sekvens som saktar in just där läser som att den lägger sig
        till ro — inte som ett hack. */
-    const p = Math.min(1, Math.max(0, -r.top / passagen));
+    const p = Math.min(1, Math.max(0, (avstand - r.top) / passagen));
     const framsteg =
       p <= klistrat
         ? (p / klistrat) * SEKV.klistratSlut

@@ -1601,9 +1601,10 @@ input:focus-visible {
 /* ── RÖRLIGT LÄGE ──────────────────────────────────────────────
    Spåret blir en scrollsträcka och scenen klistras fast. Talen:
    250svh med 120 rutor på desktop ger 18,8 px scroll per ruta på en
-   900 px hög vy, 200svh med 80 rutor ger 21,1 px på en 844 px hög
-   telefon. Under ungefär 25 px per ruta går rörelsen inte att skilja
-   från film.
+   900 px hög vy. På telefon är spåret 150svh och scenen bara bandet,
+   så klistringen blir omkring 993 px för 80 rutor — 13 px per ruta på
+   en 844 px hög vy. Under ungefär 25 px per ruta går rörelsen inte
+   att skilja från film.
 
    BRYTPUNKTEN 760 px STÅR OCKSÅ I main.js (SEKV.brytMobil). Ändras
    den på ett ställe måste den ändras på det andra, annars hämtas
@@ -1621,70 +1622,53 @@ input:focus-visible {
 }
 
 @media (max-width: 760px) {
-  .sekvens[data-rorlig='true'] .sekvens__spar {
-    height: 200svh;
-  }
-
   /* ── BANDET PÅ STÅENDE TELEFON ──────────────────────────────────
      Full täckning av vyn kostar för mycket här. En stående telefon är
      omkring 0,46 bred mot hög; rutan är 1,78. Att fylla höjden betyder
-     att bredden skalas 3,8 gånger förbi skärmen, och kvar syns 26
-     procent av bilden. Neonskylten mäter x 13 till 88 procent, alltså
-     75 procent av bredden — den blev kapad i båda ändar, och utan
-     skylten är det bara en burgare på svart botten.
+     att bredden skalas nästan fyra gånger förbi skärmen, och kvar syns
+     en fjärdedel av bilden. Neonskylten mäter x 13 till 88 procent —
+     den blev kapad i båda ändar, och utan skylten är det bara en
+     burgare på svart botten.
 
      Alltså: lägre scen i stället för bredare beskärning. Bandet är
-     lika brett som vyn och 64 procent så högt, vilket ger
-     (1 / 0,64) / (16 / 9) = 87,9 procent av rutans bredd. Skylten
-     ryms med drygt fem procentenheter marginal i vardera änden, och
-     så gör även den bredaste bildrutan i sekvensen, där garneringen
-     flyger ut till 11,9 och 92,7 procent. Höjden beskärs inte alls:
-     hela burgaren syns.
+     lika brett som vyn och 70 procent så högt, vilket ger
+     (1 / 0,70) / (16 / 9) = 80,4 procent av rutans bredd. Skylten
+     kräver 76,4 för att rymmas centrerad, så marginalen är fyra
+     procentenheter — knappt åtta pixlar i vardera änden på en 390 px
+     telefon. Höjden beskärs inte alls.
 
-     64 valdes mätt, inte känt. 68 hade gett 82,7 procent och kapat
-     den bredaste rutan; 56 hade visat hela bredden men gjort bandet
-     till en remsa på 218 px. 64 ger 250 px på en 390 px bred telefon.
+     70 ÄR TAKET MED MARGINAL. 74 hade kapat skylten; 72 klarar den
+     men med 1,7 procentenheters marginal, alltså tre pixlar, och det
+     är för tunt för att lita på. Nedåt finns ingen vinst: mellan 64
+     och 72 ändras den svarta luften bara från 594 till 563 px på en
+     844 px hög vy. Luften styrs av vyhöjden, inte av bandet.
 
-     BANDET CENTRERAS I SCENEN, SCENEN RÖRS INTE. Scenen är kvar på
-     100svh och klistras som förut, så scrollmappningen i main.js
-     räknar på samma tal som på desktop — den mäter scenens höjd, och
-     hade bandet varit scenen skulle ett klisteravstånd ha behövt
-     räknas bort från framsteget. Här får i stället duken, stillbilden
-     OCH kanttoningen samma indrag, så toningen ligger på bandets
-     kanter och inte på vyns.
+     SCENEN ÄR BANDET, inte en ruta med bandet i. Förut var scenen
+     100svh med bandet indraget på mitten, och då bar scenen en massa
+     tom höjd som inte var till någon nytta — dessutom krävde det ett
+     indrag på duk, stillbild OCH toning, där basregelns height: 100%
+     gjorde elementen överbestämda. Nu är scenen exakt bandet, och
+     basregeln räcker: inset 0 och height 100 procent ger rätt ruta.
 
-     I stilla läge, alltså utan JS och vid reducerad rörelse, är
-     scenen själv 64vw hög. Då blir indraget noll och bandet fyller
-     scenen — samma beskärning i båda lägena. */
+     KLISTRAS MITT I VYN, och det avståndet räknas in i
+     scrollmappningen — se mat() i main.js. Gjordes det inte blev de
+     första 285 pixlarna av spåret en död zon där ruta 1 stod still. */
   .sekvens__scen {
-    --sekv-band: 64vw;
+    --sekv-band: 70vw;
     height: var(--sekv-band);
   }
 
-  /* HÖJDEN SÄTTS, den härleds inte ur inset.
-
-     Basregeln ger duken och stillbilden height: 100%. Ett absolut
-     placerat element som har BÅDE top, bottom och height är
-     överbestämt, och då är det bottom som ignoreras — inte height.
-     Med bara inset satt här blev därför bandets överkant rätt medan
-     höjden förblev hela scenens: uppmätt 840,8 px bild med 296,5 px
-     indrag, mot toningens 247,8. Bilden fortsatte alltså långt under
-     toningen, och där toningen tog slut uppstod en hård vågrät skarv
-     med olika delar av burgaren över och under.
-
-     ::after har ingen egen höjd i basen och räknade därför rätt hela
-     tiden — det var just skillnaden mellan de två som gav två band.
-
-     height: auto duger inte heller: för ERSATTA element, alltså img
-     och canvas, används då den inneboende höjden och bottom
-     ignoreras igen. Höjden måste vara ett tal, och bandet är
-     definitionsmässigt --sekv-band högt. */
-  .sekvens__duk,
-  .sekvens__still,
-  .sekvens__scen::after {
-    inset-block-start: calc((100% - var(--sekv-band)) / 2);
-    inset-inline: 0;
+  .sekvens[data-rorlig='true'] .sekvens__scen {
     height: var(--sekv-band);
+    inset-block-start: calc((100svh - var(--sekv-band)) / 2);
+  }
+
+  /* Spåret kortas med en halv skärm. Klistringen blir 150svh minus
+     bandet, alltså omkring 993 px för 80 rutor — 13 px per ruta, väl
+     under de 25 där rörelsen slutar gå att skilja från film. Kortare
+     spår betyder kortare stund i den svarta rutan. */
+  .sekvens[data-rorlig='true'] .sekvens__spar {
+    height: 150svh;
   }
 }
 
