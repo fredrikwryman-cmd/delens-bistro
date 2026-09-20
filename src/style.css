@@ -346,10 +346,22 @@ a {
   height: clamp(72px, 9vw, 132px);
   pointer-events: none;
   z-index: 2;
+  /* 0,4615 ÄR UTRÄKNAT, INTE VALT. Skarven ligger överst i
+     signatursektionen, som är kol (26). Scenen ovanför slutar i
+     svart (14). Med 0,62 blev skarvens första rad 26 × 0,38 = 10,
+     alltså FYRA NIVÅER MÖRKARE än scenen — ett litet steg, men ett
+     hårt vågrätt steg över hela bredden, och ögat hittar en sådan
+     kant långt under det man tror. Det var den synliga linjen under
+     sekvensen.
+
+     1 − 14/26 = 0,4615 ger 26 × 0,5385 = 14 på pricken. De två
+     sidorna möts nu på exakt samma värde och gränsen finns inte kvar
+     att se. Skuggan är ljusare än förut, men greppet står kvar:
+     signatursektionen börjar fortfarande i skugga och stiger ur den. */
   background: linear-gradient(
     to bottom,
-    rgb(0 0 0 / 0.62),
-    rgb(0 0 0 / 0.26) 38%,
+    rgb(0 0 0 / 0.4615),
+    rgb(0 0 0 / 0.2) 38%,
     rgb(0 0 0 / 0) 100%
   );
 }
@@ -1500,48 +1512,6 @@ input:focus-visible {
   opacity: 1;
 }
 
-/* FILMKORNET.
-
-   Rutorna är 1280 px, alltså källans tak, men på en bredare vy
-   förstoras de ändå — och WebP vid kvalitet 66 lämnar mjuka fält i
-   rök och neonglöd där banding och blockkanter syns. Ett jämnt brus
-   ger ögat en struktur att läsa, och då läses de mjuka fälten som
-   film i stället för som dålig kvalitet. Se verktyg/korn.mjs för hur
-   rutan görs och varför den har två toner.
-
-   STYRKAN STÅR I EN VARIABEL för att gå att skruva på utan att leta
-   i filen. 0,06 är satt efter ögat: under 0,04 döljer kornet
-   ingenting, över 0,10 lägger det sig som damm över bilden i stället
-   för i den. Reglaget bakom ?korn i main.js skriver samma variabel.
-
-   KORNET ÄR STILLA, och det är ett val. Riktigt filmkorn kokar, och
-   ett lager som hoppar mellan åtta lägen hade bundit kornet till
-   bilden i stället för till skärmen. Men det kräver en oändlig
-   animation över en yta som fyller hela vyn, och då hålls
-   kompositören vaken så länge sidan är öppen — också när sektionen
-   ligger långt utanför vyn. Kravet var att kornet inte får kosta
-   bildrutor, och en stillastående bakgrundsbild kostar noll: den
-   målas en gång och rörs aldrig mer. Vid 0,06 läser den som struktur
-   ändå, eftersom det är BILDEN under som rör sig.
-
-   INGEN mix-blend-mode, av samma skäl. Ett blandningsläge över en duk
-   som fyller vyn tvingar kompositören att läsa tillbaka underlaget
-   varje bildruta, och duken ritas redan varje bildruta. Rutans två
-   toner bär både ljusning och mörkning i alfan, så vanlig
-   genomskinlighet räcker. */
-.sekvens__korn {
-  position: absolute;
-  inset: 0;
-  background-image: url('/bilder/korn/korn.webp');
-  background-repeat: repeat;
-  /* Rutans egna 160 px, alltså i CSS-pixlar. På en skärm med dubbel
-     pixeltäthet blir varje kornpixel två enheter bred — det är rätt:
-     korn som följer pixeltätheten blir osynligt på en tät skärm. */
-  background-size: 160px 160px;
-  opacity: var(--korn-styrka, 0.06);
-  pointer-events: none;
-}
-
 /* KANTERNA TONAS BORT I SEKTIONENS SVARTA.
 
    Bildrutornas bakgrund ÄR nästan sektionens färg — rök mot nära
@@ -1574,18 +1544,50 @@ input:focus-visible {
      och taket i pixlar ta över på breda, så tonningen är ungefär lika
      bred i millimeter oavsett skärm. */
   background:
+    /* SIDLEDS. Samma kurva som nedan, kortare sträcka: sidorna möter
+       ingen annan sektion, bara vyns kant. */
     linear-gradient(
       to right,
       var(--svart) 0,
-      rgb(14 14 14 / 0) min(13%, 120px),
-      rgb(14 14 14 / 0) calc(100% - min(13%, 120px)),
+      rgb(14 14 14 / 0.62) 2%,
+      rgb(14 14 14 / 0.26) 5.5%,
+      rgb(14 14 14 / 0.08) 9.5%,
+      rgb(14 14 14 / 0) 15%,
+      rgb(14 14 14 / 0) 85%,
+      rgb(14 14 14 / 0.08) 90.5%,
+      rgb(14 14 14 / 0.26) 94.5%,
+      rgb(14 14 14 / 0.62) 98%,
       var(--svart) 100%
     ),
+    /* HÖJDLED. Underkanten är den som syns, och den är lång med flit.
+
+       Förut: en rak ramp över 11 procent, alltså 95 px på en 867 px
+       vy. Två fel i den. Sträckan var för kort för att gömma en hel
+       bild, och rampen var RAK — alfan ändrade lutning tvärt där
+       toningen började, och ögat läser ett sådant knä som en linje
+       även när steget i färg är litet. Det är Mach-band, och det är
+       just vad en \"kant man kan ana\" är.
+
+       Nu går underkanten över 34 procent och kurvan är mjuk i båda
+       ändar. Talen är valda så att toningen knappt rör motivet:
+       burgarens underbulle ligger kring 78 procent av rutans höjd,
+       och där är alfan 0,07. Först under 88 procent tar svärtan över,
+       och de sista procenten är branta — men branta mot en färg som
+       är IDENTISK med sektionen under, så där finns ingenting kvar
+       att se. Se .skarv för den andra halvan av samma fix. */
     linear-gradient(
       to bottom,
       var(--svart) 0,
-      rgb(14 14 14 / 0) min(11%, 140px),
-      rgb(14 14 14 / 0) calc(100% - min(11%, 140px)),
+      rgb(14 14 14 / 0.58) 2.5%,
+      rgb(14 14 14 / 0.22) 6%,
+      rgb(14 14 14 / 0.06) 10%,
+      rgb(14 14 14 / 0) 16%,
+      rgb(14 14 14 / 0) 66%,
+      rgb(14 14 14 / 0.04) 74%,
+      rgb(14 14 14 / 0.14) 81%,
+      rgb(14 14 14 / 0.34) 88%,
+      rgb(14 14 14 / 0.62) 94%,
+      rgb(14 14 14 / 0.86) 97.5%,
       var(--svart) 100%
     ),
     radial-gradient(

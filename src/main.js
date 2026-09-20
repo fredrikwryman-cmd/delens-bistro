@@ -2517,101 +2517,11 @@ function riggaFinal() {
   io.observe(sek);
 }
 
-/* ═══ KORNREGLAGET — BYGGVERKTYG ═════════════════════════════════
-   Ett reglage för att känna efter filmkornets nivå på riktig bild i
-   stället för att gissa i stilmallen.
-
-   BAKOM ?korn, och det är hela skyddet. Panelen byggs bara när
-   adressen bär frågan, så en besökare kan aldrig få den — till
-   skillnad från avstämningspanelen som en gång låg framme och var en
-   ruta i vägen. Utan frågan körs funktionen till sitt första return
-   och rör ingenting.
-
-   Nivån sparas i localStorage så att en omladdning inte nollar det
-   man just ställt in. Läsningen och skrivningen är omslutna: samma
-   lärdom som laddskärmen, där en sessionStorage som KASTAR i privat
-   läge tog med sig hela funktionen.
-
-   Bort vid skarp lansering, tillsammans med window.__lenis.        */
-
-const KORN_FORVAL = 0.06;
-const KORN_NYCKEL = 'delens-korn';
-
-function riggaKornreglage() {
-  if (!new URLSearchParams(location.search).has('korn')) return;
-
-  const rot = document.documentElement;
-
-  const las = () => {
-    try {
-      const v = parseFloat(localStorage.getItem(KORN_NYCKEL));
-      return Number.isFinite(v) ? v : KORN_FORVAL;
-    } catch {
-      return KORN_FORVAL;
-    }
-  };
-
-  let niva = las();
-
-  const panel = document.createElement('div');
-  panel.style.cssText =
-    'position:fixed;z-index:99999;inset-block-end:5.5rem;inset-inline-start:1rem;' +
-    'background:rgb(14 14 14 / 0.92);color:#f2ebe0;border:1px solid rgb(242 235 224 / 0.25);' +
-    'border-radius:0.6rem;padding:0.7rem 0.9rem;font:13px/1.4 ui-sans-serif,system-ui;' +
-    'display:grid;gap:0.45rem;min-width:15rem;backdrop-filter:blur(6px)';
-
-  const rad = document.createElement('div');
-  rad.style.cssText = 'display:flex;justify-content:space-between;gap:1rem';
-  const namn = document.createElement('span');
-  namn.textContent = 'Filmkorn';
-  const varde = document.createElement('strong');
-  varde.style.cssText = 'font-variant-numeric:tabular-nums';
-  rad.append(namn, varde);
-
-  const skjut = document.createElement('input');
-  skjut.type = 'range';
-  skjut.min = '0';
-  skjut.max = '0.2';
-  skjut.step = '0.005';
-  skjut.style.cssText = 'width:100%;accent-color:#e8a33d';
-
-  const hjalp = document.createElement('small');
-  hjalp.style.cssText = 'opacity:0.62';
-  hjalp.textContent = '0 = av · dubbelklicka för 0,06';
-
-  const satt = (v, spara) => {
-    niva = Math.min(0.2, Math.max(0, v));
-    rot.style.setProperty('--korn-styrka', String(niva));
-    skjut.value = String(niva);
-    varde.textContent = niva.toFixed(3).replace('.', ',');
-    if (spara) {
-      try {
-        localStorage.setItem(KORN_NYCKEL, String(niva));
-      } catch {
-        /* Sparandet är en bekvämlighet, inte ett krav. */
-      }
-    }
-  };
-
-  skjut.addEventListener('input', () => satt(parseFloat(skjut.value), true));
-  skjut.addEventListener('dblclick', () => satt(KORN_FORVAL, true));
-
-  panel.append(rad, skjut, hjalp);
-  document.body.appendChild(panel);
-  satt(niva, false);
-}
-
 /* ═══ MJUK SCROLL ════════════════════════════════════════════════ */
 
 function riggaLenis() {
   if (reducerad.matches) return;
   const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
-  /* Handtag för att hoppa till exakta scrollägen under bygget. Stod
-     förut att det skulle bort med avstämningspanelen; det får stå
-     kvar. Panelen var en ruta i vägen, det här är en variabel utan
-     avtryck i sidan, och den är enda vägen att styra Lenis utifrån
-     när ett läge behöver mätas. Bort vid skarp lansering. */
-  window.__lenis = lenis;
   // Lenis körde ett eget rAF-varv vid sidan av sajtens. Två varv som
   // båda vill äga bildrutan är ett varv för mycket, och det var Lenis
   // varv som avgjorde när scrollvärdet var färdigt — alltså läste
@@ -2644,7 +2554,6 @@ riggaKedja();
 riggaPuls();
 const slappHeroburgaren = riggaHeroburgare();
 
-riggaKornreglage();
 riggaLenis();
 riggaScroll();
 riggaSekvens();
