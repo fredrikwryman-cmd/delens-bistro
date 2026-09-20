@@ -272,6 +272,25 @@ a {
   display: block;
   pointer-events: none;
   z-index: 2;
+  /* SVG KLIPPER MOT SIN VIEWBOX om man inte säger ifrån — det är
+     webbläsarens egen regel, inte vår. Kurvan vaggar ända ut till
+     kanterna av rutan, och amber-strecket ligger MITT PÅ kurvan med
+     halva sin bredd utanför. Där kurvan nådde y=0 eller y=90 kapades
+     alltså linjen, medan vågen såg hel ut: kroppen är fylld, och
+     under kurvan ligger sektionens egen färg, så där syns ingen skarv
+     — bara strecket avslöjade klippet.
+
+     Hitta-vågen visade det värst. En av dess kontrollpunkter ligger
+     på 90,7 i en ruta som är 90 hög, alltså permanent utanför, och
+     dämpningen nollar utslaget just där (se VAG i main.js). Linjen
+     slutade tvärt i vänsterkanten medan vågen fortsatte.
+
+     Med synligt spill ritas strecket helt, och kroppens fyllning får
+     följa med ned i sektionen under — vilket är just vad en våg som
+     bågnar ska göra. Uppåt hindras den fortfarande av dämpningen:
+     banan sluts vid y=0, och en kurva ovanför den linjen hade vikt
+     fyllningen mot sig själv. */
+  overflow: visible;
 }
 
 /* VÅGEN ÄR SILUETTEN MELLAN TVÅ FÄRGER, inte ett streck ovanpå den
@@ -287,15 +306,16 @@ a {
   fill: var(--wave-fill, var(--svart));
 }
 
-/* 3,5 px, inte 1,5. Strecket är vågens enda kontur och satt med
-   non-scaling-stroke, alltså samma tjocklek i px oavsett hur högt
-   scrubben tänjer svgn — men 1,5 px mot ett 44 px högt band läste som
-   ett hårstreck, inte som en kant. Opaciteten står kvar: kanten ska
-   vara en glimt i snittet, inte en ram runt sektionen. */
+/* 4,5 px, efter 3,5 och dessförinnan 1,5. Strecket är vågens enda
+   kontur och satt med non-scaling-stroke, alltså samma tjocklek i px
+   oavsett hur högt scrubben tänjer svgn — men mot ett 44 px högt band
+   läste även 3,5 fortfarande tunt i de grunda skarvarna. Opaciteten
+   står kvar: kanten ska vara en glimt i snittet, inte en ram runt
+   sektionen. */
 .wave__edge {
   fill: none;
   stroke: var(--amber);
-  stroke-width: 3.5;
+  stroke-width: 4.5;
   opacity: 0.55;
   vector-effect: non-scaling-stroke;
 }
@@ -1440,12 +1460,31 @@ input:focus-visible {
 .sekvens__duk,
 .sekvens__still {
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  translate: -50% -50%;
-  width: var(--sekv-bredd);
-  height: auto;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   max-width: none;
+  /* COVER, INTE CONTAIN. Rutan är 16:9 och skärmar är det inte, så
+     något måste bort. Förut sattes bredden till --sekv-bredd och
+     höjden till auto: på en bred vy tog bredden slut vid 1200 px och
+     på en klistrad scen var rutan 675 px mot vyns hela höjd. Det gav
+     svarta kanter runt om — ett 16:9-fönster mitt i en sektion som
+     skulle vara hel bild.
+
+     object-fit gör beskärningen i stället för nedskalningen, och
+     källan sträcks inte: proportionerna hålls, det som inte får plats
+     faller utanför. För duken kostar det ingenting per bildruta —
+     bufferten är kvar på 800×450 och drawImage ritar som förut, det
+     är sammansättningen som skalar.
+
+     BESKÄRNINGEN SITTER PÅ 48 PROCENT, inte i mitten. Burgaren mäter
+     upp till x 26–74 procent och y 2–78 procent över sekvensen,
+     alltså vågrätt centrerad men med tyngdpunkten en bit ovanför
+     mitten. 48 är samma punkt som vinjetten nedan redan utgår från,
+     och den håller kvar både den flygande garneringen upptill och
+     underbullen nedtill när höjden beskärs. */
+  object-fit: cover;
+  object-position: 50% 48%;
 }
 
 .sekvens__duk {
@@ -1473,11 +1512,43 @@ input:focus-visible {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    116% 116% at 50% 48%,
-    rgb(14 14 14 / 0) 44%,
-    var(--svart) 100%
-  );
+  /* TRE LAGER, ETT PER UPPGIFT.
+
+     Vinjetten underst gör det den alltid gjort: låter burgaren sväva
+     i sektionen i stället för att sitta i en rektangel.
+
+     De två linjära ovanpå är nya och kom med beskärningen. När rutan
+     bara fyllde en del av scenen låg kanten inne i svärtan och syntes
+     inte. Nu går bilden ut i vyns alla fyra kanter, och mot
+     sektionerna över och under — och mot vågen upptill — blir det en
+     kant att dölja.
+
+     FADEN MÄTS I BÅDE PROCENT OCH PIXLAR. Enbart procent hade gett
+     motsatt utfall mot det önskade: på en telefon är bilden redan
+     hårt beskuren i sidled, och en fade på 13 procent av 390 px hade
+     ätit sig in i burgaren. min() låter procenten styra på smala vyer
+     och taket i pixlar ta över på breda, så tonningen är ungefär lika
+     bred i millimeter oavsett skärm. */
+  background:
+    linear-gradient(
+      to right,
+      var(--svart) 0,
+      rgb(14 14 14 / 0) min(13%, 120px),
+      rgb(14 14 14 / 0) calc(100% - min(13%, 120px)),
+      var(--svart) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--svart) 0,
+      rgb(14 14 14 / 0) min(11%, 140px),
+      rgb(14 14 14 / 0) calc(100% - min(11%, 140px)),
+      var(--svart) 100%
+    ),
+    radial-gradient(
+      116% 116% at 50% 48%,
+      rgb(14 14 14 / 0) 44%,
+      var(--svart) 100%
+    );
   pointer-events: none;
 }
 

@@ -1911,7 +1911,21 @@ const SEKV = {
 
   /* Grovpassets steg. Var fjärde ruta = 30 rutor på desktop, ungefär
      670 kB, och sekvensen går att dra igenom hela vägen. */
-  grovt: 4
+  grovt: 4,
+
+  /* Hur långt sekvensen hunnit när scenen SLÄPPER och börjar åka ut.
+
+     Passagen består av två olika saker. Först står scenen klistrad
+     och fyller rutan — det är där sekvensen hör hemma. Sedan åker den
+     ut, och det man ser är en remsa som krymper i överkanten medan
+     nästa sektion tar plats.
+
+     Linjärt över hela passagen hamnade 40 procent av rutorna i
+     utåkningen: burgaren byggdes färdigt i en remsa ingen tittar på.
+     Med 0,95 ligger 114 av 120 rutor i det klistrade läget, och de
+     sista sex kryper fram medan scenen lämnar. Sekvensen står aldrig
+     still, och finalen landar på hel skärm. */
+  klistratSlut: 0.95
 };
 
 function riggaSekvens() {
@@ -1919,6 +1933,7 @@ function riggaSekvens() {
   if (!sek) return;
 
   const spar = $('#sekvens-spar', sek);
+  const scen = $('.sekvens__scen', sek);
   const duk = $('#sekvens-duk', sek);
   if (!spar || !duk) return;
 
@@ -2090,13 +2105,38 @@ function riggaSekvens() {
 
   /* ── SPÅRET ────────────────────────────────────────────────────
      Rörligt läge sätts först, så spåret får sin höjd, och sedan
-     mäts det. Tvärtom hade gett strackan = 0. */
+     mäts det. Tvärtom hade gett passagen = 0. */
 
   sek.setAttribute('data-rorlig', 'true');
 
-  let strackan = 1;
+  /* PASSAGEN ÄR HELA SPÅRET, inte den klistrade delen av det.
+
+     Förut drogs vyns höjd av: strackan = spårets höjd MINUS en skärm.
+     Det är precis så länge scenen står klistrad, så sista bildrutan
+     nåddes i samma ögonblick som scenen släppte och började åka ut.
+     Kvar fanns en hel skärmhöjd av spåret — 867 px av 2168 på en
+     900 px vy, alltså 29 procent av passagen — där man scrollade
+     förbi en frusen bild.
+
+     Nu mäts framsteget mot spårets HELA höjd: ruta 1 när spårets
+     överkant når vyns överkant, sista rutan när spårets underkant
+     gör det. Hela passagen driver hela sekvensen.
+
+     HÖJDEN MÄTS, DEN ANTAS INTE. window.innerHeight var fel mått även
+     bortsett från det här: scenen är 100svh, och svh är INTE
+     innerHeight på en telefon där adressfältet växer och krymper.
+     Spårets egen offsetHeight är samma tal som CSS räknat fram, på
+     varje vy. */
+  let passagen = 1;
+  let klistrat = 0.6;
   const mat = () => {
-    strackan = Math.max(1, spar.offsetHeight - window.innerHeight);
+    passagen = Math.max(1, spar.offsetHeight);
+    /* Andelen av passagen där scenen står klistrad. Scenen är 100svh
+       och spåret 250svh, alltså 0,6 på desktop och 0,5 på mobil där
+       spåret är 200svh. Mätt, inte antaget: svh och innerHeight är
+       inte samma tal när telefonens adressfält växer. */
+    const h = scen ? scen.offsetHeight : window.innerHeight;
+    klistrat = Math.max(0.05, Math.min(0.95, (passagen - h) / passagen));
   };
   mat();
   window.addEventListener('resize', mat, { passive: true });
@@ -2127,7 +2167,23 @@ function riggaSekvens() {
     // Ingenting att göra medan sektionen är utanför vyn.
     if (r.bottom < 0 || r.top > window.innerHeight) return;
 
-    const framsteg = Math.min(1, Math.max(0, -r.top / strackan));
+    /* Passagen delas vid den punkt där scenen släpper. Före den
+       punkten ligger 95 procent av sekvensen, efter den de sista fem
+       — se SEKV.klistratSlut. Båda delarna är linjära och lutningen
+       är positiv i båda, så rutan byter hela vägen: ingen del av
+       spåret står still, och finalen hinner landa medan scenen
+       fortfarande fyller rutan.
+
+       Knycken i farten sitter exakt där scenen börjar röra sig. Då
+       följer ögat scenens rörelse, inte burgarens bygge, och en
+       sekvens som saktar in just där läser som att den lägger sig
+       till ro — inte som ett hack. */
+    const p = Math.min(1, Math.max(0, -r.top / passagen));
+    const framsteg =
+      p <= klistrat
+        ? (p / klistrat) * SEKV.klistratSlut
+        : SEKV.klistratSlut +
+          ((p - klistrat) / (1 - klistrat)) * (1 - SEKV.klistratSlut);
     const i = Math.round(framsteg * (antal - 1));
 
     if (i !== forraIndex) {
