@@ -1,5 +1,5 @@
 /**
- * Bildpipeline för lagersektionen.
+ * Bildpipeline för laddskärmens burgare.
  *
  *   node verktyg/bilder.mjs
  *
@@ -7,15 +7,14 @@
  * lyser, skalar till de storlekar sidan faktiskt använder och skriver
  * WebP med alfa.
  *
- * TVÅ UPPSÄTTNINGAR UR SAMMA FÖRBEHANDLING. Lagersektionen och
- * laddskärmen visar samma fem lager i vitt skilda storlekar, och
- * beskärningen av A1 och avfransningen av A4 måste gälla båda. Därför
- * ligger de som två utgåvor av ett och samma pass i stället för som
- * två skript — en andra pipeline hade kunnat driva isär från den här
- * utan att någon märkte det.
+ * EN UTGÅVA NU, TVÅ FÖRUT. Den andra var lagersektionen — samma fem
+ * lager i 900 px, för en scen som var 560 px bred. Den sektionen är
+ * riven och ersatt av scroll-sekvensen (verktyg/sekvens.mjs), så
+ * 900-utgåvan är borttagen och public/bilder/lager/ med den: 388 kB
+ * som ingenting längre pekade på. Strukturen med UTGAVOR står kvar,
+ * för den bär förbehandlingen — beskärningen av A1 och avfransningen
+ * av A4 ska gälla varje utgåva som tillkommer.
  *
- *   lager  scenen är som mest 560 px bred, bredaste lagret 83 procent
- *          av den ≈ 465 px. 900 täcker det med marginal vid 2×.
  *   ladd   laddskärmens stapel är som mest 160 px. Varje lager får sin
  *          EGEN bredd, uträknad ur registret i stilmallen gånger två
  *          för pixeltäthet — en gemensam bredd hade gett det smalaste
@@ -35,7 +34,6 @@ const KALLA = 'kalla/lager';
 const ANDEL = { A1: 0.724, A2: 0.773, A3: 0.829, A4: 0.783, A5: 0.744 };
 
 const UTGAVOR = [
-  { mal: 'public/bilder/lager', bredd: () => 900, kvalitet: 82, alfa: 90 },
   {
     mal: 'public/bilder/ladd',
     // 160 px stapel × lagrets andel × 2 för pixeltäthet.

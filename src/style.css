@@ -24,7 +24,8 @@
 
   /* Låsta typsnitt. Mouse Memoirs bär sajten — brödtext och alla
      mindre rubriker — och Titan One är accent på exakt två ställen:
-     hero-lockupen och lagerrubriken. Fördelningen och skälen står i
+     hero-lockupen och finalens rad. Lagerrubriken var det tredje;
+     den försvann med lagersektionen. Fördelningen och skälen står i
      PLAN.md avsnitt 13.
 
      MOUSE MEMOIRS HAR EN ENDA VIKT, 400. Det är inte en brist som
@@ -66,7 +67,7 @@
      hela nedre halvan flyttades upp och behöll sin ordning.
 
      xxl och xxxl står kvar oförändrade. De bär bara Titan One —
-     hero-lockupen och lagerrubriken — och det snittet har inte
+     hero-lockupen och finalens rad — och det snittet har inte
      glyfproblemet. De är dessutom redan satta av vyns bredd, inte av
      skalan: 240 px kan inte bli 480.
 
@@ -248,7 +249,7 @@ a {
 
 /* Ingen generell paddning. Varje sektion får en av de tre
    luftklasserna, eller sätter sin egen om den har en särskild form
-   (hero är 100svh, lagersektionen är ett scrollspår). */
+   (hero är 100svh, sekvensen är ett scrollspår). */
 .sec {
   position: relative;
 }
@@ -306,7 +307,7 @@ a {
    ett streck utan form, som läste som ett misstag.
 
    Färgordningen löser det inte. Tre sektioner måste vara mörka av
-   bildskäl (hero, lagerscenen, signaturgalleriet), två av dem ligger
+   bildskäl (hero, sekvensen, signaturgalleriet), två av dem ligger
    intill varandra, och det ljusa blocket finns bara en gång. Var
    färgerna än läggs blir minst tre av nio skarvar mörkt mot mörkt.
 
@@ -516,8 +517,13 @@ a {
 
      klocka   "SEDAN 2017"       hero, svart
      smash    "SMASHAD"          rebranden, på kortet Smashmomentet
-     nöt      "100 % NÖTKÖTT"    lagerscenen, svart
      kock     kocken med brickan beställsektionen, svart
+
+   NÖTMÄRKET "100 % NÖTKÖTT" låg i lagersektionen och följde med när
+   den revs. Det är inte flyttat till sekvensen: bildrutorna där är
+   en filmad burgare som faller isär, och ett klistermärke klistrat
+   ovanpå en film läser som en dekal på en tv-skärm. Filen ligger
+   kvar i public/bilder/marken/ om det ska tillbaka någonstans.
 
    Reglerna följer med från de gamla märkena: märket påstår något
    sant om det som står bredvid, det lutar som om någon satt dit det
@@ -1356,119 +1362,11 @@ input:focus-visible {
   .kort--lut-b { margin-block-start: 0; }
 }
 
-/* ═══ 4 · LAGERSEKTIONEN ══════════════════════════════════════
-   Fem lager på samma kvadratiska duk, staplade i monterad
-   position. Scrollen driver dem isär och vrider scenen.         */
-
-/* Lagersektionen är ett scrollspår, inte en textsektion. Den får
-   ingen luftklass — spårets höjd är hela dess form. */
-.lager {
-  padding-block: 0;
-}
-
-.lager__spar {
-  /* Scrollsträckan som lagren rör sig över. */
-  height: 320svh;
-  position: relative;
-}
-
-.lager__sticky {
-  position: sticky;
-  inset-block-start: 0;
-  height: 100svh;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  perspective: 1400px;
-}
-
-.lager__rubrik {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.02em;
-  font-family: var(--font-display);
-  font-weight: var(--font-display-vikt);
-  font-size: var(--t-xxl);
-  line-height: var(--lh-xxl);
-  letter-spacing: var(--ls-xxl);
-  text-transform: uppercase;
-  text-align: center;
-  pointer-events: none;
-  hyphens: manual;
-
-  /* Samma mått som hero-lockupens ram, i em av den egna graden.
-     Lagerrubriken går i --t-xxl, alltså drygt hälften av DELENS, och
-     en ram i px hade blivit hälften så tung i förhållande till
-     bokstaven. */
-  --lager-ram: 0.05em;
-}
-
-/* Raderna får olika z så lagren passerar framför vissa och bakom
-   andra. Det är djupillusionen — inte parallaxen i sig.
-
-   KONTURRADERNA ÄR FYLLDA NU, av samma skäl som hero-lockupen.
-   Tom kontur i 2 px och 55 procents vitt betyder att raden bärs av
-   ett hårstreck och att allt innanför är det som råkar ligga bakom.
-   Bakom ligger burgarlagren: VARJE hamnade mot överbullen i nästan
-   samma ljushet och HANDLAGT mot sallad och underbulle. Uppmätt
-   lästes bara LAGER och PÅ PLATS — de två fyllda raderna.
-
-   Samma recept som i hero: djupröd fyllning, tjock vit ram, ramen
-   mätt i em så den följer graden, och paint-order så ramen växer
-   utåt i stället för att äta upp bokstaven inifrån.
-
-   FYLLNINGEN STÄRKER DJUPET, den bryter det inte. En rad som ligger
-   FÖRE ett lager skymmer det nu på riktigt i stället för att visa
-   det genom sina egna hålrum, och en rad som ligger BAKOM täcks som
-   förut. z-ordningen är orörd: position och z-index står kvar, och
-   ingen ny stackningskontext tillkommer — varken färg, kontur eller
-   paint-order skapar någon. */
-.lager__rad {
-  position: relative;
-  color: var(--rod);
-  -webkit-text-stroke: var(--lager-ram) var(--offwhite);
-  paint-order: stroke fill;
-}
-
-.lager__rad:nth-child(2),
-.lager__rad:nth-child(4) {
-  color: var(--offwhite);
-  -webkit-text-stroke: 0;
-}
-
-.lager__rad[data-z='1'] { z-index: 1; }
-.lager__rad[data-z='3'] { z-index: 3; }
-.lager__rad[data-z='5'] { z-index: 5; }
-.lager__rad[data-z='7'] { z-index: 7; }
-
-.lager__scen {
-  position: relative;
-  /* Höjdledet måste vara med i taket. Vid full separation sträcker sig
-     stapeln ungefär 1,44 gånger scenens storlek, och på en låg vy
-     klipptes överbullen mot sticky-behållarens överkant. 62svh håller
-     hela stapeln innanför ned till omkring 700 px vyhöjd. */
-  width: min(74vw, 560px, 62svh);
-  aspect-ratio: 1;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-.lager__bit {
-  position: absolute;
-  inset: 0;
-  z-index: var(--z);
-  display: grid;
-  place-items: center;
-  will-change: transform;
-}
-
-/* LAGERREGISTRET. Ett ställe, två användare.
+/* ═══ LAGERREGISTRET ══════════════════════════════════════════
+   Laddskärmens burgare, och numera ingenting annat. Lagersektionen
+   som en gång delade det här registret är borta — den är ersatt av
+   scroll-sekvensen — men laddskärmen bygger fortfarande sin stapel
+   av samma fem delar, så talen står kvar.
 
    Lagren är genererade var för sig och ligger inte i register: olika
    dukstorlek, olika skala och olika mängd tom yta runt motivet.
@@ -1482,10 +1380,9 @@ input:focus-visible {
    Negativ --t betyder att filens tomma yta ovanför motivet skjuts
    utanför scenen. Parallaxen adderas ovanpå det här viloläget.
 
-   Talen är andelar av en KVADRATISK scen, inte pixlar, så samma
-   register bygger burgaren i lagersektionens 560 px och i
-   laddskärmens 160. Anpassade egenskaper ärvs, alltså räcker det att
-   attributet sitter på bilden ELLER på dess förälder.
+   Talen är andelar av en KVADRATISK scen, inte pixlar. Anpassade
+   egenskaper ärvs, alltså räcker det att attributet sitter på bilden
+   ELLER på dess förälder.
 
    ANDEL i verktyg/bilder.mjs är samma tal som --b. Ändras ett av dem
    måste det andra ändras samtidigt, annars ritas laddskärmens lager i
@@ -1497,13 +1394,119 @@ input:focus-visible {
 [data-lager='sallad']     { --b: 78.3%; --t: 19.5%; --z: 4; }
 [data-lager='underbulle'] { --b: 74.4%; --t: 35.2%; --z: 2; }
 
-.lager__bit img {
+/* ═══ 4 · SEKVENSEN ═══════════════════════════════════════════
+   En filmad burgare som scrollen scrubbar genom: hel, isärfallen,
+   ihopbyggd till ett högre torn. Rutorna ligger i
+   public/bilder/sekvens/ och görs av verktyg/sekvens.mjs.
+
+   HELA SEKTIONEN ÄR STILLBILD I GRUNDEN. Reglerna nedan beskriver
+   ett stillastående block med en bild i; rörelsen läggs till av
+   [data-rorlig='true'], som riggaSekvens sätter först när den
+   bestämt att rörelse är rätt. Alltså: utan JS, vid reducerad
+   rörelse, vid Save-Data och på långsam uppkoppling gäller det som
+   står här — och ingen får två och en halv tomma skärmar att
+   scrolla förbi.                                                  */
+
+.sekvens {
+  padding-block: 0;
+}
+
+/* BILDENS BREDD ÄR RÄKNAD UR MOTIVET, inte ur vyn.
+
+   Motivet — burgaren med allt som flyger — är ungefär 0,42 av
+   bildrutans bredd högt. Vi vill att det ska ta ungefär 0,38 av
+   scenens höjd. Alltså: bredd = 0,38 × höjd / 0,42 ≈ 90,5svh. Aldrig
+   smalare än vyn, för då syns kanter, och aldrig bredare än 1200 px,
+   som är där uppskalningen ur en 800 px källa börjar bli mjuk.
+
+     1440×900  → 1200 px (taket)      390×844 → 764 px
+     1920×1080 → 1200 px (taket)      430×932 → 844 px
+      768×1024 →  927 px              360×640 → 579 px
+
+   På telefon blir bilden alltså bredare än skärmen och beskärs i
+   sidled. Det är avsiktligt: motivet ligger mitt i rutan och kanterna
+   är rök som ändå tonas bort. */
+.sekvens__scen {
+  --sekv-bredd: min(1200px, max(100vw, 90.5svh));
+  position: relative;
+  height: calc(var(--sekv-bredd) * 9 / 16);
+  overflow: hidden;
+}
+
+/* Duken och stillbilden ligger i exakt samma ruta, mitt i scenen.
+   Absolut placering och inte grid: ett rutnät som centrerar ett barn
+   bredare än spåret är inte lika pålitligt åt båda håll, och här ska
+   beskärningen vara symmetrisk. */
+.sekvens__duk,
+.sekvens__still {
   position: absolute;
-  inset-block-start: var(--t);
+  inset-block-start: 50%;
   inset-inline-start: 50%;
-  width: var(--b);
+  translate: -50% -50%;
+  width: var(--sekv-bredd);
   height: auto;
-  translate: -50% 0;
+  max-width: none;
+}
+
+.sekvens__duk {
+  /* Duken är tom tills första rutan är ritad. Fram till dess är det
+     stillbilden under som syns. */
+  opacity: 0;
+  transition: opacity 420ms var(--ut);
+}
+
+.sekvens__duk[data-tand='true'] {
+  opacity: 1;
+}
+
+/* KANTERNA TONAS BORT I SEKTIONENS SVARTA.
+
+   Bildrutornas bakgrund ÄR nästan sektionens färg — rök mot nära
+   svart — så en rektangel med skarp kant vore det enda som avslöjade
+   att här ligger en bild. Med tonningen svävar burgaren i sektionen
+   i stället.
+
+   Det här är ett lager OVANPÅ, inte en mask PÅ duken. En mask hade
+   fått räknas om varje gång duken ritas, alltså varje bildruta under
+   hela scrollen; det här lagret målas en gång och rör sig aldrig. */
+.sekvens__scen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    116% 116% at 50% 48%,
+    rgb(14 14 14 / 0) 44%,
+    var(--svart) 100%
+  );
+  pointer-events: none;
+}
+
+/* ── RÖRLIGT LÄGE ──────────────────────────────────────────────
+   Spåret blir en scrollsträcka och scenen klistras fast. Talen:
+   250svh med 120 rutor på desktop ger 18,8 px scroll per ruta på en
+   900 px hög vy, 200svh med 80 rutor ger 21,1 px på en 844 px hög
+   telefon. Under ungefär 25 px per ruta går rörelsen inte att skilja
+   från film.
+
+   BRYTPUNKTEN 760 px STÅR OCKSÅ I main.js (SEKV.brytMobil). Ändras
+   den på ett ställe måste den ändras på det andra, annars hämtas
+   mobilens 80 rutor till ett spår byggt för 120.                 */
+
+.sekvens[data-rorlig='true'] .sekvens__spar {
+  height: 250svh;
+  position: relative;
+}
+
+.sekvens[data-rorlig='true'] .sekvens__scen {
+  position: sticky;
+  inset-block-start: 0;
+  height: 100svh;
+}
+
+@media (max-width: 760px) {
+  .sekvens[data-rorlig='true'] .sekvens__spar {
+    height: 200svh;
+  }
 }
 
 /* ═══ 5 · SIGNATURBURGARNA ════════════════════════════════════ */
@@ -3054,16 +3057,10 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 
-  .lager__spar { height: auto; }
-
-  .lager__sticky {
-    position: static;
-    height: auto;
-    padding-block: clamp(4rem, 10vw, 7rem);
-  }
-
-  .lager__bit { transform: none !important; }
-  .lager__scen { transform: none !important; }
+  /* SEKVENSEN BEHÖVER INGEN REGEL HÄR. Den är stillbild i grunden
+     och blir rörlig först när riggaSekvens sätter data-rorlig, och
+     det gör den aldrig vid reducerad rörelse. Att dessutom nolla
+     spåret härifrån hade varit två svar på samma fråga. */
 }
 
 /* ═══════════════════════════════════════════════════════════════

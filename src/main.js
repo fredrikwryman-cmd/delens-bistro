@@ -1600,8 +1600,8 @@ const KEDJA = {
   segBas: 38,
   segSteg: 3.2,
   /* Knutarna var burgarlagren A1, A2, A4 och A5 — bilder skurna för
-     lagerscenen, där de visas 500 px breda. I en knut på 30 px blev de
-     färgfläckar. Ingredienserna är frilagda och fotade något uppifrån
+     den dåvarande lagerscenen, där de visades 500 px breda. I en knut
+     på 30 px blev de färgfläckar. Ingredienserna är frilagda och fotade något uppifrån
      och tål att visas små.
 
      Andra varianten av varje motiv, eftersom första varianten
@@ -1765,52 +1765,23 @@ function stukaStapeln() {
   );
 }
 
-/* ═══ 4 · LAGERSEKTIONEN + SCROLLVARVET ══════════════════════════ */
+/* ═══ SCROLLVARVET ═══════════════════════════════════════════════
+   Ett enda requestAnimationFrame-varv för hela sidan. Det driver den
+   fasta navbaren direkt och allt annat via varvSteg.
 
-/* LÅSTA. Framreglade i avstämningspanelen och fastställda; panelen
-   är borttagen och de här två talen ändras inte längre av ett
-   reglage utan av ett beslut. */
-const scenLage = {
-  maxVrid: 7, // grader
-  sep: 1.6 // multiplikator på lagrens fart
-};
+   LAGERPARALLAXEN LÅG HÄR FÖRUT. Den är borta med lagersektionen;
+   scroll-sekvensen nedan registrerar sig i varvSteg som alla andra
+   effekter i stället för att ha en egen gren i själva varvet.     */
 
 function riggaScroll() {
-  const spar = $('#lager-spar');
-  const scen = $('#lager-scen');
-  const bitar = $$('.lager__bit');
   const nav = $('#nav');
+  let sistFast = null;
 
-  // Djupled så vridningen läser som volym och inte som papp.
-  const djup = [40, 20, 0, -20, -40];
-
-  let progress = 0;
-  let behovsRitning = true;
-
-  const las = () => {
-    const r = spar.getBoundingClientRect();
-    const strackan = spar.offsetHeight - window.innerHeight;
-    progress = strackan > 0 ? Math.min(1, Math.max(0, -r.top / strackan)) : 0;
-    behovsRitning = true;
-  };
-
-  const rita = () => {
-    if (!behovsRitning) return;
-    behovsRitning = false;
-
-    if (!reducerad.matches) {
-      const h = scen.offsetHeight || 1;
-
-      bitar.forEach((bit, i) => {
-        const fart = parseFloat(bit.dataset.fart) || 0;
-        const y = fart * progress * h * scenLage.sep;
-        bit.style.transform = `translate3d(0, ${y.toFixed(1)}px, ${djup[i]}px)`;
-      });
-
-      scen.style.transform = `rotateY(${(progress * scenLage.maxVrid).toFixed(2)}deg)`;
-    }
-
-    nav.setAttribute('data-fast', String(window.scrollY > 40));
+  const lasNav = () => {
+    const fast = String(window.scrollY > 40);
+    if (fast === sistFast) return; // skriv inte samma attribut varje ruta
+    sistFast = fast;
+    nav.setAttribute('data-fast', fast);
   };
 
   // Ett varv för allt scrollstyrt OCH för all löpande rörelse. Varje
@@ -1820,15 +1791,306 @@ function riggaScroll() {
   const varv = (nu) => {
     const dt = Math.min(64, nu - forra); // hoppa inte vid flikbyte
     forra = nu;
-    rita();
+    lasNav();
     for (const steg of varvSteg) steg(nu, dt);
     requestAnimationFrame(varv);
   };
 
-  window.addEventListener('scroll', las, { passive: true });
-  window.addEventListener('resize', las, { passive: true });
-  las();
+  lasNav();
   requestAnimationFrame(varv);
+}
+
+/* ═══ 4 · SCROLL-SEKVENSEN ═══════════════════════════════════════
+   En filmad burgare som faller isär och byggs ihop igen, scrubbad
+   direkt av scrollen. Rutorna görs av verktyg/sekvens.mjs ur
+   originalvideon och ligger i public/bilder/sekvens/.
+
+   TRE BESLUT BÄR HELA FUNKTIONEN.
+
+   1. STILLBILD ÄR GRUNDLÄGET, INTE RESERVEN. Sektionen är ett
+      stillastående block tills den här funktionen sätter
+      data-rorlig på den. Allt som kan gå fel — ingen JS, reducerad
+      rörelse, Save-Data, 2G, ingen canvas — leder till att attributet
+      aldrig sätts, och då står stillbilden kvar i ett block med
+      normal höjd. Ingen behöver scrolla förbi två och en halv tomma
+      skärmar.
+
+   2. KOMPRIMERAT I MINNET, AVKODAT I ETT FÖNSTER. Alla rutor hämtas
+      som Blob och stannar som komprimerade byte: 2,7 MB för hela
+      desktopuppsättningen. AVKODADE är de däremot bara i ett rullande
+      fönster kring den ruta som visas. En avkodad ruta kostar
+      bredd × höjd × 4 byte — 1,37 MB på desktop — så hela sekvensen
+      avkodad hade varit 165 MB. Fönstret är 22 rutor, alltså 30 MB,
+      och de som faller ur stängs med close().
+
+   3. HÄMTNINGEN GÅR I TRE PASS. Först ruta 1, så duken aldrig är tom.
+      Sedan var fjärde ruta — då går hela sekvensen redan att scrubba,
+      om än grovt, på en fjärdedel av vikten. Sist resten. Att hämta
+      1 till 120 i ordning hade gett en sekvens som är färdig i
+      början och tom i slutet under hela laddningen.               */
+
+const SEKV = {
+  /* Brytpunkten står OCKSÅ i style.css (@media max-width: 760px).
+     Ändras den på ett ställe måste den ändras på det andra. */
+  brytMobil: 760,
+
+  /* Rutor per uppsättning. Måste stämma med UTGAVOR i
+     verktyg/sekvens.mjs — en ruta för mycket är en 404, en för lite
+     är en sekvens som slutar innan spåret gör det. */
+  rutor: { desktop: 120, mobil: 80 },
+
+  /* Det rullande fönstret av AVKODADE rutor, i scrollriktningen och
+     mot den. Asymmetriskt med flit: man scrollar nästan alltid vidare
+     åt samma håll, och de få rutorna bakåt räcker för att vända utan
+     att det syns. */
+  fram: 16,
+  bak: 6,
+
+  /* Samtidiga hämtningar. Sex är ungefär där HTTP/2 slutar tjäna på
+     fler strömmar och börjar betala för dem. */
+  parallellt: 6,
+
+  /* Grovpassets steg. Var fjärde ruta = 30 rutor på desktop, ungefär
+     670 kB, och sekvensen går att dra igenom hela vägen. */
+  grovt: 4
+};
+
+function riggaSekvens() {
+  const sek = $('#sekvens');
+  if (!sek) return;
+
+  const spar = $('#sekvens-spar', sek);
+  const duk = $('#sekvens-duk', sek);
+  if (!spar || !duk) return;
+
+  const ctx = duk.getContext && duk.getContext('2d', { alpha: false });
+  if (!ctx) return; // ingen canvas: stillbilden står kvar
+
+  /* ── GRINDEN ────────────────────────────────────────────────────
+     Fyra skäl att låta bli, och alla fyra leder till samma sak:
+     stillbilden. De läses en gång, vid start. Att lyssna på
+     förändringar hade betytt att kunna riva en pågående sekvens mitt
+     i en scroll, och det är en sämre upplevelse än att en inställning
+     slår igenom först vid omladdning. */
+
+  const natet = navigator.connection;
+  const sparaData = Boolean(natet && natet.saveData);
+  const langsamt = Boolean(
+    natet && /(^|-)(2g|slow-2g)$/.test(natet.effectiveType || '')
+  );
+
+  if (reducerad.matches || sparaData || langsamt) return;
+
+  /* ── UPPSÄTTNING ────────────────────────────────────────────────
+     Vilken uppsättning som hämtas avgörs av vyns bredd, samma
+     brytpunkt som spårets höjd. Den läses en gång: att byta
+     uppsättning mitt i besöket hade betytt att hämta 1,4 MB till för
+     att någon vände på telefonen. */
+
+  const mobil = window.innerWidth <= SEKV.brytMobil;
+  const utgava = mobil ? 'mobil' : 'desktop';
+  const antal = SEKV.rutor[utgava];
+
+  const adress = (i) =>
+    `/bilder/sekvens/${utgava}/r${String(i + 1).padStart(3, '0')}.webp`;
+
+  /* Komprimerade byte, en post per ruta. 22,5 kB styck på desktop. */
+  const blobbar = new Array(antal);
+  /* Avkodade rutor. Bara fönstrets innehåll är satt, resten undefined. */
+  const rutor = new Array(antal);
+  /* Index som har en avkodning på gång, så samma ruta inte startas två
+     gånger när fönstret glider fram över den. */
+  const pagar = new Set();
+  /* Index som är avkodade just nu — billigare att gå igenom än att
+     söka i en array på 120 platser varje bildruta. */
+  const levande = new Set();
+
+  let hamtade = 0;
+  let ritad = -1;
+  let forraIndex = 0;
+  let riktning = 1;
+  let tand = false;
+  let fonsterMin = 0;
+  let fonsterMax = 0;
+
+  const ifonster = (i) => i >= fonsterMin && i <= fonsterMax;
+
+  /* ── RITNINGEN ─────────────────────────────────────────────────
+     Duken är exakt en bildrutas storlek, så drawImage skalar
+     ingenting. CSS sköter storleken på skärmen. */
+
+  const rita = (i) => {
+    const bild = rutor[i];
+    if (!bild) return false;
+    ctx.drawImage(bild, 0, 0);
+    ritad = i;
+    if (!tand) {
+      tand = true;
+      duk.setAttribute('data-tand', 'true');
+    }
+    return true;
+  };
+
+  /** Närmaste avkodade ruta åt något håll. Används när den önskade
+   *  rutan ännu inte hunnit fram: hellre grannen än ingenting. */
+  const narmaste = (i) => {
+    for (let d = 1; d < antal; d++) {
+      if (rutor[i - d]) return i - d;
+      if (rutor[i + d]) return i + d;
+    }
+    return -1;
+  };
+
+  /* ── AVKODNINGEN ────────────────────────────────────────────────
+     createImageBitmap avkodar utanför huvudtråden, så en ruta som
+     tar tid stoppar inte varvet. */
+
+  const avkoda = (i) => {
+    if (i < 0 || i >= antal || rutor[i] || pagar.has(i) || !blobbar[i]) return;
+    pagar.add(i);
+    createImageBitmap(blobbar[i])
+      .then((bild) => {
+        pagar.delete(i);
+        // Hann fönstret glida förbi medan avkodningen pågick är rutan
+        // redan inaktuell. Stäng den direkt i stället för att lägga
+        // den i minnet och plocka bort den nästa bildruta.
+        if (!ifonster(i)) {
+          bild.close();
+          return;
+        }
+        rutor[i] = bild;
+        levande.add(i);
+      })
+      .catch(() => pagar.delete(i));
+  };
+
+  const stallFonster = (mitt) => {
+    fonsterMin = Math.max(0, mitt - (riktning >= 0 ? SEKV.bak : SEKV.fram));
+    fonsterMax = Math.min(
+      antal - 1,
+      mitt + (riktning >= 0 ? SEKV.fram : SEKV.bak)
+    );
+
+    for (const i of levande) {
+      if (ifonster(i)) continue;
+      rutor[i].close();
+      rutor[i] = undefined;
+      levande.delete(i);
+    }
+
+    // Närmast först, så det som behövs härnäst avkodas först.
+    for (let d = 0; d <= fonsterMax - fonsterMin; d++) {
+      const fram = mitt + d * riktning;
+      const bak = mitt - d * riktning;
+      if (ifonster(fram)) avkoda(fram);
+      if (ifonster(bak)) avkoda(bak);
+    }
+  };
+
+  /* ── HÄMTNINGEN ────────────────────────────────────────────────── */
+
+  const hamtaRuta = (i) =>
+    blobbar[i]
+      ? Promise.resolve()
+      : fetch(adress(i))
+          .then((r) => (r.ok ? r.blob() : null))
+          .then((b) => {
+            if (!b) return;
+            blobbar[i] = b;
+            hamtade++;
+            // Första rutan ritas så fort den finns, även om ingen
+            // scrollat hit än. Duken ska aldrig vara tom när sektionen
+            // kommer i vy.
+            if (i === 0 && !tand) avkoda(0);
+            else if (ifonster(i)) avkoda(i);
+          })
+          .catch(() => {});
+
+  /** Kör en lista index med tak på antalet samtidiga hämtningar. */
+  const koa = async (lista) => {
+    let n = 0;
+    const arbetare = async () => {
+      while (n < lista.length) await hamtaRuta(lista[n++]);
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(SEKV.parallellt, lista.length) }, arbetare)
+    );
+  };
+
+  const hamtaAllt = async () => {
+    await hamtaRuta(0);
+
+    const grovt = [];
+    for (let i = SEKV.grovt; i < antal; i += SEKV.grovt) grovt.push(i);
+    await koa(grovt);
+
+    const resten = [];
+    for (let i = 1; i < antal; i++) if (!blobbar[i]) resten.push(i);
+    await koa(resten);
+  };
+
+  /* ── SPÅRET ────────────────────────────────────────────────────
+     Rörligt läge sätts först, så spåret får sin höjd, och sedan
+     mäts det. Tvärtom hade gett strackan = 0. */
+
+  sek.setAttribute('data-rorlig', 'true');
+
+  let strackan = 1;
+  const mat = () => {
+    strackan = Math.max(1, spar.offsetHeight - window.innerHeight);
+  };
+  mat();
+  window.addEventListener('resize', mat, { passive: true });
+
+  /* Hämtningen startar när sektionen är en hel skärm bort, inte när
+     den är framme. 2,7 MB hinner inte fram på den sista skärmen, och
+     att börja tidigare hade betytt att varenda besökare betalar för
+     en sektion hen kanske aldrig når. */
+  const io = new IntersectionObserver(
+    (poster) => {
+      if (!poster.some((p) => p.isIntersecting)) return;
+      io.disconnect();
+      hamtaAllt();
+    },
+    { rootMargin: '100% 0px' }
+  );
+  io.observe(spar);
+
+  /* ── VARVET ────────────────────────────────────────────────────
+     Registrerar sig i sidans enda rAF-varv. Läser ETT rekt per
+     bildruta och skriver ingenting till DOM:en utom när rutan
+     faktiskt byts. */
+
+  varvSteg.push(() => {
+    if (flikenDold || !hamtade) return;
+
+    const r = spar.getBoundingClientRect();
+    // Ingenting att göra medan sektionen är utanför vyn.
+    if (r.bottom < 0 || r.top > window.innerHeight) return;
+
+    const framsteg = Math.min(1, Math.max(0, -r.top / strackan));
+    const i = Math.round(framsteg * (antal - 1));
+
+    if (i !== forraIndex) {
+      riktning = i > forraIndex ? 1 : -1;
+      forraIndex = i;
+      stallFonster(i);
+    }
+
+    if (i === ritad) return;
+
+    if (!rita(i)) {
+      // Rutan är inte avkodad än. Rita grannen hellre än att lämna
+      // duken stående på en ruta långt bort — under laddningen är det
+      // skillnaden mellan en grov sekvens och en frusen bild.
+      const n = narmaste(i);
+      if (n >= 0 && n !== ritad) rita(n);
+    }
+  });
+
+  // Första fönstret ställs direkt, annars avkodas ingenting förrän
+  // någon scrollat en ruta.
+  stallFonster(0);
 }
 
 /* ═══ FOTONAS ANKOMST ════════════════════════════════════════════
@@ -2218,6 +2480,7 @@ const slappHeroburgaren = riggaHeroburgare();
 
 riggaLenis();
 riggaScroll();
+riggaSekvens();
 
 // Öppettidsstatusen räknas om varje minut.
 setInterval(fyllStatus, 60_000);

@@ -282,63 +282,41 @@
         </div>
       </section>
 
-      <!-- ═══ 4 · LAGERSEKTIONEN — svart ═══════════════════════════ -->
-      <section class="sec sec--svart lager" id="lager" style="--wave-fill: var(--rod)">
+      <!-- ═══ 4 · SEKVENSEN — svart ════════════════════════════════
+           Scrollen scrubbar en filmad burgare som faller isär och
+           byggs ihop till ett högre torn. Det här är samma plats och
+           samma påstående som den gamla lagersektionen hade, men
+           gjort i riktig bild i stället för fem utklippta PNG-lager.
+
+           SEKTIONEN ÄR STUM UTAN JS, OCH DET ÄR UTGÅNGSLÄGET. Duken
+           ligger tom och stillbilden ligger under den. Först när
+           riggaSekvens har bestämt att rörelse är rätt sätter den
+           data-rorlig på sektionen, och först då blir spåret 250svh.
+           Ett 250svh-spår som saknar sin animation är två och en halv
+           tomma skärmar. -->
+      <section class="sec sec--svart sekvens" id="sekvens" style="--wave-fill: var(--rod)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,45 C230,82 470,82 700,45 C950,8 1200,8 1440,45 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,45 C230,82 470,82 700,45 C950,8 1200,8 1440,45" />
         </svg>
 
-        <div class="lager__spar" id="lager-spar">
-          <div class="lager__sticky">
-            <!-- Märket ligger INUTI det sticky spåret. Utanför rullade det
-                 bort efter 460 px medan scenen det uttalar sig om satt
-                 kvar i 2880 px — ett påstående utan sitt motiv.
-
-                 20 %, INTE 11. Vid 11 % låg märkets överkant på y 88
-                 medan vågens underkant låg på 128 när sektionen kom in
-                 i vy — fyrtio pixlars överlapp, och just i det
-                 ögonblick man tittar. Vågen tänjs dessutom till 1,5
-                 gånger av scrubben, så den når som djupast 135 px in i
-                 sektionen. 20 % lägger märket under det med marginal. -->
-            <span class="sticker"
-                  style="--r: -7deg; --s-top: 20%; --s-left: 4%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-not.webp')">
-              <img class="sticker__blad" src="/bilder/marken/delens-not.webp"
-                   alt="Klistermärke: en biff håller upp en rosett med texten 100 % nötkött"
-                   width="400" height="417" loading="lazy" decoding="async" />
-              <span class="sticker__flarp" aria-hidden="true"></span>
-              <span class="sticker__glans" aria-hidden="true"></span>
-            </span>
-            <!-- Rubriken i fyra rader. Lagren vävs in mellan raderna. -->
-            <h2 class="lager__rubrik" aria-label="Varje lager handlagt">
-              <span class="lager__rad" data-z="1">Varje</span>
-              <span class="lager__rad" data-z="3">lager</span>
-              <span class="lager__rad" data-z="5">hand&shy;lagt</span>
-              <span class="lager__rad" data-z="7">på plats</span>
-            </h2>
-
-            <!--
-              Fem lager, samma kvadratiska duk, staplade i sin monterade
-              position. Parallaxen driver dem isär.
-              data-fart = px förflyttning per scrollad pixel.
-            -->
-            <div class="lager__scen" id="lager-scen">
-              <span class="lager__bit" data-lager="overbulle" data-fart="-0.20">
-                <img src="/bilder/lager/A1.webp" alt="Överbulle" width="900" height="359" decoding="async" />
-              </span>
-              <span class="lager__bit" data-lager="ost" data-fart="-0.10">
-                <img src="/bilder/lager/A2.webp" alt="Smält cheddar" width="900" height="889" decoding="async" />
-              </span>
-              <span class="lager__bit" data-lager="kottpuck" data-fart="0">
-                <img src="/bilder/lager/A3.webp" alt="Smashad köttpuck" width="900" height="835" decoding="async" />
-              </span>
-              <span class="lager__bit" data-lager="sallad" data-fart="0.10">
-                <img src="/bilder/lager/A4.webp" alt="Sallad" width="900" height="835" decoding="async" />
-              </span>
-              <span class="lager__bit" data-lager="underbulle" data-fart="0.20">
-                <img src="/bilder/lager/A5.webp" alt="Underbulle" width="900" height="879" decoding="async" />
-              </span>
-            </div>
+        <div class="sekvens__spar" id="sekvens-spar">
+          <div class="sekvens__scen">
+            <!-- Stillbilden ligger UNDER duken och tas aldrig bort. Den
+                 är reservvägen vid reducerad rörelse, Save-Data och
+                 långsam uppkoppling, den är det som syns utan JS, och
+                 den är kvar om hämtningen skulle braka mitt i. En duk
+                 som blir tom har inget att falla tillbaka på. -->
+            <img class="sekvens__still" src="/bilder/sekvens/still.webp"
+                 alt="En dubbel smashburgare med smält cheddar, jalapeño, rödlök och friterade lökringar, svävande framför restaurangens neonskylt."
+                 width="1200" height="676" loading="lazy" decoding="async" />
+            <!-- Duken är exakt en bildrutas storlek i pixlar och skalas
+                 av CSS. Att i stället blåsa upp bufferten till skärmens
+                 pixeltäthet hade kostat fyra gånger så många pixlar att
+                 rita varje bildruta utan att tillföra en enda detalj —
+                 källan är 1280 px bred och mer finns inte. -->
+            <canvas class="sekvens__duk" id="sekvens-duk" width="800" height="450"
+                    aria-hidden="true"></canvas>
           </div>
         </div>
       </section>
