@@ -1875,12 +1875,20 @@ function riggaScroll() {
       skärmar.
 
    2. KOMPRIMERAT I MINNET, AVKODAT I ETT FÖNSTER. Alla rutor hämtas
-      som Blob och stannar som komprimerade byte: 2,7 MB för hela
+      som Blob och stannar som komprimerade byte: 4,7 MB för hela
       desktopuppsättningen. AVKODADE är de däremot bara i ett rullande
       fönster kring den ruta som visas. En avkodad ruta kostar
-      bredd × höjd × 4 byte — 1,37 MB på desktop — så hela sekvensen
-      avkodad hade varit 165 MB. Fönstret är 22 rutor, alltså 30 MB,
-      och de som faller ur stängs med close().
+      bredd × höjd × 4 byte — 3,52 MB sedan rutorna blev 1280×720 — så
+      hela sekvensen avkodad hade varit 422 MB. Fönstret är 16 rutor,
+      alltså 56 MB, och de som faller ur stängs med close().
+
+      FÖNSTRET KRYMPTE NÄR RUTAN VÄXTE. 1280 i stället för 800 är 2,56
+      gånger så många pixlar, och 22 rutor hade blivit 77 MB avkodat —
+      på en telefon är det en flik som riskerar att slängas ut. 16
+      rutor lägger sig på 56. Priset är kortare startsträcka framåt:
+      12 rutor är omkring 130 px scroll på desktop mot 173 förut. Den
+      som flickar förbi det får grannens ruta i stället, vilket är
+      precis vad narmaste() finns till för.
 
    3. HÄMTNINGEN GÅR I TRE PASS. Först ruta 1, så duken aldrig är tom.
       Sedan var fjärde ruta — då går hela sekvensen redan att scrubba,
@@ -1902,8 +1910,8 @@ const SEKV = {
      mot den. Asymmetriskt med flit: man scrollar nästan alltid vidare
      åt samma håll, och de få rutorna bakåt räcker för att vända utan
      att det syns. */
-  fram: 16,
-  bak: 6,
+  fram: 12,
+  bak: 4,
 
   /* Samtidiga hämtningar. Sex är ungefär där HTTP/2 slutar tjäna på
      fler strömmar och börjar betala för dem. */
@@ -1991,7 +1999,12 @@ function riggaSekvens() {
 
   /* ── RITNINGEN ─────────────────────────────────────────────────
      Duken är exakt en bildrutas storlek, så drawImage skalar
-     ingenting. CSS sköter storleken på skärmen. */
+     ingenting. CSS sköter storleken på skärmen.
+
+     DET ÄR ETT KRAV, INTE EN IAKTTAGELSE. drawImage(bild, 0, 0) ritar
+     i bildens egen storlek, så duken i index.html måste ha samma mått
+     som UTGAVOR i verktyg/sekvens.mjs. En mindre duk visar rutans
+     övre vänstra hörn och inget annat. */
 
   const rita = (i) => {
     const bild = rutor[i];

@@ -309,13 +309,17 @@
                  som blir tom har inget att falla tillbaka på. -->
             <img class="sekvens__still" src="/bilder/sekvens/still.webp"
                  alt="En dubbel smashburgare med smält cheddar, jalapeño, rödlök och friterade lökringar, svävande framför restaurangens neonskylt."
-                 width="1200" height="676" loading="lazy" decoding="async" />
+                 width="1280" height="720" loading="lazy" decoding="async" />
             <!-- Duken är exakt en bildrutas storlek i pixlar och skalas
-                 av CSS. Att i stället blåsa upp bufferten till skärmens
-                 pixeltäthet hade kostat fyra gånger så många pixlar att
-                 rita varje bildruta utan att tillföra en enda detalj —
-                 källan är 1280 px bred och mer finns inte. -->
-            <canvas class="sekvens__duk" id="sekvens-duk" width="800" height="450"
+                 av CSS. MÅTTEN MÅSTE FÖLJA UTGAVOR i verktyg/sekvens.mjs:
+                 rita() ritar med drawImage(bild, 0, 0), alltså i bildens
+                 EGEN storlek utan skalning, så en duk som är mindre än
+                 rutan visar bara rutans övre vänstra hörn. Den stod kvar
+                 på 800×450 när rutorna höjdes till 1280.
+                 Att blåsa upp bufferten HÖGRE än rutan, till skärmens
+                 pixeltäthet, vore däremot slöseri: källan är 1280 px
+                 bred och mer detalj finns inte. -->
+            <canvas class="sekvens__duk" id="sekvens-duk" width="1280" height="720"
                     aria-hidden="true"></canvas>
           </div>
         </div>
