@@ -407,20 +407,32 @@ skrikig Modak är.
 | Plats | Varför |
 |---|---|
 | Hero-lockupen: "DELENS" i kontur + "BISTRO" fylld | Sajtens enda rena varumärkesutrop. Här ska typen skrika |
-| Lagersektionens rubrik, fyra rader | Typen **är** konstverket — lagren vävs igenom raderna, och utan en fet form läser inte z-index-växlingen som djup |
-| Finalens rad: "Välkommen till Delens Bistro" | Sidans sista mening, under märket som just byggts ihop. Tillagd 2026-09-19 på Fredriks beslut |
 
-**ANTALET ÄR OMFÖRHANDLAT FRÅN TVÅ TILL TRE.** Regeln stod tidigare
-att ett tredje ställe krävde att ett av de två första lämnade ifrån
-sig sitt. Fredrik beslutade annat, och då är det tre.
+**ANTALET ÄR ETT, inte två och inte tre.** Räkningen har gått fram och
+tillbaka; det här är var den landade och varför.
 
-Invändningen står kvar och är värd att veta om någon vill gå tillbaka:
-finalens rad sitter under loggan, alltså under sajtens tyngsta
-varumärkesutrop, och två feta former i samma vy konkurrerar. Raden i
-Mouse Memoirs hade låtit märket vara ensamt om att skrika. Det är en
-rad i stilmallen att ändra tillbaka — `.final__rad { font-family }`.
+Regeln stod först på två: hero-lockupen och lagersektionens rubrik.
+Finalens rad blev ett tredje ställe 2026-09-19 på Fredriks beslut, mot
+invändningen att raden satt under loggan och att två feta former i
+samma vy konkurrerar.
 
-**Ingen fjärde plats.** Varje ny rubrik utgår från Mouse Memoirs.
+Sedan dess har båda de andra ställena fallit bort, var för sig och av
+skäl som inte hade med typen att göra:
+
+- **Lagersektionen revs** 2026-09-20 och ersattes av scroll-sekvensen.
+  Rubriken i fyra rader gick med den. Typen *var* konstverket där, och
+  utan lager att väva rader igenom fanns inget kvar att bära.
+- **Finalens rad blev en bild** 2026-09-20. Röd bubbeltyp, ritad och
+  frilagd, som klistras in på plats i stället för att skrivas fram
+  bokstav för bokstav. Se `verktyg/valkommen.mjs` och
+  `.final__halsning` i stilmallen.
+
+Kvar står hero-lockupen ensam. Det är STRÄNGARE än regeln någonsin
+krävt, och ingen har beslutat det — det följde av två andra beslut.
+Värt att veta för den som tycker att sajten tappat en accent: den
+lediga platsen finns, och regelns tak är två.
+
+**Ingen tredje plats.** Varje ny rubrik utgår från Mouse Memoirs.
 
 ### Var Mouse Memoirs står
 

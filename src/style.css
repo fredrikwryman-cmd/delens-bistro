@@ -23,10 +23,12 @@
   --gutter: clamp(1rem, 4vw, 3rem);
 
   /* Låsta typsnitt. Mouse Memoirs bär sajten — brödtext och alla
-     mindre rubriker — och Titan One är accent på exakt två ställen:
-     hero-lockupen och finalens rad. Lagerrubriken var det tredje;
-     den försvann med lagersektionen. Fördelningen och skälen står i
-     PLAN.md avsnitt 13.
+     mindre rubriker — och Titan One är accent på ETT enda ställe:
+     hero-lockupen. Lagerrubriken föll med lagersektionen, och
+     finalens rad är sedan dess en bild i stället för satt text.
+     Regelns tak är två; att det står på ett är följden av två andra
+     beslut, inte ett eget. Fördelningen och skälen står i PLAN.md
+     avsnitt 13.
 
      MOUSE MEMOIRS HAR EN ENDA VIKT, 400. Det är inte en brist som
      ska kringgås med syntetisk fetstil — se kommentaren vid
@@ -2495,8 +2497,7 @@ input:focus-visible {
   --del-tid: 480ms;
   --del-steg: 380ms;
   --marke-klart: 3140ms;
-  --bokstav-tid: 300ms;
-  --bokstav-steg: 38ms;
+  --halsning-tid: 380ms;
 }
 
 .final__inner {
@@ -2538,29 +2539,25 @@ input:focus-visible {
   height: auto;
 }
 
-.final__rad {
-  margin: 0;
-  max-width: 100%;
-  /* TITAN ONE, sajtens tredje och sista ställe. Se PLAN.md 13 —
-     antalet stod låst vid två och är omförhandlat till tre. */
-  font-family: var(--font-display);
-  font-weight: var(--font-display-vikt);
-  font-size: var(--t-m);
-  line-height: var(--lh-m);
-  letter-spacing: var(--ls-m);
-  color: var(--offwhite);
-}
+/* HÄLSNINGEN ÄR EN BILD. Den satta raden i Titan One är borta, och
+   med den bokstavsuppdelningen — se PLAN.md 13.
 
-/* Ordet håller ihop. Bokstäverna är inline-block, och en radbrytning
-   får ske mellan två inline-block — utan nowrap hade "Välkommen"
-   kunnat brytas mitt i på en smal skärm. Mellanrummen mellan orden är
-   riktiga textnoder, så raden bryts där den ska. */
-.final__ord {
-  white-space: nowrap;
-}
+   38rem = 608 px är taket. Typen är 8,8:1 efter beskärningen, så
+   höjden blir 69 px vid full bredd; bredare hade gjort en remsa av
+   den. Under det tar 100 procent över och hälsningen krymper med
+   spalten, ned till 41 px hög på den smalaste telefonen.
 
-.final__bokstav {
-  display: inline-block;
+   aspect-ratio matchar filen och håller lådan rätt redan innan
+   bilden hämtats, så märket ovanför inte hoppar när den landar. */
+.final__halsning {
+  display: block;
+  width: min(100%, 38rem);
+  height: auto;
+  aspect-ratio: 1216 / 138;
+  /* Urklippets tjocklek. Typen har en vit kontur som ger kanten;
+     skuggan ger lyftet från sektionens svarta. Statisk — den räknas
+     inte om under insättningen. */
+  filter: drop-shadow(0 0.4rem 0.9rem rgb(0 0 0 / 0.5));
 }
 
 /* UTGÅNGSLÄGET SÄTTS AV JS, inte här. Ett data-attribut som bara
@@ -2568,7 +2565,7 @@ input:focus-visible {
    stället för en tom ruta — samma regel som ord-för-ord-avslöjningen
    följer. */
 .final[data-bygger='vantar'] .final__del,
-.final[data-bygger='vantar'] .final__rad {
+.final[data-bygger='vantar'] .final__halsning {
   opacity: 0;
 }
 
@@ -2601,31 +2598,39 @@ input:focus-visible {
   }
 }
 
-/* Raden som helhet tänds i samma ögonblick som första bokstaven —
-   den bär inget eget intåg, bara sina bokstäver. */
-.final[data-bygger='kor'] .final__rad {
-  animation: rad-tand 1ms linear var(--marke-klart) both;
+/* HÄLSNINGEN KLISTRAS IN, den skrivs inte. Raden byggdes förut
+   bokstav för bokstav; nu är den en ritad enhet och ska landa som en.
+
+   SAMMA HANDGREPP SOM KLISTERMÄRKENA: 0,92 i skala, en vridning som
+   rätar upp sig, 380 ms — handen som trycker ner märket och släpper.
+   Se .sticker[data-ankomst].
+
+   VRIDNINGEN ÄR 2,5 GRADER, inte märkenas 7. Märkena är små och nära
+   kvadratiska; hälsningen är 8,8:1, och på 608 px bredd lyfter sju
+   grader ändarna 37 px var. Det läser som en sned bild, inte som ett
+   märke som sätts dit. 2,5 ger 13 px och stannar i handgreppet.
+
+   ALDRIG FRÅN scale(0) — samma regel som delarna följer ovan.
+
+   Delarna föll uppifrån, hälsningen trycks ned på plats. Två olika
+   handlingar ska inte se likadana ut: märket MONTERAS, hälsningen
+   SÄTTS DIT. */
+.final[data-bygger='kor'] .final__halsning {
+  animation: halsning-pa-plats var(--halsning-tid) var(--ut)
+    var(--marke-klart) both;
 }
 
-@keyframes rad-tand {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* BOKSTÄVERNA STIGER, delarna föll. Det är med flit: märket MONTERAS
-   av delar som läggs på plats uppifrån, raden SKRIVS. Två olika
-   handlingar ska inte se likadana ut, och riktningen är det billigaste
-   sättet att säga vilken som är vilken. */
-.final[data-bygger='kor'] .final__bokstav {
-  animation: bokstav-fram var(--bokstav-tid) var(--ut) both;
-  animation-delay: calc(
-    var(--marke-klart) + var(--i) * var(--bokstav-steg)
-  );
-}
-
-@keyframes bokstav-fram {
-  from { opacity: 0; transform: translateY(0.3em); }
-  to   { opacity: 1; transform: none; }
+@keyframes halsning-pa-plats {
+  from {
+    opacity: 0;
+    scale: 0.92;
+    rotate: -2.5deg;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
 }
 
 /* ═══ 9 · FOOTER ══════════════════════════════════════════════ */
@@ -3739,13 +3744,14 @@ input:focus-visible {
      rörelse, men märket och hälsningen är innehåll — det senare
      står kvar. */
   .final[data-bygger='vantar'] .final__del,
-  .final[data-bygger='vantar'] .final__rad,
+  .final[data-bygger='vantar'] .final__halsning,
   .final[data-bygger='kor'] .final__del,
-  .final[data-bygger='kor'] .final__rad,
-  .final[data-bygger='kor'] .final__bokstav {
+  .final[data-bygger='kor'] .final__halsning {
     opacity: 1;
     animation: none;
     transform: none;
+    scale: 1;
+    rotate: 0deg;
   }
 
   .final[data-bygger='vantar'] .final__inner {
