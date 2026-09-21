@@ -1,0 +1,68 @@
+# Publicerar sajten till GitHub Pages på delens.aimstudios.se.
+#
+# SPÄRRKONTROLLEN LIGGER MELLAN BYGGET OCH PUBLICERINGEN, med flit.
+# PLAN.md avsnitt 12 kräver att noindex-taggen kontrolleras i varje
+# byggd HTML-fil före varje deploy. Som rutin man ska komma ihåg är den
+# värdelös; här avslutar kontrollen med felkod och då stannar jobbet
+# innan något laddas upp. En glömd ingång kan alltså inte nå nätet.
+#
+# GRENEN HETER master. Ändras den måste raden nedan ändras med, annars
+# slutar publiceringen tyst att köra.
+
+name: Publicera
+
+on:
+  push:
+    branches: [master]
+  # Gör det möjligt att publicera om utan att ändra något i koden.
+  workflow_dispatch:
+
+# Pages kräver de här tre. id-token behövs för att deploy-steget ska
+# kunna hämta sitt OIDC-intyg — utan den faller jobbet på behörighet.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# En publicering i taget. Köade körningar avbryts inte mitt i, så en
+# halvfärdig utgåva kan inte skriva över en hel.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  bygg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # npm ci och inte npm install: låsfilen ska styra, annars kan en
+      # byggmaskin dra in en annan version än den som provats lokalt.
+      - name: Installera
+        run: npm ci
+
+      - name: Bygg
+        run: npm run build
+
+      # Faller det här steget publiceras ingenting. Det är hela poängen.
+      - name: Spärrkontroll
+        run: npm run kontroll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  publicera:
+    needs: bygg
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -328,6 +328,44 @@ inte om varandra.
 Om headers visar sig nödvändiga är Netlify eller Vercel alternativen —
 men det är ett beslut som tas om och när det behövs, inte nu.
 
+### Så publiceras det
+
+Bygget körs av GitHub Actions, inte för hand. `dist/` är ignorerad i
+git och ska förbli det — utdatan hör hemma i Pages-artefakten, inte i
+historiken.
+
+| Del | Var | Vad den gör |
+|---|---|---|
+| Arbetsflöde | `.github/workflows/publicera.yml` | Bygger vid varje push till `master`, kör spärrkontrollen, publicerar |
+| Värdnamn | `public/CNAME` | Kopieras till `dist/CNAME` av Vite. Utan den faller Pages tillbaka på `<konto>.github.io` och subdomänen slutar svara |
+| Spärrkontroll | `verktyg/kontroll-utgava.mjs` | Avslutar med felkod om något fattas. Ligger MELLAN bygget och publiceringen |
+
+**Spärrkontrollen är avsnitt 12:s krav gjort till kod.** Den räknar upp
+HTML-filerna ur `dist/` i stället för ur en lista, så en ny ingång i
+`vite.config.js` fångas automatiskt. Den kontrollerar fyra saker:
+metataggen i varje byggd HTML-fil, att `robots.txt` stänger allt, att
+`CNAME` har rätt värdnamn, och att ingen sitemap smugit sig in.
+
+Kör den lokalt med `npm run kontroll`, eller bygg och kontrollera i ett
+svep med `npm run utgava`.
+
+Går kontrollen inte igenom publiceras ingenting. Det är avsiktligt och
+ska inte kringgås: släpps spärren är det avsnitt 12:s ordning som
+gäller, och då ändras den här filen i samma commit.
+
+### Vad som inte går att göra från koden
+
+Tre saker sitter utanför repot och kräver Fredrik:
+
+1. **GitHub-remote.** Repot är lokalt och har ingen. Utan den finns
+   inget för Actions att köra.
+2. **Pages-källan** ställs om till *GitHub Actions* i repots
+   inställningar. Förvalet är en gren, och då körs arbetsflödet men
+   publicerar ingenting.
+3. **DNS-posten** hos leverantören av aimstudios.se. En `CNAME`-post
+   för `delens` som pekar på `<konto>.github.io`. Certifikatet utfärdas
+   av GitHub först när posten går att slå upp.
+
 ---
 
 ## 12. noindex — gäller hela bygget
