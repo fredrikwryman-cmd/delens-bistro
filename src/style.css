@@ -1417,11 +1417,16 @@ input:focus-visible {
   color: var(--offwhite);
 }
 
+/* CENTRERAD NÄR DEN STAPLAS. Vänsterställd såg den sned ut: BRUTAL
+   BURGERS är bredare än Delen's Bistro och "blev" smalast av alla,
+   så tre vänsterkanter i rad lämnade en trappa av luft till höger.
+   Centrerade står de tre på en gemensam mittlinje. På desktop ligger
+   de på en rad och är inte berörda. */
 @media (max-width: 600px) {
   .rebrand__rubrik {
     --rb-h: 26vw;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 }
 
@@ -2170,11 +2175,71 @@ input:focus-visible {
     transition: height var(--tid) var(--kurva);
   }
 
-  /* Nästan kvadratisk, av samma skäl som höjden på desktop: en låg
-     ruta beskär bort bullens topp ur porträttbilderna. Vid den här
-     höjden syns ~78 procent av bildhöjden. */
+  /* TEXTEN LIGGER UNDER BILDEN, inte i den. Namn, pris och beskrivning
+     låg förut nederst i bildrutan och täckte ungefär halva burgaren
+     på det öppna kortet. Och på de stängda korten, 84 px höga, rymdes
+     inte namn och pris ovanpå varandra — namnet klipptes i överkant.
+
+     Nu är kortet en bildruta med en textrad under. Bildrutan är en
+     56 px remsa när kortet är stängt och nästan kvadratisk när det
+     är öppet; texten följer med nedåt när rutan växer. Namn och pris
+     står på samma rad, beskrivningen under dem på det öppna kortet.
+
+     PRISET ÄR HÖJDEN. Galleriet blir omkring 260 px längre på en
+     390 px telefon. Det är värt det: hela burgaren syns, och varje
+     namn går att läsa utan att öppna kortet. */
+  .dragspel__kort,
   .dragspel__kort[data-aktiv='true'] {
-    height: clamp(320px, 92vw, 460px);
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    transition: none;
+  }
+
+  .dragspel__ram {
+    position: relative;
+    inset: auto;
+    flex: 0 0 auto;
+    height: 56px;
+    border-radius: 0;
+    transition: height var(--tid) var(--kurva);
+  }
+
+  /* Nästan kvadratisk, av samma skäl som höjden på desktop: en låg
+     ruta beskär bort bullens topp ur porträttbilderna. */
+  .dragspel__kort[data-aktiv='true'] .dragspel__ram {
+    height: clamp(300px, 86vw, 440px);
+  }
+
+  /* Ingen text ligger på bilden längre, så nedtoningen mot underkanten
+     har ingenting att bära. Dämpningen av de stängda korten står kvar. */
+  .dragspel__sloja {
+    background: none;
+  }
+
+  .dragspel__etikett {
+    position: static;
+    inset: auto;
+    padding: 12px 18px 14px;
+  }
+
+  /* flex: 1 så att textblocket fyller raden även när beskrivningen
+     är dold. Annars krympte det till namn plus pris på de stängda
+     korten, och priset stod i högerkant bara på det öppna. */
+  .dragspel__text {
+    flex: 1 1 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.8rem;
+  }
+
+  .dragspel__namn {
+    flex: 1 1 auto;
+  }
+
+  .dragspel__pitch {
+    flex-basis: 100%;
   }
 
   .dragspel__media {
@@ -2748,6 +2813,11 @@ input:focus-visible {
    spalten och har fyra hörn som alla andra; .foto sätter radien. */
 
 .bestall {
+  /* TÄTARE NEDÅT. sec--vid gav 192 px paddning i underkant på
+     desktop och 96 på telefon, och ovanpå den kom finalens egen luft.
+     Finalen hör ihop med beställningen — sista uppmaningen och sedan
+     avskedet — och ska inte stå en halv skärm bort. */
+  padding-block-end: var(--luft-tat);
   /* overflow: hidden står kvar. Den klipper inte längre något blöd,
      men den hindrar ett kastat kort från att ge sidan vågrät
      rullning — och ett kort som flyger ut ur sin sektion ska klippas
@@ -2787,22 +2857,23 @@ input:focus-visible {
    Laddskärmen står MELLAN besökaren och innehållet — den ska ge sig.
    Finalen står efter allt innehåll och tar ingenting ifrån någon. */
 
-/* EN SKÄRM, INTE MER. Sektionen var 979 px hög på en 900 px vy, och
-   då hamnade raden under beställningsfältet: man såg märket byggas
-   färdigt och missade meningen som är hela poängen. Med 100svh och
-   centrerat innehåll står märket och raden alltid i samma vy.
+/* INTE LÄNGRE EN HELSKÄRM. Sektionen var 100svh med innehållet
+   centrerat, för att märket och hälsningen alltid skulle stå i samma
+   vy. Men på en telefon är innehållet 322 px i en 844 px hög sektion,
+   och resten blev 260 px tom luft ovanför märket och lika mycket
+   under hälsningen — uppmätt, och synligt som ett glapp på båda
+   sidor. Borttaget 2026-09-28.
 
-   svh och inte vh: på en telefon krymper vh när adressfältet fälls
-   ut, och en sektion som är högre än skärmen är precis det här
-   felet igen.
-
-   Paddningen är egen och mindre än sec--vid:s. Luften kommer nu från
-   att sektionen är en helskärm, inte från paddning ovanpå den. */
+   Att märket och raden ryms i en vy sköts i stället av märkets
+   storlek: dess bredd dras av vyhöjden minus det som ska rymmas
+   under det, se .final__logga. Sektionen blir precis så hög som sitt
+   innehåll. */
 .final {
-  min-height: 100svh;
   display: grid;
   align-content: center;
-  padding-block: clamp(3rem, 8vw, 5rem);
+  /* Tätt mot beställningssektionen ovanför och ingenting nedåt —
+     footern tar vid direkt under hälsningen. Se kommentaren ovan. */
+  padding-block: clamp(1rem, 3vw, 2.5rem) 0;
 
   --del-tid: 480ms;
   --del-steg: 380ms;
@@ -3031,6 +3102,11 @@ input:focus-visible {
    extra klass på rätt av två footrar. */
 .foot:has(.jonglering) {
   min-height: clamp(26rem, 68svh, 44rem);
+  /* Innehållet i ÖVERKANT, inte centrerat. Höjden finns för kastbanan,
+     och den tomma ytan hör hemma under texten där bitarna flyger —
+     inte som ett glapp mellan hälsningen ovanför och footerns första
+     rad. */
+  padding-block-start: clamp(1.5rem, 3vw, 2.5rem);
   display: grid;
   /* minmax(0, 1fr), av exakt samma skäl som heron. Den underförstådda
      auto-kolumnen tar sin bredd ur innehållet, och kolofonraden är en
@@ -3040,7 +3116,7 @@ input:focus-visible {
      telefonnumret och länkarna var AVKLIPPTA 15 px in från kanten.
      Uppmätt före: elva element med högerkant på 320 i en 305 px vy. */
   grid-template-columns: minmax(0, 1fr);
-  align-content: center;
+  align-content: start;
 }
 
 .foot__strossel {
