@@ -2398,12 +2398,51 @@ function riggaFoton() {
      i det normala fallet kostar det ingenting. Misslyckas den släpps
      fotot ändå: en trasig bild är illa, ett foto som aldrig kommer
      fram är värre. Samma gate som laddskärmens lager har. */
+  /* HÄMTNINGEN STARTAS HÄRIFRÅN, INTE AV loading="lazy". Och det är
+     ingen smak — utan det kom fotona aldrig fram på den publicerade
+     sajten.
+
+     Webbläsarens lata laddning hämtar en bild först när BILDEN SJÄLV
+     skär vyn, och den mätningen räknar med clip-path. I läget
+     'vantar' är bilden klippt till ingenting (se [data-foto] i
+     stilmallen, där samma sak är uppmätt för IntersectionObserver),
+     så den skär aldrig någonting och hämtas aldrig. decode() väntar
+     då på en bild som aldrig kommer, och masken öppnas aldrig: fem
+     tomma kort med rätt mått, lutning och skugga. Lokalt syntes det
+     inte, eftersom bilderna låg i cachen eller hann börja hämtas
+     innan klippet sattes.
+
+     Här observeras RAMEN, som inte är klippt, och en vyhöjd innan den
+     syns ställs bilden om till eager. Då är den hämtad och avkodad när
+     masken ska öppnas, och ankomsten blir en rörelse och inte en
+     väntan på nätet. loading="lazy" står kvar i uppmärkningen: utan
+     JS finns inget klipp, och då gör den precis det den ska. */
+  const hamta = (ram) => {
+    const bild = $('img', ram);
+    if (bild) bild.loading = 'eager';
+  };
+
+  const forladda = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        if (!p.isIntersecting) continue;
+        forladda.unobserve(p.target);
+        hamta(p.target);
+      }
+    },
+    { rootMargin: '100% 0px 100% 0px' }
+  );
+
   const slapp = (ram) => {
     const bild = $('img', ram);
     const satt = () => ram.setAttribute('data-foto', 'kommer');
+    // Säkerhetsbälte: har förladdningen inte hunnit, hämta nu.
+    hamta(ram);
     if (bild && bild.decode) bild.decode().catch(() => {}).then(satt);
     else satt();
   };
+
+  foton.forEach((f) => forladda.observe(f));
 
   const io = new IntersectionObserver(
     (poster) => {
