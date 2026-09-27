@@ -1081,9 +1081,13 @@ input:focus-visible {
    exakt den låda den satta typen tog. Burgaren är absolut placerad
    mot rubriken och brödtexten mot sektionen; med samma lådor ligger
    allt runt omkring kvar där det låg. */
+/* flow-root och inte block: bildens övre marginal ska stanna INNE i
+   lådan. Med block slogs den ihop med lådans egen (BISTROs −0,08em),
+   och då flyttade en ny bildhöjd hela lådan — uppmätt 10 px vid
+   bildbytet 2026-09-28, fast mittpunkten var räknad rätt. */
 .hero__delens,
 .hero__bistro {
-  display: block;
+  display: flow-root;
   width: max-content;
   max-width: none;
   margin-inline-start: 50%;
@@ -1111,18 +1115,30 @@ input:focus-visible {
      DELENS  3,70 × 0,77 em   = 2,86 em²
      BISTRO  1,78 × 0,38 em   = 0,68 em²   (i DELENS em)
 
-   Bilderna är högre i förhållande till sin bredd — 4,01:1 och 3,56:1
-   mot typens 4,8 och 4,7. Samma bredd hade gjort dem 18 och 32
-   procent högre, och BISTRO hade växt ned i brödtexten. Samma yta
-   ger ord som väger lika mycket i bilden:
+   Bilderna har bytts två gånger sedan dess, och båda gångerna är det
+   ytan som hållits fast, inte bredden. Bildernas proportioner skiljer
+   sig från typens, och samma bredd hade gjort dem höga nog att växa
+   ned i brödtexten. Samma yta ger ord som väger lika mycket i bilden.
 
-     DELEN'S  3,39 × 0,845 em
-     BISTRO   1,55 × 0,436 em  = 3,24 × 0,909 i BISTROs egen em
+   Andra omgången, 2026-09-28: DELEN'S i beige skrivstil, 3,578:1, och
+   BISTRO i rött, 4,761:1 — se verktyg/lockup.mjs.
 
-   Mittpunkten i höjdled är också den uppmätta: typens bläck satt på
-   0,43 em ned i DELENS låda och 0,5 em ned i BISTROs. Marginalen
-   nedan lägger bildens mitt där, så burgaren överlappar orden lika
-   mycket som förut.
+     DELEN'S  3,20 × 0,895 em
+     BISTRO   1,80 × 0,378 em  = 3,74 × 0,786 i BISTROs egen em
+
+   BISTRO FICK SEDAN VIT KONTUR, och konturen räknas inte in i ytan —
+   den läggs utanpå bokstäverna, som ska vara lika stora som utan den.
+   Med konturen är bilden 2029 px bred för 1995 px bokstäver, 4,479:1:
+
+     BISTRO   1,83 × 0,408 em  = 3,81 × 0,851 i BISTROs egen em
+
+   (Första omgången, 4,01:1 och 3,56:1, gav 3,39 × 0,845 och
+   1,55 × 0,436.)
+
+   Mittpunkten i höjdled är den uppmätta: typens bläck satt på 0,43 em
+   ned i DELENS låda och 0,5 em ned i BISTROs. Marginalen nedan lägger
+   bildens mitt där, så burgaren överlappar orden lika mycket som
+   förut.
 
    Bredden sätts, höjden följer ur width/height-attributen. */
 .hero__ord {
@@ -1131,13 +1147,13 @@ input:focus-visible {
 }
 
 .hero__delens .hero__ord {
-  width: 3.39em;
-  margin-block-start: calc(0.43em - 0.845em / 2);
+  width: 3.2em;
+  margin-block-start: calc(0.43em - 0.895em / 2);
 }
 
 .hero__bistro .hero__ord {
-  width: 3.24em;
-  margin-block-start: calc(0.5em - 0.909em / 2);
+  width: 3.81em;
+  margin-block-start: calc(0.5em - 0.851em / 2);
 }
 
 /* Elementet är ett span inuti h1. Utan display: block blir det inline

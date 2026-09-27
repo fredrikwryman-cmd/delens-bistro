@@ -21,28 +21,17 @@
  * formen bärs av en off-white kontur, och färgerna i bilden rörs
  * inte. Beslutat 2026-09-28.
  *
- * KONTUREN ÄR EN UTVIDGNING AV ALFAN, inte ett streck. Masken
- * suddas med σ = R/2 och tröskas där en rak kant hamnar R pixlar
- * utanför bokstaven; en mjuk ramp kring tröskeln ger konturen en
- * kantutjämnad ytterkant. Hörnen blir rundade av sig själva, vilket
- * är vad en tryckt klistermärkeskontur också gör.
- *
- * R är 0,75 procent av bildens bredd — omkring 3 px när bilden visas
- * i sin största storlek, samma synliga tjocklek som DELEN'S-konturen
- * i hero.
- *
- * DAMMET TAS BORT FÖRST. Källorna har lösa korn utanför bokstäverna,
- * och med en kontur hade varje korn blivit en vit prick. Masken delas
- * i sammanhängande ytor, och allt som är mindre än DAMM pixlar kastas
- * — alfan nollas där innan konturen räknas.
- *
- * ALFAN SNÄPPS, samma skäl som i verktyg/hero.mjs: bokstävernas
- * insida ligger på 240–254 och hade släppt igenom konturens vita.
+ * KONTUREN, DAMMRENSNINGEN OCH ALFASNÄPPET ligger i verktyg/ritade.mjs,
+ * gemensamma med hero-lockupen; skälen står där. Konturen är en
+ * utvidgning av alfan med R = 0,75 procent av bildens bredd — omkring
+ * 3 px när bilden visas i sin största storlek, samma synliga tjocklek
+ * som DELEN'S-konturen i hero hade.
  */
 
 import sharp from 'sharp';
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { rensa, granser, kontur } from './ritade.mjs';
 
 const KALLOR = 'kalla/rebrand';
 const MAL = 'public/bilder/rebrand';
@@ -62,28 +51,6 @@ const BILDER = [
   { kalla: 'delens-delens.png', fil: 'delens-bistro.webp' }
 ];
 
-/** Sammanhängande ytor i en binär mask; returnerar en mask utan de små. */
-function utanDamm(mask, W, H) {
-  const kvar = new Uint8Array(W * H);
-  const sedd = new Uint8Array(W * H);
-  const ko = new Int32Array(W * H);
-  for (let start = 0; start < W * H; start++) {
-    if (!mask[start] || sedd[start]) continue;
-    let hu = 0, sv = 0;
-    ko[sv++] = start;
-    sedd[start] = 1;
-    while (hu < sv) {
-      const p = ko[hu++];
-      const x = p % W, y = (p / W) | 0;
-      for (const q of [x > 0 ? p - 1 : -1, x < W - 1 ? p + 1 : -1, y > 0 ? p - W : -1, y < H - 1 ? p + W : -1]) {
-        if (q >= 0 && mask[q] && !sedd[q]) { sedd[q] = 1; ko[sv++] = q; }
-      }
-    }
-    if (sv >= DAMM) for (let k = 0; k < sv; k++) kvar[ko[k]] = 1;
-  }
-  return kvar;
-}
-
 async function kor() {
   await mkdir(MAL, { recursive: true });
 
@@ -94,28 +61,11 @@ async function kor() {
       .toBuffer({ resolveWithObject: true });
     const W = info.width, H = info.height;
 
-    // 1 · Bokstäverna, utan damm.
-    const mask = new Uint8Array(W * H);
-    for (let i = 0; i < W * H; i++) mask[i] = data[i * 4 + 3] >= 128 ? 1 : 0;
-    const bokstav = utanDamm(mask, W, H);
-
-    // Kantutjämningen runt en bokstav har låg alfa och hör till den;
-    // allt annat med låg alfa är damm. Två pixlars marginal räcker.
-    const nara = await sharp(Buffer.from(bokstav.map((v) => v * 255)), { raw: { width: W, height: H, channels: 1 } })
-      .blur(1.5)
-      .extractChannel(0)
-      .raw()
-      .toBuffer();
-    for (let i = 0; i < W * H; i++) {
-      if (!nara[i]) data[i * 4 + 3] = 0;
-      else if (data[i * 4 + 3] >= SNAPP) data[i * 4 + 3] = 255;
-    }
+    // 1 · Bokstäverna, utan damm, med snäppt alfa.
+    const bokstav = await rensa(data, W, H, { damm: DAMM, snapp: SNAPP });
 
     // 2 · Beskär till bokstäverna plus plats för konturen.
-    let x0 = W, x1 = 0, y0 = H, y1 = 0;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (bokstav[y * W + x]) {
-      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-    }
+    const { x0, x1, y0, y1 } = granser(bokstav, W, H);
     const R = Math.round((x1 - x0) * RADIE);
     const kant = R + 4;
     const ut = {
@@ -126,27 +76,7 @@ async function kor() {
     };
 
     // 3 · Konturen: utvidgad mask, mjuk ytterkant.
-    const sigma = R / 2;
-    const suddad = await sharp(Buffer.from(bokstav.map((v) => v * 255)), { raw: { width: W, height: H, channels: 1 } })
-      .blur(sigma)
-      .extractChannel(0)
-      .raw()
-      .toBuffer();
-    // En rak kant ligger på Φ(−R/σ) = Φ(−2) ≈ 0,023 R pixlar ut.
-    const t = 0.023 * 255;
-    const kontur = Buffer.alloc(W * H * 4);
-    for (let i = 0; i < W * H; i++) {
-      const a = Math.max(0, Math.min(1, (suddad[i] - t * 0.5) / (t * 1.5)));
-      kontur[i * 4] = KONTUR[0];
-      kontur[i * 4 + 1] = KONTUR[1];
-      kontur[i * 4 + 2] = KONTUR[2];
-      kontur[i * 4 + 3] = Math.round(a * 255);
-    }
-
-    const ihop = await sharp(kontur, { raw: { width: W, height: H, channels: 4 } })
-      .composite([{ input: data, raw: { width: W, height: H, channels: 4 } }])
-      .raw()
-      .toBuffer();
+    const ihop = await kontur(data, W, H, bokstav, R, KONTUR);
 
     const fil = path.join(MAL, b.fil);
     const r = await sharp(ihop, { raw: { width: W, height: H, channels: 4 } })

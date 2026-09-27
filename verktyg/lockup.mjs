@@ -3,68 +3,63 @@
  *
  *   node verktyg/lockup.mjs
  *
- * LOCKUPEN ÄR BILDER, inte satt text. DELENS och BISTRO stod i Titan
- * One med en ram ur -webkit-text-stroke. Nu är de två ritade ord med
- * egen vit kontur: delens-hero (DELEN'S i rött) bakom burgaren och
- * bistro-hero (BISTRO i amber) framför den. Originalen ligger orörda
- * i kalla/hero/.
+ * LOCKUPEN ÄR BILDER, inte satt text. DELEN'S ligger bakom burgaren och
+ * BISTRO framför den. Originalen ligger orörda i kalla/hero/.
  *
- * DELEN'S FÄRGAS OM TILL #6B1410 på vägen in — se verktyg/farg.mjs.
- * Källan går i en rosaröd #D44E61 som inte finns någon annanstans på
- * sajten; #6B1410 är --rod, samma djupröda som den satta lockupen
- * hade. Mot svart är den bara 1,59:1, och det är avsiktligt: formen
- * bärs av den vita konturen, som skiftet lämnar orörd, precis som den
- * satta typens vita ram bar den. BISTRO är amber och rörs inte.
+ * NYA KÄLLOR 2026-09-28: delens-hero-ny och bistro-hero-ny. DELEN'S är
+ * nu beige skrivstil (#DBB485) i stället för röd blockstil, och BISTRO
+ * rött (#BD1415) i stället för amber. Ingen av dem har egen kontur.
+ * Omfärgningen som den förra DELEN'S fick (rosarött → #6B1410, via
+ * verktyg/farg.mjs) gäller inte längre — den hade flyttat en beige
+ * mot djuprött.
  *
- * BESKÄRNINGEN ÄR UPPMÄTT mot alfakanalen, med två pixlars marginal
- * för den mjuka kanten. Rader och kolumner med färre än sex
- * ogenomskinliga pixlar räknas inte — källorna har lösa dammkorn
- * utanför bokstäverna, och de hade annars flyttat kanten.
+ * RENSAS FÖRST — se verktyg/ritade.mjs. Källorna har lösa dammkorn och
+ * en ljus rest av en tidigare kontur i kanterna, och på heros svarta
+ * syns båda som brus. Rensningen snäpper också alfan: BISTRO ligger
+ * FRAMFÖR burgaren, och bokstävernas alfa 240–254 hade släppt igenom
+ * den.
  *
- *   delens-hero  2068×760  bläck x 78–1982  y 147–618  → 1909×476
- *   bistro-hero  1920×819  bläck x 77–1839  y 164–655  → 1767×496
+ * BESKÄRS MOT DE RENSADE BOKSTÄVERNA, med två pixlars marginal —
+ * eller konturens radie plus fyra när ordet har kontur. Stilmallen
+ * räknar med proportionerna som skrivs ut nedan; byts en källa måste
+ * .hero__ord-måtten räknas om.
  *
- * Stilmallen räknar med de proportionerna (4,01 och 3,56) — byts en
- * källa måste .hero__ord-måtten räknas om.
- *
- * ALFAN SNÄPPS, samma skäl som i verktyg/hero.mjs. Bokstävernas
- * insida ligger på alfa 253–254, inte 255. BISTRO ligger FRAMFÖR
- * burgaren, och en procents genomlysning är burgaren som skymtar
- * genom bokstäverna. Allt över SNAPP blir helt ogenomskinligt; den
- * mjuka kanten ligger under tröskeln och lämnas i fred.
- *
- * TVÅ BREDDER PER ORD. DELENS visas som mest 3,4 × 24rem = 1306 px
- * och BISTRO 1,56 × 24rem = 599 px (se .hero__ord i stilmallen).
- * Den stora filen är källans egen bredd — dubbel täthet på den
- * bredaste skärmen hade krävt mer än källan har. Den lilla täcker en
- * telefon: DELENS är 309 px vid 390 px vy, gånger tre är 927.
+ * TVÅ BREDDER PER ORD. Den stora täcker den bredaste skärmen i dubbel
+ * täthet så långt källan räcker; den lilla en telefon i trefaldig.
+ * Måtten står vid .hero__ord i stilmallen.
  */
 
 import sharp from 'sharp';
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
-import { hex, skiftaRott } from './farg.mjs';
+import { rensa, granser, kontur } from './ritade.mjs';
 
 const KALLOR = 'kalla/hero';
 const MAL = 'public/bilder/hero';
 const KVALITET = 84;
-const SNAPP = 240;
+
+/** Konturens färg: sajtens off-white. */
+const OFFWHITE = [0xf2, 0xeb, 0xe0];
 
 const ORD = [
   {
-    kalla: 'delens-hero.png',
+    kalla: 'delens-hero-ny.png',
     fil: 'delens',
-    utklipp: { left: 76, top: 145, width: 1909, height: 476 },
-    bredder: [960, 1909],
-    /* Fyllningens medelvärde, uppmätt på full alfa. Grönkanalen
-       ligger på 76–80 i 90 procent av pixlarna — ytan är jämn. */
-    farg: { fran: [212, 78, 97], till: hex('#6b1410') }
+    /** Största bredden: källans egen efter beskärningen. */
+    bredder: [960, 'full']
   },
   {
-    kalla: 'bistro-hero.png',
+    kalla: 'bistro-hero-ny.png',
     fil: 'bistro',
-    utklipp: { left: 75, top: 162, width: 1767, height: 496 },
-    bredder: [640, 1200]
+    bredder: [640, 1400],
+    /* Konturens radie som andel av bredden, eller 0 för ingen.
+       VIT KONTUR PÅ BISTRO, INTE PÅ DELEN'S — beslutat 2026-09-28.
+       BISTRO:s röda står på 3,00:1 mot svart men 2,3–2,7:1 mot
+       burgarens kött, som det ligger framför, och S-T-R flöt ihop med
+       det. DELEN'S beige står på 9,96:1 och ligger bakom burgaren.
+       0,0075 är samma andel som rebrandnamnen: omkring 3 px i största
+       visningsstorlek. */
+    kontur: 0.0075
   }
 ];
 
@@ -72,27 +67,38 @@ async function kor() {
   await mkdir(MAL, { recursive: true });
 
   for (const o of ORD) {
-    const { data, info } = await sharp(path.join(KALLOR, o.kalla))
-      .extract(o.utklipp)
+    let { data, info } = await sharp(path.join(KALLOR, o.kalla))
       .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true });
+    const W = info.width, H = info.height;
 
-    for (let i = 3; i < data.length; i += 4) {
-      if (data[i] >= SNAPP) data[i] = 255;
-    }
+    const bokstav = await rensa(data, W, H);
+    const { x0, x1, y0, y1 } = granser(bokstav, W, H);
 
-    if (o.farg) skiftaRott(data, o.farg.fran, o.farg.till);
+    const R = o.kontur ? Math.round((x1 - x0) * o.kontur) : 0;
+    if (R) data = await kontur(data, W, H, bokstav, R, OFFWHITE);
+
+    const kant = R ? R + 4 : 2;
+    const ut = {
+      left: Math.max(0, x0 - kant),
+      top: Math.max(0, y0 - kant),
+      width: Math.min(W, x1 + kant + 1) - Math.max(0, x0 - kant),
+      height: Math.min(H, y1 + kant + 1) - Math.max(0, y0 - kant)
+    };
+    console.log(`${o.kalla}: utklipp ${ut.width}×${ut.height}, ${(ut.width / ut.height).toFixed(3)}:1${R ? `, kontur R=${R}` : ''}`);
 
     for (const b of o.bredder) {
-      const fil = `${o.fil}-${b}.webp`;
-      const ut = path.join(MAL, fil);
-      const r = await sharp(data, { raw: info })
-        .resize({ width: b, withoutEnlargement: true })
+      const bredd = b === 'full' ? ut.width : b;
+      const fil = `${o.fil}-${bredd}.webp`;
+      const mal = path.join(MAL, fil);
+      const r = await sharp(data, { raw: { width: W, height: H, channels: 4 } })
+        .extract(ut)
+        .resize({ width: bredd, withoutEnlargement: true })
         .webp({ quality: KVALITET, effort: 6, alphaQuality: 100 })
-        .toFile(ut);
-      const kb = (await stat(ut)).size / 1024;
-      console.log(`${fil}  ${r.width}×${r.height}  ${kb.toFixed(1)} kB`);
+        .toFile(mal);
+      const kb = (await stat(mal)).size / 1024;
+      console.log(`  ${fil}  ${r.width}×${r.height}  ${kb.toFixed(1)} kB`);
     }
   }
 }
