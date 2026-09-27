@@ -17,9 +17,11 @@
  *      Filerna räknas upp ur dist/, inte ur en lista här — en ny ingång
  *      som läggs till i vite.config fångas då automatiskt.
  *   2. dist/robots.txt finns och stänger allt.
- *   3. dist/CNAME finns och innehåller rätt värdnamn. Utan den faller
- *      GitHub Pages tillbaka på <användare>.github.io och subdomänen
- *      slutar svara.
+ *   3. dist/CNAME finns och innehåller rätt värdnamn. Vid publicering
+ *      från ett Actions-arbetsflöde ignorerar Pages filen — där är det
+ *      Custom domain i repots inställningar som gäller, se PLAN.md 11.
+ *      Kontrollen står kvar så filen inte glider isär från
+ *      inställningen, och för en eventuell omställning till gren.
  *   4. Ingen sitemap har smugit sig in.
  *
  * Skriptet SÄGER INTE ifrån om spärren ska släppas. Det gör Fredrik,
@@ -82,7 +84,7 @@ async function kor() {
     if (c === VARDNAMN) ok.push(`CNAME ${c}`);
     else fel.push(`CNAME är "${c}", väntade "${VARDNAMN}"`);
   } catch {
-    fel.push('dist/CNAME saknas — subdomänen skulle sluta svara');
+    fel.push('dist/CNAME saknas — se PLAN.md 11');
   }
 
   // 4 · Ingen sitemap.

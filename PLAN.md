@@ -337,8 +337,17 @@ historiken.
 | Del | Var | Vad den gör |
 |---|---|---|
 | Arbetsflöde | `.github/workflows/publicera.yml` | Bygger vid varje push till `master`, kör spärrkontrollen, publicerar |
-| Värdnamn | `public/CNAME` | Kopieras till `dist/CNAME` av Vite. Utan den faller Pages tillbaka på `<konto>.github.io` och subdomänen slutar svara |
+| Värdnamn | Repots Pages-inställning, **inte** `public/CNAME` | Se nedan |
 | Spärrkontroll | `verktyg/kontroll-utgava.mjs` | Avslutar med felkod om något fattas. Ligger MELLAN bygget och publiceringen |
+
+**VÄRDNAMNET SITTER I INSTÄLLNINGEN, INTE I FILEN.** När Pages
+publiceras av ett Actions-arbetsflöde ignoreras en `CNAME`-fil i
+artefakten — det som styr är fältet *Custom domain* under Settings →
+Pages. Tidigare stod här att filen höll subdomänen vid liv; det
+stämmer bara för publicering från en gren. `public/CNAME` ligger kvar
+som dokumentation och för att en omställning till grenpublicering inte
+ska tappa namnet, och spärrkontrollen kräver fortfarande att den är
+rätt — men den gör ingenting för Actions-flödet.
 
 **Spärrkontrollen är avsnitt 12:s krav gjort till kod.** Den räknar upp
 HTML-filerna ur `dist/` i stället för ur en lista, så en ny ingång i
@@ -355,16 +364,26 @@ gäller, och då ändras den här filen i samma commit.
 
 ### Vad som inte går att göra från koden
 
-Tre saker sitter utanför repot och kräver Fredrik:
+Samma upplägg som `larsson.aimstudios.se` och `bopg.aimstudios.se`
+(repona `larsson-web` och `bopg`): publikt repo, publicering via
+arbetsflöde, egen domän i Pages-inställningen, och en DNS-post som går
+rakt till GitHub. Uppmätt 2026-09-27.
+
+Fyra saker sitter utanför repot och kräver Fredrik:
 
 1. **GitHub-remote.** Repot är lokalt och har ingen. Utan den finns
    inget för Actions att köra.
 2. **Pages-källan** ställs om till *GitHub Actions* i repots
    inställningar. Förvalet är en gren, och då körs arbetsflödet men
    publicerar ingenting.
-3. **DNS-posten** hos leverantören av aimstudios.se. En `CNAME`-post
-   för `delens` som pekar på `<konto>.github.io`. Certifikatet utfärdas
-   av GitHub först när posten går att slå upp.
+3. **Custom domain** `delens.aimstudios.se` i samma inställning. Se
+   stycket om värdnamnet ovan.
+4. **DNS-posten** i Cloudflare, där aimstudios.se har sina namnservrar:
+   `CNAME`, namn `delens`, värde `fredrikwryman-cmd.github.io`,
+   **proxy avstängd** (grått moln, *DNS only*). Med Cloudflares proxy
+   påslagen ser GitHub inte sin egen adress bakom namnet och kan inte
+   utfärda certifikatet. Certifikatet utfärdas av GitHub först när
+   posten går att slå upp.
 
 ---
 
