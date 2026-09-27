@@ -419,9 +419,14 @@ indexet.
 
 ## 13. Typsnitt
 
-Låsta: **Titan One** och **Mouse Memoirs**, båda hämtade från Google
-Fonts, båda **självhostade och delmängdade** i `public/typsnitt/`
-(19 kB tillsammans). Sajten hämtar ingenting från Google i drift.
+Låst: **Mouse Memoirs**, hämtat från Google Fonts, **självhostat och
+delmängdat** i `public/typsnitt/` (12 kB). Sajten hämtar ingenting från
+Google i drift.
+
+**Titan One är borta sedan 2026-09-27.** Dess sista ställe, hero-
+lockupen, blev två ritade bilder (se nedan), och ingenting på sajten
+sätter snittet längre. Filen, @font-face och preloaden är borttagna;
+`verktyg/typsnitt.mjs` hämtar bara Mouse Memoirs.
 
 Barlow bar sajten fram till 2026-09-19 och är utbytt mot Mouse Memoirs
 — samma snitt som CRAV använder till sin brödtext.
@@ -440,14 +445,11 @@ Memoirs gör allt annat, inklusive brödtexten. Den feta typen är accent,
 inte arbetshäst — och det är därför CRAV inte blir tröttsam trots hur
 skrikig Modak är.
 
-### Var Titan One står
+### Var Titan One stod
 
-| Plats | Varför |
-|---|---|
-| Hero-lockupen: "DELENS" i kontur + "BISTRO" fylld | Sajtens enda rena varumärkesutrop. Här ska typen skrika |
-
-**ANTALET ÄR ETT, inte två och inte tre.** Räkningen har gått fram och
-tillbaka; det här är var den landade och varför.
+**ANTALET ÄR NOLL.** Räkningen har gått fram och tillbaka; det här är
+var den landade och varför. Regelns tak gäller fortfarande en
+eventuell ny accenttyp: högst två ställen.
 
 Regeln stod först på två: hero-lockupen och lagersektionens rubrik.
 Finalens rad blev ett tredje ställe 2026-09-19 på Fredriks beslut, mot
@@ -467,12 +469,18 @@ skäl som inte hade med typen att göra:
   mask, rad ett färdig innan rad två börjar. Se
   `verktyg/valkommen.mjs` och `.final__halsning` i stilmallen.
 
-Kvar står hero-lockupen ensam. Det är STRÄNGARE än regeln någonsin
-krävt, och ingen har beslutat det — det följde av två andra beslut.
-Värt att veta för den som tycker att sajten tappat en accent: den
-lediga platsen finns, och regelns tak är två.
+- **Hero-lockupen blev bilder** 2026-09-27. DELEN'S i rött bakom
+  burgaren och BISTRO i amber framför, båda ritade med egen vit
+  kontur. De tar samma yta som den satta typen gjorde — inte samma
+  bredd, bilderna är högre i förhållande till bredden — och hänger i
+  samma kurva, `--lockup-stor`. Rubrikens tillgängliga namn är
+  "Delens Bistro", byggt av de två alt-texterna. Se
+  `verktyg/lockup.mjs` och `.hero__ord` i stilmallen.
 
-**Ingen tredje plats.** Varje ny rubrik utgår från Mouse Memoirs.
+Varje varumärkesutrop på sajten är därmed en bild. Ingen har beslutat
+att accenttypen skulle bort — det följde av tre andra beslut.
+
+**Varje ny rubrik utgår från Mouse Memoirs.**
 
 ### Var Mouse Memoirs står
 
@@ -516,7 +524,7 @@ mellan graderna, inte graderna i sig.
 | m | 23,2 | 42 | 3,78 px |
 | l | 33,6 | 54 | 4,86 px |
 | xl | 57,6 | 72 | 6,48 px |
-| xxl, xxxl | oförändrade — bara Titan One | | |
+| xxl, xxxl | oförändrade — satta för Titan One, som är borta | | |
 
 Radavstånden ned i samma rörelse: `--lh-s` 1,55 → 1,32, `--lh-xs` 1,45
 → 1,30, `--lh-m` 1,35 → 1,22, `--lh-l` 1,15 → 1,10.
@@ -549,10 +557,6 @@ orörda.
 
 ### Tekniska noter
 
-- Titan One finns **bara i vikt 400**. `--font-display-vikt: 400`
-  förhindrar syntetisk fetstil, som gör formen smetig.
-- Konturvarianten är genomskinlig fyllning plus `-webkit-text-stroke`.
-  Aldrig ett eget konturtypsnitt.
 - Mouse Memoirs finns **också bara i vikt 400**. Sajtens
   `font-weight: 800` på rubriker och priser ger därför ingen bredare
   form — uppmätt identisk teckenbredd vid 400 och 800. Hierarkin bärs

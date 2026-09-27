@@ -28,15 +28,13 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/ikoner/ikon-192.png" />
     <link rel="apple-touch-icon" href="/ikoner/apple-touch-icon.png" />
 
-    <!-- TYPSNITTEN ÄR SJÄLVHOSTADE. Mouse Memoirs bär brödtext och de
-         mindre rubrikerna, Titan One hero-lockupen och lagerrubriken.
-         Preload, inte bara @font-face: stilmallen upptäcks först när
-         webbläsaren läst den, och snitten först när den läst stilmallen.
-         Med preload går båda filerna ut i samma sekund som HTML:en
-         tolkas. Se PLAN.md avsnitt 13 och verktyg/typsnitt.mjs. -->
+    <!-- TYPSNITTET ÄR SJÄLVHOSTAT. Mouse Memoirs bär hela sajten; Titan
+         One föll när hero-lockupen blev bilder. Preload, inte bara
+         @font-face: stilmallen upptäcks först när webbläsaren läst den,
+         och snittet först när den läst stilmallen. Med preload går
+         filen ut i samma sekund som HTML:en tolkas. Se PLAN.md avsnitt
+         13 och verktyg/typsnitt.mjs. -->
     <link rel="preload" href="/typsnitt/mouse-memoirs.woff2" as="font"
-          type="font/woff2" crossorigin />
-    <link rel="preload" href="/typsnitt/titan-one.woff2" as="font"
           type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/style.css" />
   </head>

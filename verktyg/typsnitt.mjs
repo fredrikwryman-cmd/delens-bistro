@@ -3,10 +3,13 @@
  *
  *   node verktyg/typsnitt.mjs
  *
- * TVÅ SNITT, BÅDA FRÅN GOOGLE FONTS, BÅDA SJÄLVHOSTADE.
+ * ETT SNITT, FRÅN GOOGLE FONTS, SJÄLVHOSTAT.
  *
- *   Mouse Memoirs  brödtext och mindre rubriker
- *   Titan One      hero-lockupen och lagerrubriken, ingenting annat
+ *   Mouse Memoirs  hela sajten
+ *
+ * Titan One låg här för hero-lockupen tills lockupen blev bilder (se
+ * verktyg/lockup.mjs). Ingenting sätter det längre, så det hämtas
+ * inte.
  *
  * Fontshare-familjerna som låg här — General Sans, Cabinet Grotesk och
  * Satoshi — hämtades bara av typsnittsväxlaren. Växlaren är borta och
@@ -21,7 +24,7 @@
  * public/typsnitt/ och integritetspolicyn säger inte längre att
  * snitten hämtas från Google.
  *
- * BÅDA ÄR ENVIKTSSNITT, 400. Inga axlar att instansiera, ingen kursiv
+ * ENVIKTSSNITT, 400. Inga axlar att instansiera, ingen kursiv
  * att hämta. Att sajten sätter font-weight: 800 på rubriker och priser
  * är en fråga för stilmallen, inte för den här filen.
  *
@@ -43,8 +46,7 @@ const korProgram = promisify(execFile);
 const MAL = 'public/typsnitt';
 
 const FAMILJER = [
-  { namn: 'Mouse Memoirs', fil: 'mouse-memoirs' },
-  { namn: 'Titan One', fil: 'titan-one' }
+  { namn: 'Mouse Memoirs', fil: 'mouse-memoirs' }
 ];
 
 /** Tecknen sajten sätter. Allt annat är vikt utan nytta. */

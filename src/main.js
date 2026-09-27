@@ -631,8 +631,17 @@ function riggaAvslojning() {
    * som är satta i flera rader behåller sin radstruktur — annars slås
    * raderna ihop till en enda klump när innerHTML skrivs om.
    * Ordningen bevaras, så förskjutningen löper obruten över raderna.
+   *
+   * EN BILD ÄR ETT ORD. Hero-lockupens DELENS och BISTRO är bilder,
+   * och en img har varken barn eller text — utan undantaget hade den
+   * fått en tom span skriven i sig och aldrig tänts. Nu får den
+   * klassen själv och går in i samma förskjutning som texten gjorde.
    */
   const delaUpp = (el) => {
+    if (el.tagName === 'IMG') {
+      el.classList.add('ord');
+      return;
+    }
     const barn = [...el.children];
     if (barn.length) {
       barn.forEach(delaUpp);

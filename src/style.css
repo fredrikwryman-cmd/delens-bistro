@@ -22,20 +22,17 @@
   --wrap: 1280px;
   --gutter: clamp(1rem, 4vw, 3rem);
 
-  /* Låsta typsnitt. Mouse Memoirs bär sajten — brödtext och alla
-     mindre rubriker — och Titan One är accent på ETT enda ställe:
-     hero-lockupen. Lagerrubriken föll med lagersektionen, och
-     finalens rad är sedan dess en bild i stället för satt text.
-     Regelns tak är två; att det står på ett är följden av två andra
-     beslut, inte ett eget. Fördelningen och skälen står i PLAN.md
+  /* Låst typsnitt. Mouse Memoirs bär hela sajten — brödtext och
+     alla rubriker. Titan One var accent på upp till två ställen och
+     föll bort från det sista när hero-lockupen blev bilder; finalens
+     rad och lagerrubriken hade redan gått samma väg. Varje
+     varumärkesutrop på sajten är nu en ritad bild. Se PLAN.md
      avsnitt 13.
 
      MOUSE MEMOIRS HAR EN ENDA VIKT, 400. Det är inte en brist som
      ska kringgås med syntetisk fetstil — se kommentaren vid
      font-synthesis längre ned. */
   --font: 'Mouse Memoirs', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: 'Titan One', ui-serif, Georgia, serif;
-  --font-display-vikt: 400;
 
   --ut: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -68,9 +65,9 @@
      En skala är ordningen mellan graderna, inte graderna i sig, så
      hela nedre halvan flyttades upp och behöll sin ordning.
 
-     xxl och xxxl står kvar oförändrade. De bär bara Titan One —
-     hero-lockupen och finalens rad — och det snittet har inte
-     glyfproblemet. De är dessutom redan satta av vyns bredd, inte av
+     xxl och xxxl står kvar oförändrade. De satt för Titan One, som
+     inte hade glyfproblemet; det snittet är borta nu, men graderna
+     har inte prövats om. De är dessutom redan satta av vyns bredd, inte av
      skalan: 240 px kan inte bli 480.
 
      Steget mellan graderna krymper därmed från ungefär 1,45 till
@@ -999,38 +996,23 @@ input:focus-visible {
   position: relative;
   margin: 0;
   text-align: center;
-  font-family: var(--font-display);
-  line-height: 0.78;
-  text-transform: uppercase;
 
-  /* Hero-lockupen är sajtens enda rena varumärkesutrop och det enda
-     stället där typen får gå förbi skalans översta steg. Graden ligger
-     HÄR, på lockupen, och inte i skalan: de sju stegen styr resten av
-     sidan och ska inte rubbas av att en sektion vill skrika högre.
+  /* LOCKUPEN ÄR TVÅ BILDER, men den mäts fortfarande i em. Varje ord
+     bär en font-size som inte ritar någon text: den är måttstocken
+     bildernas bredd, höjd och förskjutning räknas i, så lockupen
+     följer samma kurva som den satta typen gjorde och ingenting
+     behöver räknas om i två ändar.
 
-     LOCKUPEN HAR EN EGEN KURVA, inte skalans översta steg gånger en
-     faktor. En multiplikator skalar båda ändarna samtidigt: 1,5 hade
-     gett de 360 px som var målet på desktop, men också 101 px på en
-     390 px skärm — och där spänner DELENS 375 px av 358 tillgängliga.
-     Kurvan sätts i stället av de två lägen som faktiskt ska stämma,
-     91 px vid 390 och 360 vid 1490, och interpolerar däremellan.
+     KURVAN ÄR KVAR, inte skalans översta steg gånger en faktor. En
+     multiplikator skalar båda ändarna samtidigt: 1,5 hade gett de
+     360 px som var målet på desktop, men också 101 px på en 390 px
+     skärm. Kurvan sätts i stället av de två lägen som faktiskt ska
+     stämma, 91 px vid 390 och 360 vid 1490, och interpolerar
+     däremellan. Deklarationen ligger på .hero__inner, där
+     brödtextspalterna också når den.
 
-     Båda raderna hänger i samma variabel, så förhållandet dem emellan
-     ligger fast när lockupen växer. Att lyfta BISTRO ett eget steg,
-     från xxl till xxxl, provades tidigare: raden blev 240 px, la sig
-     över burgaren och täckte båda brödtextspalterna.
-
-     SJÄLVA DEKLARATIONEN LIGGER PÅ .hero__inner, inte här. Anpassade
-     egenskaper ärvs nedåt, inte i sidled, och brödtextspalterna är
-     lockupens SYSKON — de behöver talet för att veta var de måste
-     sluta. Resonemanget står kvar här, där graden hör hemma. */
-
-  /* RAMEN MÄTS I em, ALDRIG I px.
-     En px-ram är samma tjocklek oavsett grad, alltså ett hårstreck på
-     360 px text och en klump på 91. I em är ramen en andel av
-     bokstavsformen och läser likadant i hela spannet. */
-  --ram-delens: 0.042em;
-  --ram-bistro: 0.058em;
+     Båda orden hänger i samma variabel, så förhållandet dem emellan
+     ligger fast när lockupen växer. */
 
   /* BISTRO uttryckt som en andel av DELENS, EN gång. Både graden och
      förskjutningen hänger i den, så de två raderna inte kan glida
@@ -1039,89 +1021,82 @@ input:focus-visible {
 
   /* Glappet mellan raderna, mätt i DELENS em. Båda raderna flyttas
      lika långt åt var sitt håll — DELENS upp, BISTRO ned — så mitten
-     mellan dem står still och burgaren inte behöver röra sig.
-     0,07em är 24 px på desktop och 6 på mobil: samma andel av
-     bokstavshöjden i hela spannet. */
+     mellan dem står still och burgaren inte behöver röra sig. */
   --lockup-glapp: 0.07em;
 }
 
-/* CENTRERINGEN SKÖTS INTE AV text-align HÄR, och det är inte ett
-   påhitt. DELENS är 1283 px brett på en 1425 px skärm medan rubrikens
-   spalt är 1184 — raden är bredare än sin behållare med flit, det är
-   hela poängen med lockupen. Och en centrerad rad som inte får plats
-   centreras INTE i CSS: radboxen får inte börja före behållarens
-   innerkant, så hela överskottet hamnar till höger. Uppmätt gav det
-   DELENS mitt 49,5 px till höger om BISTRO:s.
+/* CENTRERINGEN SKÖTS INTE AV text-align. En centrerad rad som inte
+   får plats centreras inte i CSS — radboxen får inte börja före
+   behållarens innerkant, så hela överskottet hamnar till höger.
+   Lockupen fick förr vara bredare än sin spalt med flit; bilderna är
+   smalare, men grundregeln ska inte hänga på att de råkar få plats.
 
-   Med width: max-content och margin-inline-start: 50% hamnar
-   vänsterkanten i mitten, och translate -50 % drar tillbaka halva
-   den egna bredden. Då centreras raden på sin egen bredd oavsett om
-   den får plats eller inte, och båda raderna står på samma mittlinje.
+   width: max-content och margin-inline-start: 50% lägger vänster-
+   kanten i mitten, och translate −50 % drar tillbaka halva den egna
+   bredden. Då centreras ordet på sin egen bredd oavsett spalt, och
+   båda står på samma mittlinje.
 
-   padding-inline-end kompenserar spärren. Negativ spärr läggs på
-   efter SISTA bokstaven också, så boxen blir smalare än bläcket och
-   texten hamnar ett halvt spärrmått för långt åt höger — 5,6 px på
-   DELENS, 2,1 på BISTRO, alltså inte samma fel på båda. Padding lika
-   stor som spärren ger tillbaka det utrymmet. */
-.hero__outline,
-.hero__fill {
+   HÖJDEN ÄR DEN GAMLA RADENS. Radavståndet gånger graden, alltså
+   exakt den låda den satta typen tog. Burgaren är absolut placerad
+   mot rubriken och brödtexten mot sektionen; med samma lådor ligger
+   allt runt omkring kvar där det låg. */
+.hero__delens,
+.hero__bistro {
+  display: block;
   width: max-content;
   max-width: none;
   margin-inline-start: 50%;
 }
 
-/* PAINT-ORDER ÄR HELA GREPPET HÄR.
-
-   -webkit-text-stroke centrerar stroken på glyfkonturen: halva
-   tjockleken läggs utanför formen och halva INUTI den. Vid ett
-   hårstreck märks det inte. Vid en ram som ska läsa som ritad kontur
-   äter den inre halvan upp bokstaven inifrån — punsarna i E och S
-   snörps ihop och DELENS blir en klump.
-
-   paint-order: stroke fill målar stroken först och fyllningen ovanpå.
-   Ramen växer då bara utåt, formen behålls, och fyllningen når ända
-   ut till sin egen kontur. Det är skillnaden mellan en kontur runt
-   bokstaven och en kontur genom den. */
-.hero__outline {
-  display: block;
+.hero__delens {
   font-size: var(--lockup-stor);
-  line-height: var(--lh-xxxl);
-  letter-spacing: var(--ls-xxxl);
-  font-weight: var(--font-display-vikt);
-  /* Djuprött mot svart är 1,59:1 och bär ingen form på egen hand.
-     Det är inte heller meningen: formen bärs av den vita ramen på
-     10,2:1, och fyllningen är den färg ramen omsluter. Samma
-     ordning som i ett tryckt klistermärke. */
-  color: var(--rod);
-  -webkit-text-stroke: var(--ram-delens) var(--offwhite);
-  paint-order: stroke fill;
-  padding-inline-end: calc(-1 * var(--ls-xxxl));
+  height: calc(var(--lh-xxxl) * 1em);
   translate: -50% calc(-1 * var(--lockup-glapp));
 }
 
-.hero__fill {
-  display: block;
+.hero__bistro {
   position: relative;
   z-index: 5;
   margin-block-start: -0.08em;
-  /* Bunden till DELENS i stället för till skalan, så förhållandet
-     mellan raderna ligger fast när lockupen växer. 0,48 är samma
-     förhållande som xxl mot xxxl hade. */
   font-size: calc(var(--lockup-stor) * var(--lockup-andel));
-  line-height: var(--lh-xxl);
-  letter-spacing: var(--ls-xxl);
-  font-weight: var(--font-display-vikt);
-  color: var(--amber);
-  /* Tyngre andel än DELENS med flit. Samma em-värde hade gett en
-     absolut tunnare ram på den mindre raden, och då läser lockupen
-     som två olika pennor i stället för en. */
-  -webkit-text-stroke: var(--ram-bistro) var(--offwhite);
-  paint-order: stroke fill;
-  padding-inline-end: calc(-1 * var(--ls-xxl));
-  /* Delat med andelen: 0,07em av DELENS är 0,146em av BISTRO. Utan
-     divisionen hade BISTRO flyttat sig 48 % så långt som DELENS och
-     lockupen blivit sned i höjdled i stället. */
+  height: calc(var(--lh-xxl) * 1em);
+  /* Delat med andelen: 0,07em av DELENS är 0,146em av BISTRO. */
   translate: -50% calc(var(--lockup-glapp) / var(--lockup-andel));
+}
+
+/* SAMMA YTA SOM DEN SATTA TYPEN, inte samma bredd. Uppmätt i vyer på
+   390, 1024 och 1440 px tog Titan One-raderna, med ram:
+
+     DELENS  3,70 × 0,77 em   = 2,86 em²
+     BISTRO  1,78 × 0,38 em   = 0,68 em²   (i DELENS em)
+
+   Bilderna är högre i förhållande till sin bredd — 4,01:1 och 3,56:1
+   mot typens 4,8 och 4,7. Samma bredd hade gjort dem 18 och 32
+   procent högre, och BISTRO hade växt ned i brödtexten. Samma yta
+   ger ord som väger lika mycket i bilden:
+
+     DELEN'S  3,39 × 0,845 em
+     BISTRO   1,55 × 0,436 em  = 3,24 × 0,909 i BISTROs egen em
+
+   Mittpunkten i höjdled är också den uppmätta: typens bläck satt på
+   0,43 em ned i DELENS låda och 0,5 em ned i BISTROs. Marginalen
+   nedan lägger bildens mitt där, så burgaren överlappar orden lika
+   mycket som förut.
+
+   Bredden sätts, höjden följer ur width/height-attributen. */
+.hero__ord {
+  display: block;
+  height: auto;
+}
+
+.hero__delens .hero__ord {
+  width: 3.39em;
+  margin-block-start: calc(0.43em - 0.845em / 2);
+}
+
+.hero__bistro .hero__ord {
+  width: 3.24em;
+  margin-block-start: calc(0.5em - 0.909em / 2);
 }
 
 /* Elementet är ett span inuti h1. Utan display: block blir det inline
@@ -1158,8 +1133,11 @@ input:focus-visible {
    samma 24ch 326 px breda, och vänsterspalten sköt in 44 px under
    BISTRO — uppmätt, och synligt som en rad som försvann bakom ett O.
 
-   Talet 1,76 är BISTRO:s bläckbredd delad med --lockup-stor, uppmätt
-   till 610,8 / 347,6. Uttrycket räknar alltså ut vad som blir kvar av
+   Talet 1,76 var BISTRO:s bläckbredd delad med --lockup-stor, uppmätt
+   till 610,8 / 347,6 när BISTRO var satt typ. Bilden är smalare,
+   1,56, men talet står kvar MED FLIT: provat med 1,56 blev spalterna
+   26 px bredare och gick in under burgaren vid 1024 px vy. Det är
+   burgaren, inte ordet, som tar platsen i mellanbredderna. Uttrycket räknar alltså ut vad som blir kvar av
    spalten när lockupen tagit sitt, delar på två och drar av en
    halvspalts luft. Det följer med när lockupen växer eller krymper,
    vilket ett ch-tal aldrig gjorde.
@@ -3951,7 +3929,7 @@ input:focus-visible {
 
 /* ═══ SJÄLVHOSTADE TYPSNITT ═══════════════════════════════════════
 
-   Två filer, 19 kB tillsammans, hämtade och delmängdade av
+   En fil, 12 kB, hämtad och delmängdad av
    verktyg/typsnitt.mjs. Ingen css2-länk till Google längre: den
    kontaktade Googles servrar från varje besökares webbläsare och var
    dessutom renderingsblockerande i två steg — först CSS:en, sedan den
@@ -3966,14 +3944,6 @@ input:focus-visible {
 @font-face {
   font-family: 'Mouse Memoirs';
   src: url('/typsnitt/mouse-memoirs.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Titan One';
-  src: url('/typsnitt/titan-one.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
