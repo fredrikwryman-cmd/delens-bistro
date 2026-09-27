@@ -1321,10 +1321,20 @@ input:focus-visible {
   /* Lutningen på 7 grader gör den omslutande rutan bredare än bilden.
      Vid 1 procent stack den ut 6 px och gav sidan vågrät rullning. */
   /* Kolofonmärket: staplat lägger footerns spalter under varandra och
-     märket skulle hamna över nästa rubrik. Ned i hörnet i stället. */
+     märket skulle hamna över nästa rubrik.
+
+     FÖRANKRAT I NEDERKANT, INTE I ÖVERKANT. I överkant låg det på
+     adressraden och täckte slutet av "Upplands Väsby" — adressen går
+     ända ut mot högerkanten, och sedan namnraden togs bort är den
+     blockets första rad. Adressen är en rad på de flesta telefoner
+     men två vid 320 px, så ett fast avstånd uppifrån hade träffat fel
+     någonstans. Mot nederkanten hamnar märket bredvid telefonnumret
+     och Webbdesign, som båda är korta och vänsterställda, oavsett hur
+     många rader adressen tar. −1,5rem låter det hänga en bit under
+     blocket, i luften före nästa spalt. */
   .sticker--kolofon {
-    inset-block-end: auto;
-    inset-block-start: 0;
+    inset-block-start: auto;
+    inset-block-end: -1.5rem;
     inset-inline-end: 0;
   }
 
