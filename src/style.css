@@ -1578,15 +1578,17 @@ input:focus-visible {
 
 /* ── RÖRLIGT LÄGE ──────────────────────────────────────────────
    Spåret blir en scrollsträcka och scenen klistras fast. Talen:
-   250svh med 120 rutor på desktop ger 18,8 px scroll per ruta på en
-   900 px hög vy. På telefon är spåret 150svh och scenen bara bandet,
-   så klistringen blir omkring 993 px för 80 rutor — 13 px per ruta på
-   en 844 px hög vy. Under ungefär 25 px per ruta går rörelsen inte
-   att skilja från film.
+   på desktop är spåret 250svh och scenen 100svh, så klistringen blir
+   1350 px på en 900 px hög vy. 92,5 procent av 80 rutor ligger i
+   den — 18,5 px scroll per ruta. På telefon är spåret 150svh och
+   scenen bara bandet, så klistringen blir omkring 993 px för 59 rutor
+   — också 18,5 px per ruta, på en 844 px hög vy. Under ungefär 25 px per ruta
+   går rörelsen inte att skilja från film. Räkningen står i
+   verktyg/sekvens.mjs.
 
    BRYTPUNKTEN 760 px STÅR OCKSÅ I main.js (SEKV.brytMobil). Ändras
    den på ett ställe måste den ändras på det andra, annars hämtas
-   mobilens 80 rutor till ett spår byggt för 120.                 */
+   mobilens 59 rutor till ett spår byggt för 80.                  */
 
 .sekvens[data-rorlig='true'] .sekvens__spar {
   height: 250svh;
@@ -1642,7 +1644,7 @@ input:focus-visible {
   }
 
   /* Spåret kortas med en halv skärm. Klistringen blir 150svh minus
-     bandet, alltså omkring 993 px för 80 rutor — 13 px per ruta, väl
+     bandet, alltså omkring 993 px för 59 rutor — 18,5 px per ruta,
      under de 25 där rörelsen slutar gå att skilja från film. Kortare
      spår betyder kortare stund i den svarta rutan. */
   .sekvens[data-rorlig='true'] .sekvens__spar {

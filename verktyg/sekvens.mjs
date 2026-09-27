@@ -19,9 +19,23 @@
  *
  * TVÅ UPPSÄTTNINGAR OCH EN STILL, ALLA I KÄLLANS FULLA BREDD.
  *
- *   desktop  120 rutor, 1280 px bredd
- *   mobil     80 rutor, 1280 px bredd
+ *   desktop   80 rutor, 1280 px bredd
+ *   mobil     59 rutor, 1280 px bredd
  *   still      1 ruta, 1280 px bredd
+ *
+ * ANTALET SÄTTS AV SCROLLEN, INTE AV KÄLLAN. Rutorna ska räcka till
+ * omkring 18 px scroll per ruta i det klistrade läget — väl under
+ * ungefär 25 px, där rörelsen slutar läsa som film. Klistringen är
+ * spårets höjd minus scenens, och 92,5 procent av rutorna ligger i
+ * den (se SEKV.klistratSlut i main.js):
+ *
+ *   desktop  900 px vy:  1350 px / (0,925 × 79) = 18,5 px per ruta
+ *   mobil    844 px vy:   993 px / (0,925 × 58) = 18,5 px per ruta
+ *
+ * Förut var det 120 och 80 rutor, alltså 11,9 och 13,2 px. Steget
+ * tog sekvensen från 4,94 till 3,29 MB på desktop och från 3,29 till
+ * 2,43 MB på mobil, med upplösningen orörd — det var den som löste
+ * grynigheten, och den är inte med i den här räkningen.
  *
  * 1280 ÄR TAKET, INTE ETT VAL. Videon är 1280×720 och mer detalj
  * finns inte; att skala över det hade gett större filer utan en enda
@@ -57,7 +71,7 @@
  *
  * PASSET GÅR I OMGÅNGAR om 20 rutor. En omgång i taget plockas ut,
  * kodas och städas bort innan nästa börjar. Hela uppsättningen som
- * PNG samtidigt vore 120 × 2,7 MB ≈ 320 MB på disk i ett svep; med
+ * PNG samtidigt vore 80 × 2,7 MB ≈ 216 MB på disk i ett svep; med
  * omgångar ligger toppen på omkring 54 MB.
  *
  * WEBP OCH INTE AVIF, trots att AVIF mätte 34 procent lättare på just
@@ -68,7 +82,7 @@
  * restaurangsajt är den andelen telefoner inte försumbar.
  *
  * KVALITETEN ÄR 66 OCH KURVAN ÄR PLATT. Uppmätt på sex rutor i 1280,
- * omräknat till desktopens 120: q58 4,26 MB, q62 4,45, q66 4,64,
+ * omräknat till en uppsättning om 120: q58 4,26 MB, q62 4,45, q66 4,64,
  * q72 5,02, q78 5,78. Mellan 58 och 66 skiljer nio procent, och 66 är
  * samma punkt som mätningen i 800 en gång landade på.
  *
@@ -98,8 +112,8 @@ const KALLRUTOR = 192;
 const OMGANG = 20;
 
 const UTGAVOR = [
-  { id: 'desktop', rutor: 120, bredd: 1280, kvalitet: 66 },
-  { id: 'mobil', rutor: 80, bredd: 1280, kvalitet: 66 }
+  { id: 'desktop', rutor: 80, bredd: 1280, kvalitet: 66 },
+  { id: 'mobil', rutor: 59, bredd: 1280, kvalitet: 66 }
 ];
 
 /** Stillen: sista bilden, alltså den färdiga burgaren. */

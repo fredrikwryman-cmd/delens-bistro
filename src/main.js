@@ -1998,7 +1998,7 @@ function riggaScroll() {
       skärmar.
 
    2. KOMPRIMERAT I MINNET, AVKODAT I ETT FÖNSTER. Alla rutor hämtas
-      som Blob och stannar som komprimerade byte: 4,7 MB för hela
+      som Blob och stannar som komprimerade byte: 3,3 MB för hela
       desktopuppsättningen. AVKODADE är de däremot bara i ett rullande
       fönster kring den ruta som visas. En avkodad ruta kostar
       bredd × höjd × 4 byte — 3,52 MB sedan rutorna blev 1280×720 — så
@@ -2009,14 +2009,14 @@ function riggaScroll() {
       gånger så många pixlar, och 22 rutor hade blivit 77 MB avkodat —
       på en telefon är det en flik som riskerar att slängas ut. 16
       rutor lägger sig på 56. Priset är kortare startsträcka framåt:
-      12 rutor är omkring 130 px scroll på desktop mot 173 förut. Den
+      12 rutor är omkring 215 px scroll på desktop. Den
       som flickar förbi det får grannens ruta i stället, vilket är
       precis vad narmaste() finns till för.
 
    3. HÄMTNINGEN GÅR I TRE PASS. Först ruta 1, så duken aldrig är tom.
       Sedan var fjärde ruta — då går hela sekvensen redan att scrubba,
       om än grovt, på en fjärdedel av vikten. Sist resten. Att hämta
-      1 till 120 i ordning hade gett en sekvens som är färdig i
+      1 till 80 i ordning hade gett en sekvens som är färdig i
       början och tom i slutet under hela laddningen.               */
 
 const SEKV = {
@@ -2027,7 +2027,7 @@ const SEKV = {
   /* Rutor per uppsättning. Måste stämma med UTGAVOR i
      verktyg/sekvens.mjs — en ruta för mycket är en 404, en för lite
      är en sekvens som slutar innan spåret gör det. */
-  rutor: { desktop: 120, mobil: 80 },
+  rutor: { desktop: 80, mobil: 59 },
 
   /* Det rullande fönstret av AVKODADE rutor, i scrollriktningen och
      mot den. Asymmetriskt med flit: man scrollar nästan alltid vidare
@@ -2040,8 +2040,8 @@ const SEKV = {
      fler strömmar och börjar betala för dem. */
   parallellt: 6,
 
-  /* Grovpassets steg. Var fjärde ruta = 30 rutor på desktop, ungefär
-     670 kB, och sekvensen går att dra igenom hela vägen. */
+  /* Grovpassets steg. Var fjärde ruta = 20 rutor på desktop, ungefär
+     820 kB, och sekvensen går att dra igenom hela vägen. */
   grovt: 4,
 
   /* Hur långt sekvensen hunnit när scenen SLÄPPER och börjar åka ut.
@@ -2053,10 +2053,18 @@ const SEKV = {
 
      Linjärt över hela passagen hamnade 40 procent av rutorna i
      utåkningen: burgaren byggdes färdigt i en remsa ingen tittar på.
-     Med 0,95 ligger 114 av 120 rutor i det klistrade läget, och de
+     Med 0,925 ligger 74 av 80 rutor i det klistrade läget, och de
      sista sex kryper fram medan scenen lämnar. Sekvensen står aldrig
-     still, och finalen landar på hel skärm. */
-  klistratSlut: 0.95
+     still, och finalen landar på hel skärm.
+
+     0,925 OCH INTE 0,95 SEDAN RUTORNA BLEV FÄRRE. Utåkningen är lika
+     lång som förut, 900 px på desktop, men med 80 rutor i stället för
+     120 fick den bara fyra: burgaren byggdes färdig i steg om 228 px,
+     uppmätt — fyra ryck precis där bygget landar. Med 0,925 får slutet
+     sex rutor och steg om omkring 150 px, samma som före bantningen.
+     Priset är 18,5 px per ruta i det klistrade läget i stället för
+     18,0. */
+  klistratSlut: 0.925
 };
 
 function riggaSekvens() {
@@ -2107,7 +2115,7 @@ function riggaSekvens() {
      gånger när fönstret glider fram över den. */
   const pagar = new Set();
   /* Index som är avkodade just nu — billigare att gå igenom än att
-     söka i en array på 120 platser varje bildruta. */
+     söka i en array på 80 platser varje bildruta. */
   const levande = new Set();
 
   let hamtade = 0;
@@ -2300,7 +2308,7 @@ function riggaSekvens() {
   window.addEventListener('resize', mat, { passive: true });
 
   /* Hämtningen startar när sektionen är en hel skärm bort, inte när
-     den är framme. 2,7 MB hinner inte fram på den sista skärmen, och
+     den är framme. 3 MB hinner inte fram på den sista skärmen, och
      att börja tidigare hade betytt att varenda besökare betalar för
      en sektion hen kanske aldrig når. */
   const io = new IntersectionObserver(
@@ -2326,7 +2334,7 @@ function riggaSekvens() {
     if (r.bottom < 0 || r.top > window.innerHeight) return;
 
     /* Passagen delas vid den punkt där scenen släpper. Före den
-       punkten ligger 95 procent av sekvensen, efter den de sista fem
+       punkten ligger 92,5 procent av sekvensen, efter den resten
        — se SEKV.klistratSlut. Båda delarna är linjära och lutningen
        är positiv i båda, så rutan byter hela vägen: ingen del av
        spåret står still, och finalen hinner landa medan scenen
