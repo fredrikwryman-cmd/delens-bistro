@@ -2958,19 +2958,12 @@ input:focus-visible {
     color 200ms ease;
 }
 
-/* VERSALER PÅ ETIKETTERNA, INTE PÅ NAMNET. "Byggd av", "Webbdesign"
-   och adressen är mikroetiketter och ska stå i versaler — spärren
-   --ls-xs är satt för just det. AiM Studios är ett egennamn med
-   avsiktligt blandad skrivning, och uppercase hade gjort det till AIM
-   STUDIOS. Samma sak som att ändra namnet; se footerraden, som gick i
-   samma fälla. Gemen text får gemenspärren i stället. */
+/* "Byggd av", "Webbdesign" och adressen är mikroetiketter och står i
+   versaler — spärren --ls-xs är satt för just det. Namnet är ingen
+   etikett längre utan en logotyp; se .byggd__aktiv img. */
 .byggd__lada,
 .byggd__vila {
   text-transform: uppercase;
-}
-
-.byggd__aktiv {
-  letter-spacing: var(--ls-xs-gemen);
 }
 
 /* Mitten byter ord. De två orden ligger i samma ruta och växlar
@@ -3004,7 +2997,47 @@ input:focus-visible {
   opacity: 0;
   transform: translateY(0.35em);
   filter: blur(2px);
-  letter-spacing: var(--ls-xs-gemen);
+}
+
+/* LOGOTYPEN TAR INGEN PLATS. Den ligger i samma ruta som Webbdesign,
+   och i ett grid bestämmer det bredaste barnet rutans bredd — även
+   när det står osynligt. En logotyp bredare än ordet hade gjort
+   KNAPPEN bredare i vila, och hörnen hade stått ute i luften kring
+   ett ord som inte fyller dem.
+
+   Därför är .byggd__aktiv en punkt, 0 × 0 mitt i rutan, och bilden
+   hänger absolut kring den. Knappens mått sätts av Webbdesign som
+   förut, och logotypen får breda ut sig in i paddningen.
+
+   5,3em ÄR BREDDEN, uppmätt mot knappen. Vid 26 px grad blir det
+   138 px i en knapp som är 164 px bred: 13 px luft till kanterna på
+   var sida, så den går inte in i hörnmarkeringarna. Höjden blir
+   22 px, och ordbildens versaler 14 — samma storlek som versalerna i
+   WEBBDESIGN. En logotyp som bara fick vara lika bred som ordet hade
+   blivit 18 px hög, och där är "Studios" för smått att läsa.
+
+   PÅ SVART, INTE PÅ AMBER. Mitten har ingen fyllning; ambern sitter
+   i lådorna ovanför och under. Ordbilden #E0E0F8 står mot footerns
+   #0E0E0E på 14,9:1. Den blå vinkeln #5850F8 står på 3,6:1, över 3:1
+   som gäller för grafik. På amber hade det sett annorlunda ut —
+   ljuslila mot #E8A33D är 1,66:1 — så logotypen får aldrig flyttas
+   in i en låda. Logotypen behåller sina egna färger — den
+   tonas inte om till amber som texten gjorde, ett varumärke byter
+   inte färg för att någon pekar på det. */
+.byggd__aktiv {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+.byggd__aktiv img {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  translate: -50% -50%;
+  width: 5.3em;
+  max-width: none;
+  height: auto;
 }
 
 /* Lådorna ligger bakom knappen och glider ut. transform och opacity,
