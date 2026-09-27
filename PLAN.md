@@ -461,9 +461,11 @@ skäl som inte hade med typen att göra:
   Rubriken i fyra rader gick med den. Typen *var* konstverket där, och
   utan lager att väva rader igenom fanns inget kvar att bära.
 - **Finalens rad blev en bild** 2026-09-20. Röd bubbeltyp, ritad och
-  frilagd, som klistras in på plats i stället för att skrivas fram
-  bokstav för bokstav. Se `verktyg/valkommen.mjs` och
-  `.final__halsning` i stilmallen.
+  frilagd, som klistrades in på plats i stället för att skrivas fram
+  bokstav för bokstav. 2026-09-27 byttes bilden mot röd trycktyp i två
+  rader — VÄLKOMMEN TILL / DELEN'S BISTRO — som skrivs fram av en
+  mask, rad ett färdig innan rad två börjar. Se
+  `verktyg/valkommen.mjs` och `.final__halsning` i stilmallen.
 
 Kvar står hero-lockupen ensam. Det är STRÄNGARE än regeln någonsin
 krävt, och ingen har beslutat det — det följde av två andra beslut.

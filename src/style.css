@@ -2587,7 +2587,13 @@ input:focus-visible {
   --del-tid: 480ms;
   --del-steg: 380ms;
   --marke-klart: 3140ms;
-  --halsning-tid: 380ms;
+
+  /* Hälsningens tidsschema, se .final__halsning nedan. Rad två
+     börjar när rad ett är färdig plus radbytet. */
+  --rad1-tid: 520ms;
+  --radbyte: 80ms;
+  --rad2-tid: 640ms;
+  --skriv: cubic-bezier(0.45, 0, 0.3, 1);
 }
 
 .final__inner {
@@ -2611,13 +2617,17 @@ input:focus-visible {
      Höjdtaket DRAR IFRÅN i stället för att skala. En andel av
      vyhöjden hade tagit lika mycket från desktop som från en låg
      skärm — 58svh gav 512 px vid 900 men klämde ändå inte in raden
-     vid 500. 18rem är det som ska rymmas UNDER märket och är lika
-     stort oavsett vy: beställningsfältets 80 px, raden, gapet och
-     paddningen. Det som blir kvar får märket ta.
+     vid 500. 22rem är det som ska rymmas UNDER märket och är lika
+     stort oavsett vy: beställningsfältets 80 px, hälsningen, gapet
+     och paddningen. Det som blir kvar får märket ta.
 
-       900 px vy   min(512, 612) = 512   desktop orört
-       620 px vy   min(512, 332) = 332
-       500 px vy   min(512, 212) = 212
+     Avdraget var 18rem när hälsningen var en rad på 69 px. I två
+     rader är den 128 px, och de 59 px skillnaden är de 4rem som
+     lagts till — annars sköts hälsningen ned under fältet igen.
+
+       900 px vy   min(512, 548) = 512   desktop orört
+       620 px vy   min(512, 268) = 268
+       500 px vy   min(512, 148) = 148
 
      max(9rem, ...) är GOLVET, och det behövs. Avdraget har ingen
      undre gräns av sig självt: vid 300 px vyhöjd blev 100svh − 18rem
@@ -2625,29 +2635,31 @@ input:focus-visible {
      spiller ut ur en 300 px hög webbläsarruta är ett litet fel; ett
      märke som försvinner är ett stort. Golvet gör det första till det
      enda som kan hända. */
-  width: min(clamp(13rem, 44vw, 32rem), max(9rem, calc(100svh - 18rem)));
+  width: min(clamp(13rem, 44vw, 32rem), max(9rem, calc(100svh - 22rem)));
   height: auto;
 }
 
 /* HÄLSNINGEN ÄR EN BILD. Den satta raden i Titan One är borta, och
    med den bokstavsuppdelningen — se PLAN.md 13.
 
-   38rem = 608 px är taket. Typen är 8,8:1 efter beskärningen, så
-   höjden blir 69 px vid full bredd; bredare hade gjort en remsa av
-   den. Under det tar 100 procent över och hälsningen krymper med
-   spalten, ned till 41 px hög på den smalaste telefonen.
+   30rem = 480 px är taket. Bilden är 3,75:1 i två rader, så höjden
+   blir 128 px vid full bredd och varje rad ungefär lika hög som den
+   enradiga hälsningen var vid 38rem. Bredare hade gjort den till en
+   rubrik som tävlar med märket. Under taket tar 100 procent över och
+   hälsningen krymper med spalten.
 
    aspect-ratio matchar filen och håller lådan rätt redan innan
-   bilden hämtats, så märket ovanför inte hoppar när den landar. */
+   bilden hämtats, så märket ovanför inte hoppar när den landar.
+
+   Ingen skugga längre. Den förra typen var ett klistermärke med vit
+   kontur, och drop-shadow gav det lyft. Den här är tryck direkt på
+   det svarta, och en svart skugga på svart ritar ingenting — utom
+   att masken nedan hade klippt den i lådans kant ändå. */
 .final__halsning {
   display: block;
-  width: min(100%, 38rem);
+  width: min(100%, 30rem);
   height: auto;
-  aspect-ratio: 1216 / 138;
-  /* Urklippets tjocklek. Typen har en vit kontur som ger kanten;
-     skuggan ger lyftet från sektionens svarta. Statisk — den räknas
-     inte om under insättningen. */
-  filter: drop-shadow(0 0.4rem 0.9rem rgb(0 0 0 / 0.5));
+  aspect-ratio: 1080 / 288;
 }
 
 /* UTGÅNGSLÄGET SÄTTS AV JS, inte här. Ett data-attribut som bara
@@ -2688,39 +2700,81 @@ input:focus-visible {
   }
 }
 
-/* HÄLSNINGEN KLISTRAS IN, den skrivs inte. Raden byggdes förut
-   bokstav för bokstav; nu är den en ritad enhet och ska landa som en.
+/* HÄLSNINGEN SKRIVS FRAM, i läsriktningen. En mjuk kant sveper från
+   VÄLKOMMEN till BISTRO, och det som ligger bakom kanten syns.
 
-   SAMMA HANDGREPP SOM KLISTERMÄRKENA: 0,92 i skala, en vridning som
-   rätar upp sig, 380 ms — handen som trycker ner märket och släpper.
-   Se .sticker[data-ankomst].
+   TVÅ MASKLAGER, ETT PER RAD. Ett enda svep i sidled avtäcker båda
+   raderna på en gång — det läser som en ridå, inte som skrift. Därför
+   har varje rad sitt eget lager: rad ett äger övre halvan, rad två
+   den undre, och rad två börjar först när rad ett är skriven.
 
-   VRIDNINGEN ÄR 2,5 GRADER, inte märkenas 7. Märkena är små och nära
-   kvadratiska; hälsningen är 8,8:1, och på 608 px bredd lyfter sju
-   grader ändarna 37 px var. Det läser som en sned bild, inte som ett
-   märke som sätts dit. 2,5 ger 13 px och stannar i handgreppet.
+   SKARVEN LIGGER PÅ 50 %. Rad ett slutar på 43 % av bildens höjd och
+   rad två börjar på 50,5 % — uppmätt i verktyg/valkommen.mjs. Skarven
+   i luckan betyder att ingen bokstav delas mellan två lager.
 
-   ALDRIG FRÅN scale(0) — samma regel som delarna följer ovan.
+   SVEPET GÅR ÖVER TEXTEN, inte över lådan. Rad ett står på 8,4–91,5 %
+   av bredden; ett svep från kant till kant hade lagt en åttondel av
+   tiden på tom luft i var ände och sett ut som en paus. Rad två går
+   kant till kant och sveper hela vägen.
 
-   Delarna föll uppifrån, hälsningen trycks ned på plats. Två olika
-   handlingar ska inte se likadana ut: märket MONTERAS, hälsningen
-   SÄTTS DIT. */
-.final[data-bygger='kor'] .final__halsning {
-  animation: halsning-pa-plats var(--halsning-tid) var(--ut)
-    var(--marke-klart) both;
+   KANTEN ÄR 6 % BRED. Hårt avskuren ser den ut som en skjutdörr;
+   mjuk ser den ut som färg som når fram. 6 % av 480 px är 29 px,
+   ungefär en halv bokstav.
+
+   VARFÖR @property. Masken ritas med gradienter, och ett gradientstopp
+   går bara att animera via en registrerad egenskap — oregistrerad
+   hade den bytt värde i ett hopp på halva tiden. Grundvärdet är
+   100 %, alltså helt avtäckt: allt som inte är just den här
+   animeringen ser en färdig hälsning.
+
+   TEMPOT. Märket monteras på 3,14 s med ett nytt steg var 380:e ms.
+   Hälsningen tar 1,24 s — 520 ms för rad ett, 80 ms radbyte, 640 ms
+   för rad två. Ungefär 50 ms per bokstav: snabbare än att läsa, så
+   ögat följer kanten i stället för att vänta på den. Rad två tar
+   längre tid för att den är bredare — hastigheten är densamma.
+
+   KURVAN ÄR MJUK I BÅDA ÄNDAR, inte --ut. Ett utsvep rusar först och
+   kryper sist, och det är fel för skrift: i slutet av raden är det
+   läsaren som ska vila, inte pennan. Inbromsningen i radslutet och
+   uppstarten i nästa rad är själva radbytet. */
+@property --rad1 {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 100%;
 }
 
-@keyframes halsning-pa-plats {
-  from {
-    opacity: 0;
-    scale: 0.92;
-    rotate: -2.5deg;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    rotate: 0deg;
-  }
+@property --rad2 {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 100%;
+}
+
+.final[data-bygger] .final__halsning {
+  mask-image:
+    linear-gradient(to right, #000 var(--rad1), transparent calc(var(--rad1) + 6%)),
+    linear-gradient(to right, #000 var(--rad2), transparent calc(var(--rad2) + 6%));
+  mask-size: 100% 50%, 100% 50%;
+  mask-position: 0 0, 0 100%;
+  mask-repeat: no-repeat;
+}
+
+.final[data-bygger='kor'] .final__halsning {
+  animation:
+    halsning-rad1 var(--rad1-tid) var(--skriv) var(--marke-klart) both,
+    halsning-rad2 var(--rad2-tid) var(--skriv)
+      calc(var(--marke-klart) + var(--rad1-tid) + var(--radbyte)) both;
+}
+
+/* Rad ett: vid 2 % når kanten (2 + 6) ännu inte första bokstaven på
+   8,4; vid 92 % är den förbi sista på 91,5. Rad två: −6 till 100. */
+@keyframes halsning-rad1 {
+  from { --rad1: 2%; }
+  to   { --rad1: 92%; }
+}
+
+@keyframes halsning-rad2 {
+  from { --rad2: -6%; }
+  to   { --rad2: 100%; }
 }
 
 /* ═══ 9 · FOOTER ══════════════════════════════════════════════ */
@@ -3848,8 +3902,7 @@ input:focus-visible {
     opacity: 1;
     animation: none;
     transform: none;
-    scale: 1;
-    rotate: 0deg;
+    mask: none;
   }
 
   .final[data-bygger='vantar'] .final__inner {

@@ -2579,7 +2579,8 @@ function riggaFinal() {
 
   /* Hälsningen behöver ingen förberedelse längre. Den var satt text
      som delades i ord och bokstäver härifrån; nu är den en bild som
-     ligger färdig i uppmärkningen och sätts dit av stilmallen. */
+     ligger färdig i uppmärkningen och skrivs fram av stilmallens
+     mask. */
   sek.setAttribute('data-bygger', 'vantar');
 
   const io = new IntersectionObserver(
@@ -2588,8 +2589,8 @@ function riggaFinal() {
       io.disconnect();
       sek.setAttribute('data-bygger', 'kor');
     },
-    /* SEKVENSEN ÄR 3,5 SEKUNDER LÅNG: 3140 ms montering plus 380 ms
-       för hälsningen som sätts dit. Då räcker det inte att sektionen
+    /* SEKVENSEN ÄR 4,4 SEKUNDER LÅNG: 3140 ms montering plus 1240 ms
+       för hälsningen som skrivs fram. Då räcker det inte att sektionen
        nätt och jämnt kommit in i vyn — då hinner den spelas färdigt
        medan besökaren fortfarande scrollar förbi.
 
