@@ -6,8 +6,15 @@
  * LOCKUPEN ÄR BILDER, inte satt text. DELENS och BISTRO stod i Titan
  * One med en ram ur -webkit-text-stroke. Nu är de två ritade ord med
  * egen vit kontur: delens-hero (DELEN'S i rött) bakom burgaren och
- * bistro-hero (BISTRO i amber) framför den. Båda källorna är PNG utan
- * filändelse.
+ * bistro-hero (BISTRO i amber) framför den. Originalen ligger orörda
+ * i kalla/hero/.
+ *
+ * DELEN'S FÄRGAS OM TILL #6B1410 på vägen in — se verktyg/farg.mjs.
+ * Källan går i en rosaröd #D44E61 som inte finns någon annanstans på
+ * sajten; #6B1410 är --rod, samma djupröda som den satta lockupen
+ * hade. Mot svart är den bara 1,59:1, och det är avsiktligt: formen
+ * bärs av den vita konturen, som skiftet lämnar orörd, precis som den
+ * satta typens vita ram bar den. BISTRO är amber och rörs inte.
  *
  * BESKÄRNINGEN ÄR UPPMÄTT mot alfakanalen, med två pixlars marginal
  * för den mjuka kanten. Rader och kolumner med färre än sex
@@ -36,21 +43,25 @@
 import sharp from 'sharp';
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { hex, skiftaRott } from './farg.mjs';
 
-const KALLOR = 'C:/Users/fredr/OneDrive/Desktop/Delens Bistro';
+const KALLOR = 'kalla/hero';
 const MAL = 'public/bilder/hero';
 const KVALITET = 84;
 const SNAPP = 240;
 
 const ORD = [
   {
-    kalla: 'delens-hero',
+    kalla: 'delens-hero.png',
     fil: 'delens',
     utklipp: { left: 76, top: 145, width: 1909, height: 476 },
-    bredder: [960, 1909]
+    bredder: [960, 1909],
+    /* Fyllningens medelvärde, uppmätt på full alfa. Grönkanalen
+       ligger på 76–80 i 90 procent av pixlarna — ytan är jämn. */
+    farg: { fran: [212, 78, 97], till: hex('#6b1410') }
   },
   {
-    kalla: 'bistro-hero',
+    kalla: 'bistro-hero.png',
     fil: 'bistro',
     utklipp: { left: 75, top: 162, width: 1767, height: 496 },
     bredder: [640, 1200]
@@ -70,6 +81,8 @@ async function kor() {
     for (let i = 3; i < data.length; i += 4) {
       if (data[i] >= SNAPP) data[i] = 255;
     }
+
+    if (o.farg) skiftaRott(data, o.farg.fran, o.farg.till);
 
     for (const b of o.bredder) {
       const fil = `${o.fil}-${b}.webp`;

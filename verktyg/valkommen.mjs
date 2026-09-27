@@ -3,8 +3,8 @@
  *
  *   node verktyg/valkommen.mjs
  *
- * TVÅ RADER, INTE EN. Källan är ny-valkommen (en PNG utan filändelse):
- * "VÄLKOMMEN TILL" över "DELEN'S BISTRO", i en ljusare röd än märkets.
+ * TVÅ RADER, INTE EN. Källan är kalla/final/ny-valkommen.png:
+ * "VÄLKOMMEN TILL" över "DELEN'S BISTRO".
  * Den ersatte en rad bubbeltyp i 8,8:1 som klistrades in som en enhet.
  * Nu skrivs den fram rad för rad — se .final__halsning i stilmallen.
  *
@@ -27,6 +27,16 @@
  * räcker 960 för dubbel pixeltäthet. En telefon med trefaldig täthet
  * når 358 px × 3 = 1074, och 1080 täcker den.
  *
+ * FÄRGEN SKIFTAS PÅ VÄGEN IN — se verktyg/farg.mjs. Källan går i en
+ * rosaröd #D53F50. Sajtens djupröda är #6B1410, men den står bara på
+ * 1,59:1 mot svart, och den här typen har ingen vit kontur som bär
+ * formen. Det är sidans sista mening; den ska gå att läsa.
+ *
+ * Därför samma nyans som #6B1410 — 2,6° och 74 procents mättnad i
+ * HSL — med ljusheten lyft från 24 till 43 procent: #BF241D. Den står
+ * på 3,20:1 mot sektionens #0E0E0E, över 3:1 för stor text. 42 procent
+ * hade gett 3,07 — på gränsen, utan marginal för tryckets struktur.
+ *
  * WEBP MED ALFA. Typen ligger direkt på sektionens svarta. Kvalitet
  * 82: de trasiga tryckkanterna är mjuka övergångar mot genomskinligt,
  * och där syns artefakter tidigare än i ett foto.
@@ -35,8 +45,13 @@
 import sharp from 'sharp';
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { hex, skiftaRott } from './farg.mjs';
 
-const KALLA = 'C:/Users/fredr/OneDrive/Desktop/Delens Bistro/ny-valkommen';
+const KALLA = 'kalla/final/ny-valkommen.png';
+
+/** Fyllningens medelvärde, uppmätt på full alfa. */
+const FRAN = [213, 63, 80];
+const TILL = hex('#bf241d');
 const MAL = 'public/bilder/final';
 const FIL = 'valkommen.webp';
 
@@ -51,8 +66,15 @@ async function kor() {
   await mkdir(MAL, { recursive: true });
 
   const ut = path.join(MAL, FIL);
-  const info = await sharp(KALLA)
+  const { data, info: ra } = await sharp(KALLA)
     .extract(UTKLIPP)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  skiftaRott(data, FRAN, TILL);
+
+  const info = await sharp(data, { raw: ra })
     .resize({ width: BREDD, withoutEnlargement: true })
     .webp({ quality: KVALITET, effort: 6, alphaQuality: 100 })
     .toFile(ut);
