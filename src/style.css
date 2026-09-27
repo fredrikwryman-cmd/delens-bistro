@@ -745,9 +745,10 @@ input:focus-visible {
    vänsterställt. Förlagan bryter spalten hela tiden. Fyra brott,
    inte fler — utströsslat blir det brus igen.                    */
 
-/* 1 · Rubriken går i trappa i stället för att stapla rakt. */
-.rubrik--trappa .rubrik__rad:nth-child(2) { padding-inline-start: 0.14em; }
-.rubrik--trappa .rubrik__rad:nth-child(3) { padding-inline-start: 0.28em; }
+/* 1 · Trappan i rebrandrubriken är borta sedan 2026-09-28: rubriken
+   blev en mening, "Brutal Burgers blev Delen's Bistro", utan rader att
+   förskjuta. Numreringen står kvar så de andra brotten behåller sina
+   nummer. */
 
 /* 2 · Rubrik som medvetet går ut ur spalten åt höger. */
 .rubrik--utanfor {

@@ -253,7 +253,9 @@ function fyllKontakt() {
   for (const sel of ['#hitta-fb', '#foot-fb']) {
     satt(sel, (el) => (el.href = kontakt.facebook));
   }
-  satt('#foot-ig', (el) => (el.href = kontakt.instagram));
+  for (const sel of ['#hitta-ig', '#foot-ig']) {
+    satt(sel, (el) => (el.href = kontakt.instagram));
+  }
   for (const sel of ['#bestall-lank', '#orderbar-lank']) {
     satt(sel, (el) => (el.href = kontakt.bestall));
   }
