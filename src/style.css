@@ -1146,9 +1146,40 @@ input:focus-visible {
   height: auto;
 }
 
+/* DELEN'S ÄR 15 PROCENT STÖRRE OCH LYFT, sedan 2026-09-28. Ytan ovan
+   var utgångsläget; nu är ordet 3,68 × 1,029 em i stället för
+   3,20 × 0,895.
+
+   LYFTET RÄKNAS FRÅN NEDERKANTEN, inte från mitten. Nederkanten låg
+   redan tätt mot brödtexten — 539 mot 534 px vid 1440 — och en
+   förstoring kring mitten hade skjutit ned den i texten. Nu ligger
+   nederkanten 0,04em HÖGRE än förut, och all tillväxt går uppåt:
+
+     förut   överkant −0,018em  nederkant 0,878em  (från lådans topp)
+     nu      överkant −0,192em  nederkant 0,838em
+
+   Vid 1440 är det 60 px upp för överkanten, 37 för mitten och 14 för
+   nederkanten. */
 .hero__delens .hero__ord {
-  width: 3.2em;
-  margin-block-start: calc(0.43em - 0.895em / 2);
+  width: 3.68em;
+  margin-block-start: calc(0.838em - 1.029em);
+}
+
+/* PÅ EN LITEN, LÅG TELEFON FINNS INGEN PLATS UPPÅT. Hero är en
+   helskärm med innehållet centrerat, och när vyn är låg fyller det
+   hela höjden: uppmätt låg DELEN'S 3 px under navbaren vid 320×640
+   och 21 px vid 360×740. Ett lyft hade lagt ordet under navlänkarna.
+
+   Samma sak på en liggande telefon, oavsett bredd: vid 844×390 och
+   667×375 hamnade den lyfta överkanten 2 och 13 px in under navbaren.
+
+   Där står överkanten kvar där den stod och förstoringen går nedåt,
+   in bakom burgaren — som ligger ovanpå och ändå skymmer den delen.
+   390×844 har 65 px luft och lyfts som desktop. */
+@media (max-width: 440px) and (max-height: 760px), (max-height: 520px) {
+  .hero__delens .hero__ord {
+    margin-block-start: calc(0.43em - 0.895em / 2);
+  }
 }
 
 .hero__bistro .hero__ord {
