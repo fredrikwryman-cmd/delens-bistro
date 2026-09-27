@@ -1258,12 +1258,47 @@ input:focus-visible {
 .hero__copy p { margin: 0; }
 
 @media (max-width: 900px) {
+  /* Burgarens bredd, en gång. BISTRO räknas ut ur den nedan. */
+  .hero__title {
+    --burgare-b: min(70vw, 340px);
+  }
+
   /* Burgaren går in i flödet så texten inte hamnar under den. */
   .hero__burger {
     position: static;
     translate: none;
-    width: min(70vw, 340px);
+    width: var(--burgare-b);
     margin: -0.5rem auto 0;
+  }
+
+  /* BISTRO ÖVER BURGARENS NEDERDEL, som på desktop. I flödet hamnade
+     ordet under burgaren som en egen rad, och greppet med ett ord bakom
+     och ett framför försvann.
+
+     STORLEKEN RÄKNAS MOT BURGAREN, INTE MOT DELEN'S. Förhållandet till
+     DELEN'S var redan detsamma som på desktop, 0,50 — uppmätt. Det
+     som skilde var burgaren: på en telefon är den dubbelt så stor i
+     förhållande till orden, och BISTRO blev 0,61 av dess bredd mot
+     desktopens 1,22. Nu är BISTRO 1,1 av burgarens bredd och sticker
+     ut på båda sidor, som på desktop — och blir då ungefär 0,9 av
+     DELEN'S. Beslutat 2026-09-28.
+
+     LÄGET: BISTROs mitt på 77 procent av burgarens höjd, samma andel
+     som vid 1440. Burgarbilden är 0,956 så hög som bred, alltså ligger
+     punkten 0,23 × 0,956 = 0,22 burgarbredder ovanför dess nederkant.
+     Bilden dras upp dit med en negativ marginal i en flow-root-låda,
+     och lådan krymper lika mycket — brödtexten under följer med upp i
+     stället för att stå kvar under ett tomrum. Bildens höjd är
+     bredden delad med 4,479, dess proportion med konturen. */
+  .hero__bistro {
+    height: auto;
+    margin-block-start: 0;
+    translate: -50% 0;
+  }
+
+  .hero__bistro .hero__ord {
+    width: calc(var(--burgare-b) * 1.1);
+    margin-block-start: calc(var(--burgare-b) * -0.22 - var(--burgare-b) * 1.1 / 4.479 / 2);
   }
 
   .hero__copy {
