@@ -233,12 +233,25 @@
           <path class="wave__edge" d="M0,45 C260,8 500,8 740,45 C980,82 1200,82 1440,45" />
         </svg>
         <div class="wrap rebrand__inner">
-          <!-- En mening, inte tre rader. Trappan med "Från / Brutal
-               Burgers / till Delens Bistro" är borta; raden bryts där
-               bredden tar slut. Apostrofen i Delen's är avsiktlig och
-               går emot namnformsregeln för satt text — beslutat
-               2026-09-28. -->
-          <h2 class="rubrik rubrik--stor" data-reveal>Brutal Burgers blev Delen's Bistro</h2>
+          <!-- TVÅ NAMN OCH ETT ORD. De två namnen är ritade bilder med
+               vit kontur — se verktyg/rebrand.mjs — och "blev" står kvar
+               som text emellan. Rubrikens tillgängliga namn byggs av
+               alt-texterna och ordet: "Brutal Burgers blev Delen's
+               Bistro". Apostrofen i Delen's är avsiktlig och går emot
+               namnformsregeln för satt text — beslutat 2026-09-28.
+
+               Ingen data-reveal här. Ord-för-ord-avslöjningen hade gjort
+               bilderna till ord och lagt sin rörelse ovanpå maskens.
+               Namnen skrivs fram av .rebrand__rubrik i stilmallen. -->
+          <h2 class="rubrik rubrik--stor rebrand__rubrik" id="rebrand-rubrik">
+            <img class="rebrand__namn rebrand__namn--brutal"
+                 src="/bilder/rebrand/brutal-burgers.webp"
+                 alt="Brutal Burgers" width="900" height="324" decoding="async" />
+            <span class="rebrand__blev">blev</span>
+            <img class="rebrand__namn rebrand__namn--delens"
+                 src="/bilder/rebrand/delens-bistro.webp"
+                 alt="Delen's Bistro" width="900" height="373" decoding="async" />
+          </h2>
           <div class="rebrand__grid">
             <!-- Sidans enda längre brödtext. Ord för ord vore fel här:
                  ögat läser klart innan sista ordet kommit fram. Raderna

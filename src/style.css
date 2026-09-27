@@ -1332,6 +1332,159 @@ input:focus-visible {
 
 /* ═══ 3 · REBRANDEN ═══════════════════════════════════════════ */
 
+/* ── REBRANDRUBRIKEN: TVÅ NAMN OCH ETT ORD ─────────────────────
+
+   SAMMA HÖJD PÅ BÅDA NAMNEN. Rubriken säger att det ena blev det
+   andra, och två namn som ställs mot varandra ska väga lika. Bredden
+   får skilja — BRUTAL BURGERS är 2,78:1, Delen's Bistro 2,41:1 — men
+   höjden är densamma, så ingen av dem läser som huvudsak.
+
+   "BLEV" ÄR GÅNGJÄRNET, INTE ETT TREDJE NAMN. Graden är 0,42 av
+   namnens höjd, vilket ger versaler ungefär två tredjedelar så höga
+   som en rad i BRUTAL BURGERS. Lika högt hade gjort ordet till en
+   tredje rubrik i raden; mindre än så försvann det mellan två
+   konturerade bilder. Det står mitt på namnens höjd, i sektionens
+   off-white — samma vita som konturerna, så de tre hänger ihop.
+
+   Höjden följer vyn: 9vw på desktop, 130 px vid 1440, med tak på
+   8,5rem. Under 600 px staplas de tre, och namnen tar då 26vw i
+   höjd — 101 px på en 390 px telefon, BRUTAL BURGERS 281 px bred. */
+.rebrand__rubrik {
+  --rb-h: clamp(4.5rem, 9vw, 8.5rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: clamp(1rem, 2.5vw, 2rem);
+  row-gap: 0.4rem;
+}
+
+.rebrand__namn {
+  display: block;
+  height: var(--rb-h);
+  width: auto;
+}
+
+.rebrand__blev {
+  font-size: calc(var(--rb-h) * 0.42);
+  line-height: 1;
+  color: var(--offwhite);
+}
+
+@media (max-width: 600px) {
+  .rebrand__rubrik {
+    --rb-h: 26vw;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* SKRIVS FRAM, SAMMA GREPP SOM VÄLKOMSTHÄLSNINGEN i finalen — se
+   .final__halsning, där resonemanget står i sin helhet. Kort: två
+   masklager per bild, ett per rad, så att rad ett är skriven innan
+   rad två börjar. Ett enda svep i sidled hade avtäckt båda raderna
+   på en gång och läst som en ridå. --rad1 och --rad2 är de
+   registrerade egenskaperna därifrån.
+
+   DELNINGEN ÄR UPPMÄTT i de färdiga bilderna (verktyg/rebrand.mjs):
+
+     BRUTAL BURGERS   51 %   raderna går kant till kant
+     Delen's Bistro   69 %   skrivstilens D-svans går ned till 68,6;
+                             under 69 finns i källan bara BISTRO,
+                             19,4–79,8 % av bredden
+
+   ORDNINGEN FÖLJER MENINGEN: BRUTAL, BURGERS, "blev" tonar in, sedan
+   Delen's och BISTRO. Tempot är långsammare än hälsningens — 700 ms
+   per hel rad mot 520–640 — eftersom det här är sektionens rubrik
+   och inte ett avsked; den ska hinna läsas medan den kommer.
+   BISTRO får 570 ms: svepet går 86 procent av bredden mot en hel
+   rads 106, alltså samma fart. Hela förloppet tar 2,9 s.
+
+   UTGÅNGSLÄGET SÄTTS AV JS (data-skrivs), inte här. Utan JS matchar
+   ingen regel och rubriken står färdig. */
+.rebrand__rubrik {
+  --rb-rad: 700ms;
+  --rb-radbyte: 80ms;
+  /* Samma kurva som hälsningen; den står i .final och ärvs inte hit. */
+  --skriv: cubic-bezier(0.45, 0, 0.3, 1);
+  --rb-bistro: 570ms;
+  /* Starttiderna, i ordning. */
+  --rb-t-burgers: calc(var(--rb-rad) + var(--rb-radbyte));
+  --rb-t-blev: calc(var(--rb-t-burgers) + var(--rb-rad) + var(--rb-radbyte));
+  --rb-t-delens: calc(var(--rb-t-blev) + 80ms);
+  /* BISTRO startar 132 ms tidigare än radbytet säger. Dess svep börjar
+     på −6 men bokstäverna först på 19,4 (se rb-bistro), och med
+     kurvan --skriv når kanten dit efter 164 ms av 570 — en hel rad
+     visar sin första pixel efter 32. Utan försprånget blev radbytet
+     före BISTRO 300 ms mot de andras 110, och rubriken tvekade just
+     före sista ordet. Räknat ur kurvan, inte provat fram. */
+  --rb-bistro-forsprang: 132ms;
+  --rb-t-bistro: calc(var(--rb-t-delens) + var(--rb-rad) + var(--rb-radbyte) - var(--rb-bistro-forsprang));
+}
+
+.rebrand__namn--brutal { --delning: 51%; }
+.rebrand__namn--delens { --delning: 69%; }
+
+.rebrand__rubrik[data-skrivs] .rebrand__namn {
+  mask-image:
+    linear-gradient(to right, #000 var(--rad1), transparent calc(var(--rad1) + 6%)),
+    linear-gradient(to right, #000 var(--rad2), transparent calc(var(--rad2) + 6%));
+  mask-size: 100% var(--delning), 100% calc(100% - var(--delning));
+  mask-position: 0 0, 0 100%;
+  mask-repeat: no-repeat;
+}
+
+.rebrand__rubrik[data-skrivs='vantar'] > * {
+  opacity: 0;
+}
+
+.rebrand__rubrik[data-skrivs='kor'] .rebrand__namn--brutal {
+  animation:
+    rb-rad1 var(--rb-rad) var(--skriv) 0ms both,
+    rb-rad2 var(--rb-rad) var(--skriv) var(--rb-t-burgers) both;
+}
+
+.rebrand__rubrik[data-skrivs='kor'] .rebrand__blev {
+  animation: rb-blev 280ms var(--ut) var(--rb-t-blev) both;
+}
+
+.rebrand__rubrik[data-skrivs='kor'] .rebrand__namn--delens {
+  animation:
+    rb-rad1 var(--rb-rad) var(--skriv) var(--rb-t-delens) both,
+    rb-bistro var(--rb-bistro) var(--skriv) var(--rb-t-bistro) both;
+}
+
+/* Hela rader: från −6 % (kanten helt utanför) till 100. */
+@keyframes rb-rad1 {
+  from { --rad1: -6%; }
+  to   { --rad1: 100%; }
+}
+
+@keyframes rb-rad2 {
+  from { --rad2: -6%; }
+  to   { --rad2: 100%; }
+}
+
+/* BISTRO slutar förbi sista bokstaven på 79,8, men börjar på −6 som
+   de hela raderna och inte vid BISTROs vänsterkant på 19,4.
+
+   D-SVANENS SISTA PIXELRAD är skälet. I källan ligger den ovanför
+   delningen, men efter skalningen hamnar den en pixel under — i
+   BISTROs lager, vid 7 procent av bredden. Ett svep som började på
+   13 visade allt till vänster om sig från första stund, och svansen
+   syntes som en lös fläck innan något annat av bilden fanns. Från −6
+   täcks den tills svepet når dit, och då hör den till bilden. */
+@keyframes rb-bistro {
+  from { --rad2: -6%; }
+  to   { --rad2: 80%; }
+}
+
+/* Ordet emellan skrivs inte, det tonar in — det är en text, inte en
+   ritning. Samma lilla fall som ord-för-ord-avslöjningen på hero. */
+@keyframes rb-blev {
+  from { opacity: 0; transform: translateY(0.15em); }
+  to   { opacity: 1; transform: none; }
+}
+
 .rebrand__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3931,6 +4084,18 @@ input:focus-visible {
   @keyframes foto-tona {
     from { opacity: 0; }
     to   { opacity: 1; }
+  }
+
+  /* REBRANDRUBRIKEN: namnen står färdiga. JS sätter inte ens
+     utgångsläget vid reducerad rörelse, men regeln håller också om
+     inställningen ändras medan sidan är öppen. */
+  .rebrand__rubrik[data-skrivs] .rebrand__namn {
+    mask: none;
+  }
+  .rebrand__rubrik[data-skrivs] > * {
+    opacity: 1;
+    animation: none !important;
+    transform: none;
   }
 
   /* BYGGKREDITEN: tillstånden står kvar, rörelsen tas bort. Hörnen

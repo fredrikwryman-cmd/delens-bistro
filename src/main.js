@@ -2667,6 +2667,32 @@ function riggaFotokort() {
    gången — och det här är sidans sista ögonblick, inte en kontroll
    man återvänder till.                                            */
 
+/* ═══ REBRANDRUBRIKEN ════════════════════════════════════════════
+   Namnen skrivs fram av stilmallen; det här är avtryckaren, samma
+   mönster som finalen. Utgångsläget sätts härifrån så att rubriken
+   står färdig utan JS, och vid reducerad rörelse sätts det inte alls.
+   En gång per sidladdning.                                         */
+
+function riggaRebrandRubrik() {
+  const rubrik = $('#rebrand-rubrik');
+  if (!rubrik || reducerad.matches) return;
+
+  rubrik.setAttribute('data-skrivs', 'vantar');
+
+  const io = new IntersectionObserver(
+    ([post]) => {
+      if (!post.isIntersecting) return;
+      io.disconnect();
+      rubrik.setAttribute('data-skrivs', 'kor');
+    },
+    /* Rubriken ska stå en bit upp i vyn innan den börjar skrivas —
+       2,9 s är för långt för att spelas medan den glider in i
+       underkanten. -25 % och tröskel 0 av samma skäl som finalen. */
+    { rootMargin: '0px 0px -25% 0px', threshold: 0 }
+  );
+  io.observe(rubrik);
+}
+
 function riggaFinal() {
   const sek = $('#final');
   if (!sek) return;
@@ -2730,6 +2756,7 @@ riggaVagor();
 riggaFoton();
 riggaFotokort();
 riggaFinal();
+riggaRebrandRubrik();
 riggaAvskalning();
 riggaBlick();
 riggaGlans();
