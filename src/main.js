@@ -6,7 +6,6 @@
  */
 
 import Lenis from 'lenis';
-import { animate, stagger } from 'animejs';
 import { kategorier, signaturer, oppettider, kontakt } from './data/menu.js';
 
 const reducerad = matchMedia('(prefers-reduced-motion: reduce)');
@@ -653,25 +652,64 @@ function riggaAvslojning() {
 
   mal.forEach(delaUpp);
 
+  /**
+   * WEB ANIMATIONS API, INTE anime.js. Rörelsen är förutbestämd — samma
+   * två nyckelbilder varje gång — och då ska den gå på kompositorn.
+   * anime.js räknade fram varje bildruta i ett requestAnimationFrame-
+   * varv på huvudtråden, och hero-intoningen spelas precis när sidan
+   * fortfarande laddar bilder och kör skript. Där hackar rAF först.
+   *
+   * KURVAN ÄR SAMMA: anime.js 'out(3)' är 1 − (1 − t)³, alltså
+   * cubic-bezier(0.33, 1, 0.68, 1).
+   *
+   * UTGÅNGSLÄGET LIGGER I STYLE-ATTRIBUTET (opacity 0, satt nedan) och
+   * tas bort i samma stund som animeringen startar. fill: 'backwards'
+   * håller ordet osynligt under fördröjningen; efteråt finns ingen
+   * fyllning kvar, och ordet står i sitt naturliga läge utan inline-
+   * stil eller en animering som hänger kvar.
+   *
+   * FALLET STYRS PER RUBRIK med data-fall, annars 0,5em. Ett halvt em
+   * är lagom för en sektionsrubrik men blev 174 px på hero-lockupen,
+   * där em-måttet är ordets egen grad.
+   */
+  const KURVA = 'cubic-bezier(0.33, 1, 0.68, 1)';
+
+  const tand = (ord, i, fall) => {
+    ord.style.opacity = '';
+    const nyckel = reducerad.matches
+      ? [{ opacity: 0 }, { opacity: 1 }]
+      : [
+          { opacity: 0, transform: `translateY(${fall}) rotate(-4deg)` },
+          { opacity: 1, transform: 'none' }
+        ];
+    ord.animate(nyckel, {
+      duration: reducerad.matches ? 260 : 620,
+      delay: i * (reducerad.matches ? 30 : 55),
+      easing: reducerad.matches ? 'linear' : KURVA,
+      fill: 'backwards'
+    });
+  };
+
+  /* FÖRSKJUTNINGEN LÖPER ÖVER ALLA RUBRIKER SOM KOMMER IN SAMTIDIGT,
+     i dokumentordning. Hero-lockupen är två rubrikdelar som alltid
+     syns i samma ögonblick; räknades de var för sig började båda från
+     noll och DELENS och BISTRO kom in som ett block. Nu kommer BISTRO
+     55 ms efter DELENS — läsordning. En ensam sektionsrubrik
+     påverkas inte. */
   const io = new IntersectionObserver(
     (poster) => {
-      for (const p of poster) {
-        if (!p.isIntersecting) continue;
-        io.unobserve(p.target);
-        const ord = $$('.ord', p.target);
+      const inne = poster
+        .filter((p) => p.isIntersecting)
+        .map((p) => p.target)
+        .sort((a, b) =>
+          a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+        );
 
-        if (reducerad.matches) {
-          animate(ord, { opacity: [0, 1], duration: 260, delay: stagger(30) });
-        } else {
-          animate(ord, {
-            opacity: [0, 1],
-            y: [{ from: '0.5em' }],
-            rotate: [{ from: -4 }],
-            duration: 620,
-            delay: stagger(55),
-            ease: 'out(3)'
-          });
-        }
+      let i = 0;
+      for (const el of inne) {
+        io.unobserve(el);
+        const fall = el.dataset.fall || '0.5em';
+        for (const ord of $$('.ord', el)) tand(ord, i++, fall);
       }
     },
     { rootMargin: '0px 0px -12% 0px', threshold: 0.15 }
