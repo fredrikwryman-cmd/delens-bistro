@@ -389,16 +389,6 @@ function byggSignaturer() {
 
   new ResizeObserver(mat).observe(galleri);
   mat();
-
-  const hjalp = $('#dragspel-hjalp');
-  const sattHjalp = () => {
-    if (!hjalp) return;
-    hjalp.textContent = fingerlage.matches
-      ? 'Tryck på ett kort för att fälla ut det'
-      : 'Peka på ett kort för att fälla ut det';
-  };
-  sattHjalp();
-  fingerlage.addEventListener('change', sattHjalp);
 }
 
 /* ═══ 6 · MENYN ══════════════════════════════════════════════════

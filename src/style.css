@@ -1912,15 +1912,6 @@ input:focus-visible {
   color: rgb(242 235 224 / 0.8);
 }
 
-.dragspel__hjalp {
-  margin: 1rem 0 0;
-  font-size: var(--t-xs);
-  line-height: var(--lh-xs);
-  letter-spacing: var(--ls-xs);
-  text-transform: uppercase;
-  color: var(--dampad);
-}
-
 /* ── Finger i stället för pekare ───────────────────────────────
    Utan fin pekare finns ingen hover. Då blir dragspelet lodrätt och
    drivs av tryck: kortet man trycker på fäller ut sig nedåt.        */
