@@ -16,7 +16,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         start: resolve(__dirname, 'index.html'),
-        integritetspolicy: resolve(__dirname, 'integritetspolicy.html')
+        integritetspolicy: resolve(__dirname, 'integritetspolicy.html'),
+        omOss: resolve(__dirname, 'om-oss.html')
       }
     }
   },

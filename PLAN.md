@@ -110,6 +110,12 @@ egen färg; sektionerna anpassar sig inte till den och tvärtom.
 | 8 | **Beställ** | Qopla, stort |
 | 9 | **Footer** | öppettider, adress, telefon, Facebook, utspridda ingrediensurklipp |
 
+**Personalen är en egen sida sedan 2026-09-28:** `om-oss.html`, med
+samma ram som integritetspolicyn — navbar, footer, `dokument.js` och
+noindex. Den länkas från navbaren som "Om oss" på alla sidor. På
+startsidan möts menyn och Hitta hit direkt; Hitta hits våg bär nu
+menyns off-white.
+
 ---
 
 ## 4. Rörelseplan

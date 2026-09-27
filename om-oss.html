@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- ═══ NOINDEX — GÄLLER HELA BYGGET ═══════════════════════════
+         Släpps bara på Fredriks uttryckliga order, som ett eget
+         commit, aldrig som sidoeffekt av en driftsättning.
+         Se PLAN.md avsnitt 12. Gäller varje sida, även den här. -->
+    <meta name="robots" content="noindex, nofollow" />
+
+    <title>Om oss — Delens Bistro</title>
+    <meta
+      name="description"
+      content="Fem personer driver Delens Bistro på Centralvägen 3 i Upplands Väsby — tre i köket, två i baren."
+    />
+
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/ikoner/ikon-192.png" />
+    <link rel="apple-touch-icon" href="/ikoner/apple-touch-icon.png" />
+
+    <!-- Samma förladdning som övriga sidor; se integritetspolicyn. -->
+    <link rel="preload" href="/typsnitt/mouse-memoirs.woff2" as="font"
+          type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+
+  <body>
+    <header class="nav" id="nav">
+      <a class="nav__logo" href="/">
+        <img class="nav__logotyp" src="/bilder/granssnitt/logotyp.webp"
+             alt="Delens Bistro" width="180" height="193" decoding="async" />
+      </a>
+      <nav class="nav__links" aria-label="Huvudmeny">
+        <a href="/#meny"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></a>
+        <a href="/#signatur"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></a>
+        <a href="/#hitta"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></a>
+        <a href="/om-oss.html" aria-current="page"><span class="rulle">Om oss</span><span class="rulle rulle--under" aria-hidden="true">Om oss</span></a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- PERSONALEN, FLYTTAD FRÅN STARTSIDAN 2026-09-28. Innehållet är
+           oförändrat; bara ramen är dokumentsidans. Stilen för text och
+           bild är fortfarande .personal__text och .personal__bild i
+           stilmallen.
+
+           ETT NAMN SAKNAS ÄNNU. Sök på TODO-NAMN; det står på alla
+           ställen arbetsnamnet förekommer. -->
+      <section class="sec sec--vid sec--svart dokument personal">
+        <div class="wrap dokument__inner personal__inner">
+          <!-- Apostrofen i Delen's är avsiktlig och går emot
+               namnformsregeln för satt text — beslutat 2026-09-28. -->
+          <h1 class="rubrik">Delen's Bistro, Om Oss:</h1>
+
+          <!-- TEXT OCH BILD VARVAS, och det är sektionens hela form.
+               Varje bild står direkt under de rader den visar: köket
+               efter stycket om köket, baren efter stycket om baren.
+               Bildtexten behöver då inte upprepa vad som redan står —
+               den namnger bara vem som är vem. -->
+          <div class="personal__text">
+            <p data-rader>
+              Fem personer driver Delens Bistro. Tre står i köket, två i baren.
+            </p>
+            <p data-rader>
+              Hakan Delen äger stället sedan januari 2026. Hans pappa Ömer står
+              vid plåten bredvid honom, och Emil Haglund — mannen han köpte
+              stället av — blev kvar i köket.
+            </p>
+          </div>
+
+          <!-- Ingen ankomst här. data-foto står kvar så att bilden ser
+               likadan ut som på startsidan — lutning, rundning, skugga —
+               men dokumentsidorna laddar inte main.js, så masken läggs
+               aldrig på och bilden står färdig från början. Samma regel
+               som resten av en textsida: innehållet rör sig inte. -->
+          <figure class="personal__bild">
+            <span class="foto" data-foto style="--lut: 2deg">
+              <img src="/bilder/lokal/E5.webp"
+                   alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
+                   width="1600" height="900" decoding="async" />
+            </span>
+            <figcaption class="bildtext">
+              Från vänster: Ömer Delen, Hakan Delen och Emil Haglund.
+            </figcaption>
+          </figure>
+
+          <div class="personal__text">
+            <p data-rader>
+              <!-- TODO-NAMN: "Emils son" är ett arbetsnamn. Byt här. -->
+              I baren möts du av Julia och (Emils son, namn?). De tar emot
+              beställningarna, bär ut maten och är de som stamgästerna hälsar
+              på först.
+            </p>
+          </div>
+
+          <!-- E7: Julia och Emils son i baren. 16:9, samma format som
+               gruppbilden ovanför — två bilder i samma sektion som inte
+               har samma form läser som två olika sektioner.
+
+               NÄR FOTOT KOMMER ska platshållaren bytas mot samma
+               konstruktion som gruppbilden:
+
+                 <span class="foto" data-foto style="--lut: 3deg">
+                   <img src="/bilder/lokal/E7.webp" ... />
+                 </span> -->
+          <figure class="personal__bild">
+            <span class="ph" style="--ar: 16 / 9" data-id="E7" data-spec="2400 × 1350 · JPG"></span>
+            <figcaption class="bildtext">
+              <!-- TODO-NAMN: "Emils son" är ett arbetsnamn. Byt här. -->
+              (Emils son, namn?) och Julia i baren.
+            </figcaption>
+          </figure>
+
+          <p class="personal__tillbaka"><a class="lank" href="/">Tillbaka till startsidan</a></p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Samma svarta som dokumentsektionen ovanför; se startsidan. -->
+    <footer class="sec sec--tat sec--svart foot">
+      <div class="wrap foot__inner">
+        <div class="foot__namnblock">
+          <p class="foot__namn">Delens Bistro</p>
+          <p>Centralvägen 3, 194 76 Upplands Väsby</p>
+        </div>
+        <div>
+          <p><a class="lank" href="/#hitta">Öppettider</a></p>
+          <p><a class="lank" href="/">Startsidan</a></p>
+        </div>
+      </div>
+      <p class="foot__not">
+        Ett visningsprojekt av AiM Studios. Inte Delens Bistros officiella
+        webbplats.
+      </p>
+    </footer>
+
+    <script type="module" src="/src/dokument.js"></script>
+  </body>
+</html>

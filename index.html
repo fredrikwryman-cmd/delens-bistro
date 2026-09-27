@@ -118,6 +118,8 @@
         <a href="#meny"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></a>
         <a href="#signatur"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></a>
         <a href="#hitta"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></a>
+        <!-- En egen sida, inte ett ankare. -->
+        <a href="/om-oss.html"><span class="rulle">Om oss</span><span class="rulle rulle--under" aria-hidden="true">Om oss</span></a>
       </nav>
     </header>
 
@@ -397,92 +399,11 @@
       </section>
 
 
-      <!-- ═══ 7 · PERSONALEN — svart ═══════════════════════════════
-           Svart mellan menyns off-white och Hitta hits djupröda. Vågen
-           uppåt får därmed sidans hårdaste kontrast att arbeta med, och
-           vågen nedåt en kulörskillnad i stället för en ljushetsskillnad
-           — två snitt som läser på var sitt sätt i stället för två som
-           läser likadant.
-
-           ETT NAMN SAKNAS ÄNNU. Sök på TODO-NAMN; det står på alla
-           ställen arbetsnamnet förekommer. -->
-      <section class="sec sec--normal sec--svart personal" id="personal" style="--wave-fill: var(--offwhite)">
-        <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-          <path class="wave__body" d="M0,44 C250,80 500,80 760,44 C1000,8 1220,8 1440,46 L1440,0 L0,0 Z" />
-          <path class="wave__edge" d="M0,44 C250,80 500,80 760,44 C1000,8 1220,8 1440,46" />
-        </svg>
-        <div class="wrap personal__inner">
-          <!-- Apostrofen i Delen's är avsiktlig och går emot
-               namnformsregeln för satt text — beslutat 2026-09-28. -->
-          <h2 class="rubrik rubrik--stor" data-reveal>Delen's Bistro, Om Oss:</h2>
-
-          <!-- TEXT OCH BILD VARVAS, och det är sektionens hela form.
-               Först låg all text i ett block och bilden sist, som en
-               illustration EFTER ett resonemang. Nu står varje bild
-               direkt under de rader den visar: köket efter stycket om
-               köket, baren efter stycket om baren. Bildtexten behöver
-               då inte upprepa vad som redan står — den namnger bara
-               vem som är vem.
-
-               Rytmen bärs av bredden. Texten går i 50ch och bilderna i
-               62rem, alltså ungefär 680 mot 992 px på en bred skärm.
-               Det steget gör växlingen läsbar utan att något behöver
-               kantställas eller lutas. -->
-          <div class="personal__text">
-            <p data-rader>
-              Fem personer driver Delens Bistro. Tre står i köket, två i baren.
-            </p>
-            <p data-rader>
-              Hakan Delen äger stället sedan januari 2026. Hans pappa Ömer står
-              vid plåten bredvid honom, och Emil Haglund — mannen han köpte
-              stället av — blev kvar i köket.
-            </p>
-          </div>
-
-          <figure class="personal__bild">
-            <span class="foto" data-foto style="--lut: 2deg">
-              <img src="/bilder/lokal/E5.webp"
-                   alt="Ömer, Hakan och Emil framför väggmålningen, som bär texten Local Heroes 194 i neon."
-                   width="1600" height="900" loading="lazy" decoding="async" />
-            </span>
-            <figcaption class="bildtext">
-              Från vänster: Ömer Delen, Hakan Delen och Emil Haglund.
-            </figcaption>
-          </figure>
-
-          <div class="personal__text">
-            <p data-rader>
-              <!-- TODO-NAMN: "Emils son" är ett arbetsnamn. Byt här. -->
-              I baren möts du av Julia och (Emils son, namn?). De tar emot
-              beställningarna, bär ut maten och är de som stamgästerna hälsar
-              på först.
-            </p>
-          </div>
-
-          <!-- E7: Julia och Emils son i baren. 16:9, samma format som
-               gruppbilden ovanför — två bilder i samma sektion som inte
-               har samma form läser som två olika sektioner.
-
-               NÄR FOTOT KOMMER ska platshållaren bytas mot samma
-               konstruktion som de fem andra korten:
-
-                 <span class="foto" data-foto style="--lut: 3deg">
-                   <img src="/bilder/lokal/E7.webp" ... />
-                 </span>
-
-               Då får den ankomsten, lutningen, rundningen, skuggan och
-               följningen utan att något mer behöver röras. -->
-          <figure class="personal__bild">
-            <span class="ph" style="--ar: 16 / 9" data-id="E7" data-spec="2400 × 1350 · JPG"></span>
-            <figcaption class="bildtext">
-              <!-- TODO-NAMN: "Emils son" är ett arbetsnamn. Byt här. -->
-              (Emils son, namn?) och Julia i baren.
-            </figcaption>
-          </figure>
-        </div>
-      </section>
-      <!-- ═══ 7 · HITTA HIT — djuprött ═════════════════════════════ -->
-      <section class="sec sec--normal sec--rod hitta" id="hitta" style="--wave-fill: var(--svart)">
+      <!-- ═══ 7 · HITTA HIT — djuprött ═════════════════════════════
+           Personalsektionen låg här emellan och flyttade till
+           om-oss.html 2026-09-28. Grannen ovanför är nu menyns
+           off-white, och vågen bär den färgen. -->
+      <section class="sec sec--normal sec--rod hitta" id="hitta" style="--wave-fill: var(--offwhite)">
         <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
           <path class="wave__body" d="M0,42 C250,80 500,80 760,42 C1000,8 1220,8 1440,44 L1440,0 L0,0 Z" />
           <path class="wave__edge" d="M0,42 C250,80 500,80 760,42 C1000,8 1220,8 1440,44" />
