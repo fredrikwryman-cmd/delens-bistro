@@ -671,15 +671,22 @@ function riggaAvslojning() {
    * FALLET STYRS PER RUBRIK med data-fall, annars 0,5em. Ett halvt em
    * är lagom för en sektionsrubrik men blev 174 px på hero-lockupen,
    * där em-måttet är ordets egen grad.
+   *
+   * VRIDNINGEN LIKASÅ, med data-vrid, annars −4°. En vridning växer med
+   * ordets BREDD, inte med graden: DELEN'S är 1178 px brett, och −4°
+   * kring mitten lyfte ändarna ±41 px medan hela ordet föll 52. Då var
+   * det svängen man såg, inte fallet. Hero går på −1,5°, alltså ±15 px
+   * i ändarna — en tredjedel av fallet, och fallet leder igen. En
+   * sektionsrubrik är några hundra pixlar bred och behåller sina −4°.
    */
   const KURVA = 'cubic-bezier(0.33, 1, 0.68, 1)';
 
-  const tand = (ord, i, fall) => {
+  const tand = (ord, i, fall, vrid) => {
     ord.style.opacity = '';
     const nyckel = reducerad.matches
       ? [{ opacity: 0 }, { opacity: 1 }]
       : [
-          { opacity: 0, transform: `translateY(${fall}) rotate(-4deg)` },
+          { opacity: 0, transform: `translateY(${fall}) rotate(${vrid})` },
           { opacity: 1, transform: 'none' }
         ];
     ord.animate(nyckel, {
@@ -709,7 +716,8 @@ function riggaAvslojning() {
       for (const el of inne) {
         io.unobserve(el);
         const fall = el.dataset.fall || '0.5em';
-        for (const ord of $$('.ord', el)) tand(ord, i++, fall);
+        const vrid = el.dataset.vrid || '-4deg';
+        for (const ord of $$('.ord', el)) tand(ord, i++, fall, vrid);
       }
     },
     { rootMargin: '0px 0px -12% 0px', threshold: 0.15 }
