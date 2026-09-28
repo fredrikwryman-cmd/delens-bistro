@@ -1482,12 +1482,30 @@ input:focus-visible {
    på en gång och läst som en ridå. --rad1 och --rad2 är de
    registrerade egenskaperna därifrån.
 
-   DELNINGEN ÄR UPPMÄTT i de färdiga bilderna (verktyg/rebrand.mjs):
+   DELNINGEN ÄR UPPMÄTT RAD FÖR RAD i de färdiga bilderna
+   (verktyg/rebrand.mjs), med alfa över 4 — alltså med konturens mjuka
+   ytterkant medräknad. Mätt om 2026-09-28; de första talen, 51 och
+   69, var tagna ur en tätaste-rad-mätning och låg båda fel:
 
-     BRUTAL BURGERS   51 %   raderna går kant till kant
-     Delen's Bistro   69 %   skrivstilens D-svans går ned till 68,6;
-                             under 69 finns i källan bara BISTRO,
-                             19,4–79,8 % av bredden
+     BRUTAL BURGERS  (324 rader)
+       BRUTAL slutar på rad 166, BURGERS börjar på 178 — rad 167–177
+       är helt tomma. 51 % (rad 165) låg INNE i BRUTALs underkant, och
+       dess två nedersta rader skrevs fram med BURGERS. Nu mitt i
+       mellanrummet: rad 172, 53,1 %.
+
+     Delen's Bistro  (373 rader)
+       BISTRO börjar på rad 255; skrivstilens D-svans slutar på 256.
+       Något helt tomt mellanrum finns alltså inte — de går in i
+       varandra två rader. 69 % (rad 257) lade BISTROs tre översta
+       rader i Delen's lager, och en avklippt topp av BISTRO syntes
+       innan BISTRO skulle börja. Nu på rad 251, 67,3 %: ovanför BISTRO
+       med drygt en pixels marginal även när bilden bara är 102 px hög
+       på en telefon. Svansens sista sex rader, vid 4–14 % av
+       bredden, hamnar i BISTROs lager och kommer när dess svep börjar
+       — därför börjar det på −6 %, se rb-bistro.
+
+     BISTRO går 19,4–79,8 % av bredden, BRUTAL och BURGERS kant till
+     kant.
 
    ORDNINGEN FÖLJER MENINGEN: BRUTAL, BURGERS, "blev" tonar in, sedan
    Delen's och BISTRO. Tempot är långsammare än hälsningens — 700 ms
@@ -1518,8 +1536,8 @@ input:focus-visible {
   --rb-t-bistro: calc(var(--rb-t-delens) + var(--rb-rad) + var(--rb-radbyte) - var(--rb-bistro-forsprang));
 }
 
-.rebrand__namn--brutal { --delning: 51%; }
-.rebrand__namn--delens { --delning: 69%; }
+.rebrand__namn--brutal { --delning: 53.1%; }
+.rebrand__namn--delens { --delning: 67.3%; }
 
 .rebrand__rubrik[data-skrivs] .rebrand__namn {
   mask-image:
@@ -1564,12 +1582,12 @@ input:focus-visible {
 /* BISTRO slutar förbi sista bokstaven på 79,8, men börjar på −6 som
    de hela raderna och inte vid BISTROs vänsterkant på 19,4.
 
-   D-SVANENS SISTA PIXELRAD är skälet. I källan ligger den ovanför
-   delningen, men efter skalningen hamnar den en pixel under — i
-   BISTROs lager, vid 7 procent av bredden. Ett svep som började på
-   13 visade allt till vänster om sig från första stund, och svansen
-   syntes som en lös fläck innan något annat av bilden fanns. Från −6
-   täcks den tills svepet når dit, och då hör den till bilden. */
+   D-SVANENS SISTA RADER är skälet. Delningen ligger ovanför BISTROs
+   topp, och svansen går ned förbi den — dess sex sista rader, vid
+   4–14 procent av bredden, ligger i BISTROs lager. Ett svep som
+   började på 13 visade allt till vänster om sig från första stund,
+   och svansspetsen syntes som en lös fläck innan något annat av
+   bilden fanns. Från −6 täcks den tills svepet når dit. */
 @keyframes rb-bistro {
   from { --rad2: -6%; }
   to   { --rad2: 80%; }
