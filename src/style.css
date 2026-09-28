@@ -1257,6 +1257,22 @@ input:focus-visible {
 
 .hero__copy p { margin: 0; }
 
+/* MADE TO ENJOY-MÄRKET i vänsterspalten, där brödtexten stod. Det tar
+   spaltens hela bredd, alltså samma bredd som texten hade (253 px vid
+   1440). Märket är 2,13 gånger så brett som högt och blir därför
+   lägre än textens fyra rader. Det står på samma baslinje som
+   adressen till höger: spalten ligger fast i nederkant, och bilden
+   följer med. */
+.hero__copy--bild {
+  line-height: 0;
+}
+
+.hero__enjoy {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 @media (max-width: 900px) {
   /* Burgarens bredd, en gång. BISTRO räknas ut ur den nedan. */
   .hero__title {
@@ -1308,6 +1324,11 @@ input:focus-visible {
     text-align: start;
   }
   .hero__copy--h { text-align: start; }
+
+  /* I smal vy tar texten hela bredden, men tre rader text är lägre än
+     ett märke i full bredd. 16 rem ger ungefär samma yta som texten
+     hade: 256 × 120 px mot textens 340 × 111. */
+  .hero__enjoy { width: min(16rem, 100%); }
 
   /* Maskotarna skalas ned med två tredjedelar, och de behåller sina
      inbördes storlekar. Bredden sätts som width och inte som

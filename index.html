@@ -187,11 +187,23 @@
                grundningsår hör hemma och underlaget är kol.
           -->
 
-          <div class="hero__copy hero__copy--v">
-            <p>
-              Smashad hårt mot plåten. Krispiga kanter, hemmagjord smet på
-              hundra procent nötkött.
-            </p>
+          <!-- MADE TO ENJOY i stället för brödtexten. Märket kommer in
+               med samma mekanism som DELEN'S och BISTRO (data-reveal):
+               det faller in, vrids rätt och tonar upp, i samma
+               förskjutning, alltså efter BISTRO. Bilden är text, så
+               alt-texten är texten. Kontrasten är uppmätt, se
+               verktyg/enjoy.mjs. -->
+          <div class="hero__copy hero__copy--v hero__copy--bild" data-reveal data-fall="0.7em" data-vrid="-3deg">
+            <img
+              class="hero__enjoy"
+              src="/bilder/hero/enjoy-800.webp"
+              srcset="/bilder/hero/enjoy-480.webp 480w, /bilder/hero/enjoy-800.webp 800w"
+              sizes="(max-width: 900px) 16rem, 22vw"
+              alt="Made To Enjoy — Fast Food &amp; Bar"
+              width="800"
+              height="376"
+              decoding="async"
+            />
           </div>
           <div class="hero__copy hero__copy--h">
             <p>
