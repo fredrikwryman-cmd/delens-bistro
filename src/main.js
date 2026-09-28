@@ -2269,11 +2269,12 @@ function riggaSekvens() {
   const mat = () => {
     const spårH = spar.offsetHeight;
 
-    /* KLISTERAVSTÅNDET RÄKNAS MED. På desktop klistras scenen i
-       vyns överkant och avståndet är noll. På telefon är scenen bara
-       bandet högt och klistras MITT i vyn, alltså med ett avstånd —
-       och då börjar klistringen när spårets överkant står vid
-       avståndet, inte vid noll.
+    /* KLISTERAVSTÅNDET RÄKNAS MED. I dag klistras scenen i vyns
+       överkant överallt och avståndet är noll. Telefonen hade
+       2026-09-21–28 ett lägre band som klistrades MITT i vyn, alltså
+       med ett avstånd — och då börjar klistringen när spårets
+       överkant står vid avståndet, inte vid noll. Termen står kvar så
+       att ett sådant läge fungerar igen utan att röra mappningen.
 
        Utan den här termen blev de första avstånd-pixlarna av spåret
        en död zon: framsteget räknades negativt och klämdes till noll,

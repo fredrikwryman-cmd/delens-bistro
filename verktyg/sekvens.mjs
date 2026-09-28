@@ -30,7 +30,7 @@
  * den (se SEKV.klistratSlut i main.js):
  *
  *   desktop  900 px vy:  1350 px / (0,925 × 79) = 18,5 px per ruta
- *   mobil    844 px vy:   993 px / (0,925 × 58) = 18,5 px per ruta
+ *   mobil    844 px vy:   996 px / (0,925 × 58) = 18,6 px per ruta
  *
  * Förut var det 120 och 80 rutor, alltså 11,9 och 13,2 px. Steget
  * tog sekvensen från 4,94 till 3,29 MB på desktop och från 3,29 till
