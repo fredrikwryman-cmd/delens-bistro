@@ -1350,8 +1350,8 @@ input:focus-visible {
      att det kommer först. Intåget följer med: riggaAvslojning() låter
      ett element med negativ order börja förskjutningen.
 
-     Ingen utflyttning: 1,5 rem åt vänster hade inte gått ihop med
-     centreringen. Lutningen står kvar. */
+     Ingen utflyttning och ingen lutning: märket står upprätt och
+     centrerat här, beslutat 2026-09-28. Desktop behåller sina 4°. */
   .hero__inner {
     display: flex;
     flex-direction: column;
@@ -1361,6 +1361,7 @@ input:focus-visible {
     order: -1;
     align-self: center;
     translate: none;
+    rotate: none;
     margin-block: 1rem 1.25rem;
   }
 
