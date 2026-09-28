@@ -150,6 +150,9 @@ export function oppna(knapp) {
 
   panel.setAttribute('data-oppen', 'true');
   utlosare.setAttribute('aria-expanded', 'true');
+  // Sajtens pekarkedja vilar medan chatten är öppen, se .kedja i
+  // style.css. Här skrivs, och där behövs systemets textmarkör.
+  document.documentElement.setAttribute('data-chatt', 'oppen');
   document.addEventListener('keydown', vidTangent);
   falt.focus({ preventScroll: true });
 }
@@ -158,6 +161,15 @@ function stangPanel() {
   if (!panel) return;
   panel.setAttribute('data-oppen', 'false');
   utlosare?.setAttribute('aria-expanded', 'false');
+  // Kedjan kommer tillbaka först när panelen gled ut (160 ms, se
+  // assistent.css). Den ligger under panelen, och tas attributet bort
+  // direkt syns varken handen eller systemets markör medan panelen
+  // glider ut. Öppnas panelen igen innan dess står attributet kvar.
+  setTimeout(() => {
+    if (panel.getAttribute('data-oppen') !== 'true') {
+      document.documentElement.removeAttribute('data-chatt');
+    }
+  }, 200);
   document.removeEventListener('keydown', vidTangent);
   utlosare?.focus({ preventScroll: true });
 }

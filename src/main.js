@@ -1924,6 +1924,10 @@ function riggaKedja() {
     .catch(slaAv);
   window.addEventListener('keydown', (e) => {
     if (avstangd) return;
+    // Ett Escape som chatten redan tagit emot stängde panelen. Det var
+    // inget besked om pekaren, och den som använder mus ska inte bli
+    // av med kedjan för gott för att den stängt en chatt.
+    if (e.key === 'Escape' && e.defaultPrevented) return;
     if (e.key === 'Escape' || e.key === 'Tab') slaAv();
   });
 

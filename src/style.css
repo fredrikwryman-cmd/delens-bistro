@@ -4095,10 +4095,10 @@ input:focus-visible {
    två pekare. cursor: none sätts från JS och inte härifrån — slutar
    skriptet fungera ska markören finnas kvar. */
 
-.kedja-pa,
-.kedja-pa a,
-.kedja-pa button,
-.kedja-pa [role='tab'] {
+.kedja-pa:not([data-chatt]),
+.kedja-pa:not([data-chatt]) a,
+.kedja-pa:not([data-chatt]) button,
+.kedja-pa:not([data-chatt]) [role='tab'] {
   cursor: none;
 }
 
@@ -4107,6 +4107,22 @@ input:focus-visible {
   inset: 0;
   z-index: 950;
   pointer-events: none;
+}
+
+/* MEDAN CHATTEN ÄR ÖPPEN VILAR KEDJAN. Panelen ligger på 1000, över
+   kedjan, och handen försvann under den. Då var panelen svår att
+   stänga. Att lyfta kedjan över panelen hade inte räckt: i fältet
+   ska man se var texten hamnar, och en hand ovanpå systemets
+   textmarkör är två pekare igen. Så länge assistent.js har satt
+   data-chatt på html gäller systemets egna markörer, textmarkör i
+   fältet och pil på knapparna, och kedjan döljs.
+
+   Kedjan följer pekaren även medan den är dold. När panelen stängs
+   står handen därför redan där musen är, och den kommer inte
+   glidande från platsen där den försvann. Bytet sker i ett slag. En
+   pekare som tonar är en pekare man inte vet var den är. */
+[data-chatt] .kedja {
+  visibility: hidden;
 }
 
 .led {
