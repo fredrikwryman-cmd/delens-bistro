@@ -72,7 +72,9 @@ function bygg() {
   stang.setAttribute('aria-label', 'Stäng');
   stang.innerHTML =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" /></svg>';
-  stang.addEventListener('click', stangPanel);
+  // detail är 0 när knappen trycks med Enter eller mellanslag, och 1
+  // eller mer vid klick och tryck. Se stangPanel.
+  stang.addEventListener('click', (e) => stangPanel(e.detail > 0));
   topp.append(rubrik, stang);
 
   const not = el(
@@ -129,7 +131,7 @@ function visa(li) {
 function vidTangent(e) {
   if (e.key === 'Escape' && panel?.getAttribute('data-oppen') === 'true') {
     e.preventDefault();
-    stangPanel();
+    stangPanel(false);
   }
 }
 
@@ -157,7 +159,19 @@ export function oppna(knapp) {
   falt.focus({ preventScroll: true });
 }
 
-function stangPanel() {
+/* FOKUSRINGEN VID STÄNGNING. Fokus går tillbaka till knappen som
+   öppnade panelen. Webbläsaren avgör då själv om ringen ska ritas, och
+   den ritar den om elementet som hade fokus innan visade ring. Det
+   hade textfältet, och textfält visar alltid ring. Därför fick bubblan
+   en gul ring även när man stängde med fingret. :focus-visible räcker
+   inte här, eftersom det är just :focus-visible som matchar.
+
+   Stängs panelen med pekare eller finger märks knappen med
+   data-pekfokus, och då döljer CSS:en ringen. Märket släpps vid nästa
+   tangenttryck eller när knappen tappar fokus. Den som sedan tabbar
+   ser alltså ringen igen, och den som stänger med Esc eller Enter ser
+   den direkt. */
+function stangPanel(franPekare) {
   if (!panel) return;
   panel.setAttribute('data-oppen', 'false');
   utlosare?.setAttribute('aria-expanded', 'false');
@@ -171,6 +185,17 @@ function stangPanel() {
     }
   }, 200);
   document.removeEventListener('keydown', vidTangent);
+  if (utlosare && franPekare) {
+    const knapp = utlosare;
+    knapp.setAttribute('data-pekfokus', '');
+    const slapp = () => {
+      knapp.removeAttribute('data-pekfokus');
+      document.removeEventListener('keydown', slapp, true);
+      knapp.removeEventListener('blur', slapp);
+    };
+    document.addEventListener('keydown', slapp, true);
+    knapp.addEventListener('blur', slapp);
+  }
   utlosare?.focus({ preventScroll: true });
 }
 

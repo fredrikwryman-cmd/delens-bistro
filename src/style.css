@@ -3726,6 +3726,14 @@ input:focus-visible {
   border-radius: 1.5rem;
 }
 
+/* Fokus kom tillbaka hit för att chatten stängdes med pekare eller
+   finger. Webbläsaren räknar det ändå som :focus-visible, eftersom
+   textfältet i chatten hade fokus innan. Se stangPanel() i
+   assistent.js. */
+.fraga[data-pekfokus]:focus-visible .fraga__bild {
+  outline: none;
+}
+
 /* ═══ REDUCERAD RÖRELSE ═══════════════════════════════════════
    Parallaxen stängs av, avslöjningen blir ren opacity,
    laddskärmen hoppas över helt (JS).                            */
