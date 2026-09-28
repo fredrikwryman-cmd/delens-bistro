@@ -20,7 +20,7 @@
  * TVÅ VIDEOR, TVÅ UPPSÄTTNINGAR, TVÅ STILLAR.
  *
  *   desktop   80 rutor, 1280 × 720   ur delens-scroll-animation.mp4
- *   mobil    150 rutor,  360 × 640   ur ny-scroll-mobil.mp4
+ *   mobil    150 rutor,  720 × 1280  ur nyaste-scroll-delens.mp4
  *
  * Varje uppsättning har sin still ur sista rutan: still.webp och
  * still-mobil.webp.
@@ -29,21 +29,19 @@
  * beskar telefonen den liggande videon hårt i sidled och visade
  * omkring 26 procent av bredden. Nu visar den 82 procent.
  *
- * NY-SCROLL-MOBIL ÄR 360 × 640, 10 s och 240 rutor. Den ersatte samma
- * dag delens-scroll-mobil, som var 720 × 1280, 8 s och 192 rutor.
- * 360 är källans fulla bredd och alltså taket: att skala upp hade gett
- * större filer utan en enda ny pixel. Det ger 0,76 källpixlar per
- * CSS-pixel på en 390 px telefon, mot 1,5 med den förra videon, och
- * bilden är mjukare än den var. Blir en större export av samma video
- * tillgänglig räcker det att byta filen och bredden här.
+ * NYASTE-SCROLL-DELENS ÄR 720 × 1280, 8 s och 192 rutor, sedan
+ * 2026-09-28. Den ersatte ny-scroll-mobil (360 × 640, 10 s, 240 rutor),
+ * som gav 0,76 källpixlar per CSS-pixel och en mjuk bild. 720 är
+ * källans fulla bredd och ger 1,5 på en 390 px telefon. Före det låg
+ * delens-scroll-mobil här, också i 720 × 1280.
  *
  * Varje video har sitt eget antal källrutor (kallrutor i UTGAVOR), så
  * att rutorna sprids jämnt över just den videon.
  *
  * svart i UTGAVOR lyfter allt under ett värde till det värdet. Det
  * behövdes för delens-scroll-mobil, som började med helt svarta fält
- * mot sektionens #0E0E0E. ny-scroll-mobil fyller bilden från första
- * rutan och behöver det inte.
+ * mot sektionens #0E0E0E. nyaste-scroll-delens fyller bilden från
+ * första rutan och behöver det inte.
  *
  * ANTALET SÄTTS AV SCROLLEN, INTE AV KÄLLAN. Rutorna ska räcka till
  * omkring 18 px scroll per ruta i det klistrade läget — väl under
@@ -59,7 +57,7 @@
  * sekvensen tar tre gånger så lång tid att scrolla igenom. Rutorna
  * ökades samtidigt från 59 till 150, så att takten stannar under 25 px
  * även på den högsta vanliga telefonen, 932 px. Med 134 blev den 26,4.
- * Källan har 240 rutor, så det finns utrymme.
+ * Källan har 192 rutor, så var fjärde ungefär hoppas över.
  *
  * Förut var det 120 och 80 rutor, alltså 11,9 och 13,2 px. Steget
  * tog sekvensen från 4,94 till 3,29 MB på desktop och från 3,29 till
@@ -143,10 +141,10 @@ const UTGAVOR = [
   },
   {
     id: 'mobil',
-    video: 'ny-scroll-mobil.mp4',
-    kallrutor: 240, // 24 FPS × 10,01 s
+    video: 'nyaste-scroll-delens.mp4',
+    kallrutor: 192, // 24 FPS × 8,00 s
     rutor: 150,
-    bredd: 360,
+    bredd: 720,
     kvalitet: 66,
     still: 'still-mobil.webp'
   }
