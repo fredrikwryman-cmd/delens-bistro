@@ -1968,17 +1968,17 @@ input:focus-visible {
 
 @media (max-width: 760px) {
   /* ── STÅENDE VIDEO PÅ TELEFON, sedan 2026-09-28 ──────────────────
-     Telefonen har en egen video i 9:16, 720 × 1280 (se
+     Telefonen har en egen video i 9:16, 360 × 640 (se
      verktyg/sekvens.mjs), och duken får de måtten av riggaSekvens.
      Scenen fyller vyn som förut, men beskärningen i sidled är nästan
      borta: en 390 × 844-vy är 0,46 bred mot hög och rutan 0,56, så
      cover visar 82 procent av bildens bredd. Med den liggande videon
      var det 26 procent, och neonskylten kapades i båda ändar.
 
-     KÄLLPIXLAR PER SKÄRMPIXEL: 82 procent av 720 px över 390 CSS-px
-     är 1,5, alltså halva vägen till en telefon med tredubbel
-     pixeltäthet. Den liggande videon gav 0,85 (28 procent). Mer finns
-     inte i källan.
+     KÄLLPIXLAR PER SKÄRMPIXEL: 82 procent av 360 px över 390 CSS-px
+     är 0,76, alltså en fjärdedel av vad en telefon med tredubbel
+     pixeltäthet behöver. Den förra stående videon, 720 × 1280, gav 1,5
+     och den liggande 0,85. Mer finns inte i källan.
 
      Ett band på 70vw provades 2026-09-21 och togs bort 2026-09-28.
      Det behövs inte heller nu: bilden har redan telefonens form.
@@ -2003,7 +2003,7 @@ input:focus-visible {
   }
 
   /* KORTARE BOTTENTONING. Den stående bilden går längre ned: i sista
-     rutan slutar burgaren vid 86 procent av höjden, mot 78 i den
+     rutan slutar burgaren vid 82 procent av höjden, mot 78 i den
      liggande. Desktopens toning är 0,34 redan vid 88 procent och hade
      mörkat underbullen. Här börjar den vid 88 och är tät först i
      själva kanten. Sidor och vinjett är som på desktop. */

@@ -2067,9 +2067,9 @@ const SEKV = {
 
   /* Rutornas mått i pixlar, bredd × höjd. Duken sätts till dem, för
      rita() skalar ingenting — se RITNINGEN. Mobilen har en egen,
-     stående video sedan 2026-09-28 och är 720 × 1280, källans fulla
+     stående video sedan 2026-09-28 och är 360 × 640, källans fulla
      bredd. Duken i index.html står på desktopens mått. */
-  matt: { desktop: [1280, 720], mobil: [720, 1280] },
+  matt: { desktop: [1280, 720], mobil: [360, 640] },
 
   /* Det rullande fönstret av AVKODADE rutor, i scrollriktningen och
      mot den. Asymmetriskt med flit: man scrollar nästan alltid vidare

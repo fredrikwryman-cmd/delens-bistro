@@ -20,20 +20,30 @@
  * TVÅ VIDEOR, TVÅ UPPSÄTTNINGAR, TVÅ STILLAR.
  *
  *   desktop   80 rutor, 1280 × 720   ur delens-scroll-animation.mp4
- *   mobil     59 rutor,  720 × 1280  ur delens-scroll-mobil.mp4
+ *   mobil     59 rutor,  360 × 640   ur ny-scroll-mobil.mp4
  *
  * Varje uppsättning har sin still ur sista rutan: still.webp och
  * still-mobil.webp.
  *
- * MOBILEN HAR EN EGEN, STÅENDE VIDEO sedan 2026-09-28, 9:16 i
- * 720 × 1280. Förut beskar telefonen den liggande videon hårt i sidled
- * och visade omkring 26 procent av bredden. Nu visar den 82 procent.
- * 720 är källans fulla bredd och alltså taket, av samma skäl som 1280
- * är det för desktop.
+ * MOBILEN HAR EN EGEN, STÅENDE VIDEO sedan 2026-09-28, 9:16. Förut
+ * beskar telefonen den liggande videon hårt i sidled och visade
+ * omkring 26 procent av bredden. Nu visar den 82 procent.
  *
- * Mobilvideon börjar med svarta fält över och under bilden, som växer
- * bort mot slutet. Fälten är 0,0,0 och sektionen #0E0E0E, så allt
- * under 14 lyfts till 14 i samma pass (svart i UTGAVOR).
+ * NY-SCROLL-MOBIL ÄR 360 × 640, 10 s och 240 rutor. Den ersatte samma
+ * dag delens-scroll-mobil, som var 720 × 1280, 8 s och 192 rutor.
+ * 360 är källans fulla bredd och alltså taket: att skala upp hade gett
+ * större filer utan en enda ny pixel. Det ger 0,76 källpixlar per
+ * CSS-pixel på en 390 px telefon, mot 1,5 med den förra videon, och
+ * bilden är mjukare än den var. Blir en större export av samma video
+ * tillgänglig räcker det att byta filen och bredden här.
+ *
+ * Varje video har sitt eget antal källrutor (kallrutor i UTGAVOR), så
+ * att rutorna sprids jämnt över just den videon.
+ *
+ * svart i UTGAVOR lyfter allt under ett värde till det värdet. Det
+ * behövdes för delens-scroll-mobil, som började med helt svarta fält
+ * mot sektionens #0E0E0E. ny-scroll-mobil fyller bilden från första
+ * rutan och behöver det inte.
  *
  * ANTALET SÄTTS AV SCROLLEN, INTE AV KÄLLAN. Rutorna ska räcka till
  * omkring 18 px scroll per ruta i det klistrade läget — väl under
@@ -103,8 +113,6 @@ const korProgram = promisify(execFile);
 const KALLMAPP = 'C:/Users/fredr/OneDrive/Desktop/Delens Bistro';
 const MAL = 'public/bilder/sekvens';
 
-/** Källornas antal bildrutor. Båda videorna är 24 FPS × 8,00 s. */
-const KALLRUTOR = 192;
 
 /**
  * En uppsättning per video. Mobilen har en egen, stående video sedan
@@ -120,6 +128,7 @@ const UTGAVOR = [
   {
     id: 'desktop',
     video: 'delens-scroll-animation.mp4',
+    kallrutor: 192, // 24 FPS × 8,00 s
     rutor: 80,
     bredd: 1280,
     kvalitet: 66,
@@ -127,12 +136,12 @@ const UTGAVOR = [
   },
   {
     id: 'mobil',
-    video: 'delens-scroll-mobil.mp4',
+    video: 'ny-scroll-mobil.mp4',
+    kallrutor: 240, // 24 FPS × 10,01 s
     rutor: 59,
-    bredd: 720,
+    bredd: 360,
     kvalitet: 66,
-    still: 'still-mobil.webp',
-    svart: 14
+    still: 'still-mobil.webp'
   }
 ];
 
@@ -140,8 +149,8 @@ const UTGAVOR = [
 const STILL_KVALITET = 80;
 
 /** Källrutans nummer för ruta i av totalt n, jämnt spritt över klippet. */
-const kallruta = (i, n) =>
-  n <= 1 ? 0 : Math.round((i * (KALLRUTOR - 1)) / (n - 1));
+const kallruta = (i, n, kallrutor) =>
+  n <= 1 ? 0 : Math.round((i * (kallrutor - 1)) / (n - 1));
 
 /** Filterkedjan: exakta rutnummer, skalning och ev. lyft svart. */
 function filter(nummer, u) {
@@ -209,7 +218,7 @@ async function kor() {
     await rm(utmapp, { recursive: true, force: true });
     await mkdir(utmapp, { recursive: true });
 
-    const nummer = Array.from({ length: u.rutor }, (_, i) => kallruta(i, u.rutor));
+    const nummer = Array.from({ length: u.rutor }, (_, i) => kallruta(i, u.rutor, u.kallrutor));
     await extrahera(u, nummer, path.join(utmapp, 'r%03d.webp'));
 
     const filer = (await readdir(utmapp)).filter((f) => f.endsWith('.webp')).sort();
@@ -221,7 +230,7 @@ async function kor() {
     const summa = storlekar.reduce((s, b) => s + b, 0);
 
     const stillUt = path.join(MAL, u.still);
-    await extrahera(u, [KALLRUTOR - 1], stillUt, { kvalitet: STILL_KVALITET, enstaka: true });
+    await extrahera(u, [u.kallrutor - 1], stillUt, { kvalitet: STILL_KVALITET, enstaka: true });
 
     rader.push({
       utgava: u.id,
