@@ -744,9 +744,10 @@
     </div>
 
     <!-- ═══ FRÅGA KOCKEN ═══════════════════════════════════════════
-         Menyassistentens knapp, fast i nedre högra hörnet, ovanför
-         beställningsfältets plats. Den står still när fältet viker
-         undan — se .fraga i style.css. Texten i bubblan är en bild,
+         Menyassistentens knapp, fast i nedre högra hörnet. Den står
+         EFTER beställningsfältet med flit: CSS:en läser fältets
+         data-undan med ~, och bubblan följer fältet ned och upp —
+         se .fraga i style.css. Texten i bubblan är en bild,
          så namnet står i aria-label. Chatten laddas först vid klick
          — se riggaAssistent() i main.js. -->
     <button type="button" class="fraga" id="assistent-knapp"

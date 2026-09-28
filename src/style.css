@@ -3650,13 +3650,23 @@ input:focus-visible {
    startsidan. Den låg förut som pratbubbla på kockmärket i Beställ
    och syntes bara där.
 
-   DEN STÅR OVANFÖR FÄLTETS PLATS OCH FLYTTAR SIG ALDRIG.
+   DEN FÖLJER BESTÄLLNINGSFÄLTET. När fältet syns står bubblan
+   ovanför det, och när fältet viker undan åker bubblan ned i hörnet.
    --orderbar-h är fältets uppmätta höjd, satt av riggaOrderbar() i
-   main.js. 4 rem är bara läget innan första mätningen. Fältet viker
-   undan vid varje nedscroll och kommer tillbaka vid varje uppscroll.
-   En bubbla som följde med skulle gunga upp och ned hela tiden
-   medan man läser. Därför står den kvar på samma höjd, och fältet
-   glider in och ut under den utan att de överlappar.
+   main.js. 4 rem är bara läget innan första mätningen.
+
+   Bubblan flyttas med translate, inte med bottom, och med fältets
+   egen tid och kurva, 300 ms var(--ut). Då rör sig de två som en
+   enhet och aldrig åt var sitt håll. Den läser fältets data-undan
+   med ~, och därför står knappen efter fältet i index.html.
+
+   Säkerhetsmarginalen i nederkant finns redan i fältets höjd, så
+   den dras av när bubblan åker ned. Annars hamnar bubblan under
+   hemlinjen på iPhone.
+
+   Att bubblan rör sig vid varje byte av scrollriktning är ett
+   beslut, inte ett förbiseende. Fredrik valde det 2026-09-28, efter
+   att alternativet med en bubbla som står still hade prövats.
 
    z-index 950 är samma lager som fältet. Muspekarkedjan läggs sist i
    body med samma värde och ligger alltså ovanpå, och panelen (1000)
@@ -3671,6 +3681,11 @@ input:focus-visible {
   background: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: translate 300ms var(--ut);
+}
+
+.orderbar[data-undan='true'] ~ .fraga {
+  translate: 0 calc(var(--orderbar-h, 4rem) - env(safe-area-inset-bottom));
 }
 
 /* Bredden räknas från bilden. 6 rem på telefon är tillräckligt för

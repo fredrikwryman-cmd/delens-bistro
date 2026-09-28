@@ -632,8 +632,9 @@ slutar här.
 
 En pratbubbla, "Fråga kocken", står fast i nedre högra hörnet på
 startsidan och öppnar en chatt. Den svarar på frågor om menyn,
-priserna, öppettiderna och adressen. Bubblan står ovanför
-beställningsfältets plats och rör sig inte när fältet viker undan.
+priserna, öppettiderna och adressen. Bubblan följer
+beställningsfältet: ovanför det när det syns, nere i hörnet när det
+viker undan, med fältets 300 ms och kurva.
 Bilden är `kalla/marken/fraga-kocken.png`, som görs om av
 `verktyg/marken.mjs`.
 
