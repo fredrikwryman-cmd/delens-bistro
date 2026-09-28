@@ -27,6 +27,11 @@
  * ligger långt under tröskeln — den lämnas i fred, annars blir
  * siluetten hackig.
  *
+ * KLISTERMÄRKETS VITA RAM TAS BORT, 2026-09-28. Källan har en vit
+ * kontur på omkring 16 px runt hela burgaren, upp till 36 px i
+ * inbuktningarna mellan kött och sallad. DELEN'S har ingen kontur och
+ * BISTRO en tunn, så burgarens tjocka såg ojämn ut. Se utanRam().
+ *
  * TVÅ FILER, SAMMA BESKÄRNING. B1 och B2 är inte längre två motiv
  * utan samma bild i två upplösningar. Hero-burgaren ritas som mest
  * 520 px bred på desktop och ~305 på mobil, och en telefon ska inte
@@ -97,6 +102,98 @@ async function inreHal(fil) {
   return hal;
 }
 
+/**
+ * Tar bort den vita ramen genom att fylla från bakgrunden och in.
+ *
+ * Allt som är genomskinligt eller VITT och hänger ihop med bildens
+ * ytterkant räknas till ramen. Vitt betyder ljust och omättat: bullen
+ * är orange, osten gul, salladen grön, så fyllningen stannar där
+ * motivet börjar. Vita partier INNE i motivet nås inte, eftersom de
+ * inte hänger ihop med utsidan.
+ *
+ * Övergången mellan ram och motiv är kantutjämnad — pixlar som är
+ * delvis vita och delvis bulle. De ligger utanför tröskeln och blir
+ * kvar som en ljus hårlinje. Därför vidgas det borttagna ett steg
+ * till, KANT, och den nya kanten mjukas upp över en pixel så att
+ * siluetten inte blir trappstegad.
+ */
+const RAM_LJUS = 170;
+const RAM_MATTNAD = 50;
+const KANT = 2;
+
+function utanRam(data, W, H, C) {
+  const ram = new Uint8Array(W * H);
+  const ko = new Int32Array(W * H);
+  let huvud = 0;
+  let svans = 0;
+  const arRam = (p) => {
+    const i = p * C;
+    if (data[i + 3] < 250) return true;
+    const lo = Math.min(data[i], data[i + 1], data[i + 2]);
+    const hi = Math.max(data[i], data[i + 1], data[i + 2]);
+    return lo > RAM_LJUS && hi - lo < RAM_MATTNAD;
+  };
+  const salt = (p) => {
+    if (ram[p] || !arRam(p)) return;
+    ram[p] = 1;
+    ko[svans++] = p;
+  };
+  for (let x = 0; x < W; x++) {
+    salt(x);
+    salt((H - 1) * W + x);
+  }
+  for (let y = 0; y < H; y++) {
+    salt(y * W);
+    salt(y * W + W - 1);
+  }
+  while (huvud < svans) {
+    const p = ko[huvud++];
+    const x = p % W;
+    const y = (p - x) / W;
+    if (x > 0) salt(p - 1);
+    if (x < W - 1) salt(p + 1);
+    if (y > 0) salt(p - W);
+    if (y < H - 1) salt(p + W);
+  }
+
+  // Vidga ramen KANT steg, så att kantutjämningens ljusa mix följer med.
+  let nu = ram;
+  for (let k = 0; k < KANT; k++) {
+    const ny = nu.slice();
+    for (let p = 0; p < W * H; p++) {
+      if (nu[p]) continue;
+      const x = p % W;
+      if (
+        (x > 0 && nu[p - 1]) ||
+        (x < W - 1 && nu[p + 1]) ||
+        (p >= W && nu[p - W]) ||
+        (p < W * (H - 1) && nu[p + W])
+      )
+        ny[p] = 1;
+    }
+    nu = ny;
+  }
+
+  // Ny alfa: noll i ramen, halv på motivets yttersta pixel, full inuti.
+  let borta = 0;
+  for (let p = 0; p < W * H; p++) {
+    const i = p * C + 3;
+    if (nu[p]) {
+      if (data[i] > 12) borta++;
+      data[i] = 0;
+      continue;
+    }
+    const x = p % W;
+    const grannar =
+      (x > 0 && nu[p - 1] ? 1 : 0) +
+      (x < W - 1 && nu[p + 1] ? 1 : 0) +
+      (p >= W && nu[p - W] ? 1 : 0) +
+      (p < W * (H - 1) && nu[p + W] ? 1 : 0);
+    if (grannar) data[i] = Math.min(data[i], grannar >= 2 ? 110 : 170);
+  }
+  return borta;
+}
+
 async function kor() {
   await mkdir(MAL, { recursive: true });
 
@@ -130,6 +227,13 @@ async function kor() {
       if (y > y1) y1 = y;
     }
   }
+
+  /* Rutan ovan räknades MED ramen, och så ska det vara. Beskärningen
+     står därmed kvar exakt som förut — samma proportion, samma
+     width/height i index.html, samma läge för DELEN'S och BISTRO i
+     lockupen. Burgaren blir några procent mindre i rutan, och det
+     som försvinner är ramen, inget annat. */
+  const ramBorta = utanRam(data, W, H, C);
 
   const mw = x1 - x0 + 1;
   const pad = Math.round(mw * MARGINAL);
@@ -191,6 +295,7 @@ async function kor() {
     `\nkälla ${W}×${H}, ${(kallstorlek / 1048576).toFixed(2)} MB  →  ` +
       `beskuren ${width}×${height}, förhållande ${(width / height).toFixed(3)}`
   );
+  console.log(`vit ram borttagen: ${ramBorta.toLocaleString('sv-SE')} pixlar`);
   console.log(
     `helt ogenomskinliga i källan ${heltFore.toLocaleString('sv-SE')}  ` +
       `snäppta till 255 ${snappade.toLocaleString('sv-SE')}`
