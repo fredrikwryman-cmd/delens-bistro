@@ -637,6 +637,68 @@ a {
   }
 }
 
+/* ── Kocken som knapp ──────────────────────────────────────────
+   Kockmärket i Beställ öppnar menyassistenten. Det är fortfarande
+   ett märke — samma ankomst, avskalning, blick och glans — men det
+   ENDA märket som tar emot pekaren. Resten är dekor och släpper
+   igenom klick till det som ligger under.
+
+   Pratbubblan gör märket läsbart som knapp. En kock på en bild säger
+   ingenting om att man kan fråga honom något; bubblan säger det,
+   och den är också knappens tillgängliga namn.
+
+   Tryckkänslan är scale på bilden, inte på knappen: knappens rotate
+   och scale ägs redan av ankomsten. */
+.sticker--knapp {
+  pointer-events: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sticker--knapp .sticker__blad {
+  transition: scale 160ms var(--ut);
+}
+
+.sticker--knapp:active .sticker__blad {
+  scale: 0.96;
+}
+
+/* PÅ DESKTOP TILL HÖGER OM KOCKEN. Till vänster låg den över
+   ingressens sista ord, Qopla; till höger finns luften mellan kocken
+   och fotot. Under 900 px står kocken i högerkanten, och där får
+   bubblan gå åt vänster i stället — se längre ned. */
+.sticker__bubbla {
+  position: absolute;
+  inset-block-start: 0.4rem;
+  inset-inline-end: -5.5rem;
+  padding: 0.4rem 0.85rem 0.3rem;
+  background: var(--offwhite);
+  color: var(--rod);
+  font-size: var(--t-xs);
+  line-height: 1;
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: 1rem 1rem 1rem 0.25rem;
+  rotate: -4deg;
+  box-shadow: 0 0.4rem 0.9rem rgb(0 0 0 / 0.45);
+}
+
+@media (max-width: 900px) {
+  .sticker__bubbla {
+    inset-block-start: -0.6rem;
+    inset-inline-start: -2.4rem;
+    inset-inline-end: auto;
+    rotate: -12deg;
+  }
+}
+
 /* ── Knappar ───────────────────────────────────────────────────── */
 
 .knapp {

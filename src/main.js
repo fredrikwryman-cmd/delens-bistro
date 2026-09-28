@@ -2742,6 +2742,35 @@ function riggaLenis() {
   varvSteg.unshift((nu) => lenis.raf(nu));
 }
 
+/* ═══ MENYASSISTENTEN ════════════════════════════════════════════
+   Kockmärket i Beställ öppnar en chatt. Här står BARA avtryckaren:
+   panelen, dess stilar och all kod för samtalet ligger i
+   assistent.js och hämtas med import() först vid klick. Vite gör en
+   egen bit av den, och startpaketet vet inte att den finns.
+
+   Laddningen misslyckas tyst om nätet går ned. Knappen står kvar och
+   går att trycka igen; ett felmeddelande i en panel som inte laddats
+   finns det ingenstans att visa.                                   */
+
+function riggaAssistent() {
+  const knapp = $('#assistent-knapp');
+  if (!knapp) return;
+
+  let modul = null;
+  knapp.addEventListener('click', async () => {
+    if (knapp.getAttribute('aria-busy') === 'true') return;
+    knapp.setAttribute('aria-busy', 'true');
+    try {
+      modul ??= await import('./assistent.js');
+      modul.oppna(knapp);
+    } catch (fel) {
+      console.warn('Assistenten kunde inte laddas.', fel);
+    } finally {
+      knapp.removeAttribute('aria-busy');
+    }
+  });
+}
+
 /* ═══ START ══════════════════════════════════════════════════════ */
 
 fyllStatus();
@@ -2750,6 +2779,7 @@ byggSignaturer();
 byggMeny();
 forberedStickers();
 riggaOrderbar();
+riggaAssistent();
 
 // Momenten registrerar sina varvsteg FÖRE riggaScroll, som startar
 // varvet. Registreras de efter kör första bildrutan utan dem.

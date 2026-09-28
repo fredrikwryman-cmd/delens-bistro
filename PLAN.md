@@ -625,3 +625,35 @@ hur kundens logotyp ser ut, och de två reglerna står inte i konflikt.
 Den här punkten finns eftersom apostrofen flaggades som ett fel i tre
 rapporter i rad. Det var fel läsning av namnformsregeln. Den läsningen
 slutar här.
+
+---
+
+## 15. Menyassistenten — sedan 2026-09-28
+
+Kockmärket i Beställ öppnar en chatt, "Fråga kocken". Den svarar på
+frågor om menyn, priserna, öppettiderna och adressen.
+
+| Del | Var |
+|---|---|
+| Avtryckare | `riggaAssistent()` i `src/main.js`, bara en klicklyssnare och `import()` |
+| Panel och stilar | `src/assistent.js` + `src/assistent.css`, en egen bit som hämtas först vid klick |
+| Backend | `api/assistent.js`, serverless på **Vercel** — sajten själv ligger kvar på GitHub Pages |
+| Vercel-inställning | `vercel.json`; `vercel-rot/` är en tom, noindexad rot så att Vercel inte publicerar en andra kopia av sajten |
+
+**Menyn, öppettiderna, adressen och Qopla-länken läses ur
+`src/data/menu.js`.** Samma fil som bygger sidan; ingenting står på två
+ställen. Qopla-länken läggs på svaret av backend och kan inte ändras av
+modellen.
+
+**Nyckeln** står som `ANTHROPIC_API_KEY` i Vercel-projektets
+miljövariabler. Aldrig i repot — repot är publikt.
+
+**Takbegränsningen** är i minnet per serverinstans: 12 frågor per 10
+minuter och 60 per dygn per besökare, 600 per dygn och instans. Det
+stoppar en besökare som hamrar, inte en angripare som sprider sig över
+instanser. Det hårda kostnadstaket är månadsgränsen i Anthropics konsol.
+
+**Adressen** till funktionen står i `src/assistent.js`:
+`https://delens-assistent.vercel.app/api/assistent`. Heter Vercel-
+projektet något annat ska den ändras där, och `TILLATNA_URSPRUNG` i
+`api/assistent.js` ska innehålla sajtens domän.

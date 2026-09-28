@@ -1,0 +1,275 @@
+/* ═══ MENYASSISTENTEN ═══════════════════════════════════════════
+   Laddas bara tillsammans med assistent.js, alltså först när någon
+   tryckt på kocken. Tokens, typsnitt och .knapp kommer från
+   style.css, som redan ligger på sidan.
+
+   RÖRELSEN: panelen glider in från höger, 220 ms på var(--ut). Bara
+   transform och opacity animeras. visibility följer med men byter
+   läge i ett slag — vid öppning direkt, så att fältet går att fokusera
+   i samma ögonblick, och vid stängning först när utglidningen är
+   klar, så att den syns och panelen sedan lämnar tabbordningen.
+
+   STÄNGNINGEN ÄR KORTARE, 160 ms. Öppningen är det man tittar på —
+   panelen kommer, och man ska se varifrån. Stängningen är ett svar
+   på en handling som redan är gjord; den ska bara bort. Lika lång
+   tid åt båda hållen läser som en skjutdörr, samma skäl som för det
+   fasta beställningsfältet i style.css.                            */
+
+.assistent {
+  position: fixed;
+  z-index: 1000;
+  inset-block: 0;
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(30rem, 100vw);
+  background: var(--kol);
+  color: var(--offwhite);
+  border-inline-start: 2px solid var(--amber);
+  box-shadow: -1.5rem 0 3rem rgb(0 0 0 / 0.5);
+
+  transform: translateX(100%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 160ms var(--ut),
+    opacity 160ms var(--ut),
+    visibility 0s linear 160ms;
+}
+
+.assistent[data-oppen='true'] {
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform 220ms var(--ut),
+    opacity 220ms var(--ut),
+    visibility 0s linear 0s;
+}
+
+/* På telefon täcker panelen hela skärmen, och då finns ingen kant
+   att rita. */
+@media (max-width: 560px) {
+  .assistent {
+    border-inline-start: 0;
+    box-shadow: none;
+  }
+}
+
+/* Utan rörelse: panelen tonar, den glider inte.
+
+   TONINGEN MÅSTE TVINGAS IGENOM. style.css sätter alla övergångar
+   till 0,01 ms med !important vid reducerad rörelse, och då slog
+   panelen upp och försvann i ett slag. Reducerad rörelse betyder
+   ingen förflyttning, inte inga övergångar. Klassväljaren väger mer
+   än *, så den här !important vinner; fördröjningarna ovan står
+   kvar, så visibility byter fortfarande först när toningen är klar. */
+@media (prefers-reduced-motion: reduce) {
+  .assistent,
+  .assistent[data-oppen='true'] {
+    transform: none;
+  }
+
+  .assistent {
+    transition-duration: 160ms, 160ms, 0s !important;
+  }
+
+  .assistent[data-oppen='true'] {
+    transition-duration: 220ms, 220ms, 0s !important;
+  }
+}
+
+/* ── Huvudet ────────────────────────────────────────────────── */
+
+.assistent__topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gutter) 0.25rem;
+  padding-block-start: calc(1rem + env(safe-area-inset-top));
+}
+
+.assistent__rubrik {
+  margin: 0;
+  font-size: var(--t-m);
+  line-height: var(--lh-m);
+  letter-spacing: var(--ls-m);
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+/* 44 px träffyta, oavsett hur liten ikonen är. */
+.assistent__stang {
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(242 235 224 / 0.08);
+  color: var(--offwhite);
+  cursor: pointer;
+}
+
+.assistent__stang svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .assistent__stang:hover {
+    background: rgb(242 235 224 / 0.16);
+  }
+}
+
+.assistent__not {
+  margin: 0;
+  padding: 0 var(--gutter) 0.75rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  color: rgb(242 235 224 / 0.62);
+}
+
+/* ── Samtalet ───────────────────────────────────────────────── */
+
+.assistent__logg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1rem var(--gutter);
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-block: 1px solid rgb(242 235 224 / 0.1);
+}
+
+.assistent__rad {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-inline-size: 88%;
+
+  /* Varje ny rad glider upp en bit och tonar in. Inga tidigare rader
+     rör sig; det är bara den nya som kommer. */
+  animation: assistent-rad 220ms var(--ut) both;
+}
+
+/* Hälsningen finns redan när panelen glider in. Rörde den sig också
+   blev det två rörelser ovanpå varandra i samma ögonblick. */
+.assistent__rad:first-child {
+  animation: none;
+}
+
+.assistent__rad--kund {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.assistent__bubbla {
+  margin: 0;
+  padding: 0.55rem 0.95rem 0.5rem;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  border-radius: 1.1rem 1.1rem 1.1rem 0.3rem;
+  background: rgb(242 235 224 / 0.08);
+  overflow-wrap: anywhere;
+}
+
+.assistent__rad--kund .assistent__bubbla {
+  background: var(--amber);
+  color: var(--svart);
+  border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
+}
+
+.assistent__rad--vantar .assistent__bubbla {
+  color: rgb(242 235 224 / 0.62);
+}
+
+.assistent__rad--fel .assistent__bubbla {
+  box-shadow: inset 0 0 0 1px rgb(232 163 61 / 0.5);
+}
+
+.assistent__bestall {
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
+  padding: 0.55rem 1.2rem;
+}
+
+@keyframes assistent-rad {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistent__rad {
+    animation-name: assistent-rad-tona;
+    animation-duration: 180ms !important;
+  }
+
+  .assistent__rad:first-child {
+    animation: none;
+  }
+
+  @keyframes assistent-rad-tona {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/* ── Fältet ─────────────────────────────────────────────────── */
+
+.assistent__form {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.9rem var(--gutter);
+  padding-block-end: calc(0.9rem + env(safe-area-inset-bottom));
+}
+
+.assistent__falt {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: var(--t-s);
+  line-height: var(--lh-s);
+  color: var(--offwhite);
+  background: var(--svart);
+  border: 1px solid rgb(242 235 224 / 0.25);
+  border-radius: 999px;
+}
+
+.assistent__falt::placeholder {
+  color: rgb(242 235 224 / 0.45);
+}
+
+/* Knappar ärver inte typsnittet av sig själva. .knapp är skriven för
+   länkar och sätter det aldrig. */
+.assistent__skicka {
+  flex: none;
+  font-family: inherit;
+  padding: 0.5rem 1.2rem;
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
+  border: 0;
+  cursor: pointer;
+}
+
+.assistent__skicka:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
