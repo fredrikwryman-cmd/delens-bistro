@@ -361,9 +361,15 @@
                  långsam uppkoppling, den är det som syns utan JS, och
                  den är kvar om hämtningen skulle braka mitt i. En duk
                  som blir tom har inget att falla tillbaka på. -->
-            <img class="sekvens__still" src="/bilder/sekvens/still.webp"
-                 alt="En dubbel smashburgare med smält cheddar, jalapeño, rödlök och friterade lökringar, svävande framför restaurangens neonskylt."
-                 width="1280" height="720" loading="lazy" decoding="async" />
+            <!-- Telefonen får en stående still ur sin egen video, samma
+                 brytpunkt som rutorna (760 px, SEKV.brytMobil). -->
+            <picture>
+              <source media="(max-width: 760px)" srcset="/bilder/sekvens/still-mobil.webp"
+                      width="720" height="1280" />
+              <img class="sekvens__still" src="/bilder/sekvens/still.webp"
+                   alt="En dubbel smashburgare med smält cheddar, jalapeño, rödlök och friterade lökringar, svävande framför restaurangens neonskylt."
+                   width="1280" height="720" loading="lazy" decoding="async" />
+            </picture>
             <!-- Duken är exakt en bildrutas storlek i pixlar och skalas
                  av CSS. MÅTTEN MÅSTE FÖLJA UTGAVOR i verktyg/sekvens.mjs:
                  rita() ritar med drawImage(bild, 0, 0), alltså i bildens

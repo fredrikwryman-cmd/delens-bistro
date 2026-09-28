@@ -1967,19 +1967,25 @@ input:focus-visible {
 }
 
 @media (max-width: 760px) {
-  /* ── FULL TÄCKNING PÅ TELEFON ───────────────────────────────────
-     Scenen fyller vyn, samma som på desktop. En stående telefon är
-     omkring 0,46 bred mot hög och rutan 1,78, så cover beskär hårt i
-     sidled: ungefär en fjärdedel av bildens bredd syns, och
-     neonskylten kapas i båda ändar. Det är valt.
+  /* ── STÅENDE VIDEO PÅ TELEFON, sedan 2026-09-28 ──────────────────
+     Telefonen har en egen video i 9:16, 720 × 1280 (se
+     verktyg/sekvens.mjs), och duken får de måtten av riggaSekvens.
+     Scenen fyller vyn som förut, men beskärningen i sidled är nästan
+     borta: en 390 × 844-vy är 0,46 bred mot hög och rutan 0,56, så
+     cover visar 82 procent av bildens bredd. Med den liggande videon
+     var det 26 procent, och neonskylten kapades i båda ändar.
 
-     Ett band på 70vw provades 2026-09-21 för att få med hela skylten.
-     Det såg sämre ut — en låg remsa i en svart vy — och togs bort
-     2026-09-28 på Fredriks beslut. Den inzoomade bilden som fyller
-     vyn är bättre än den hela bilden som inte gör det.
+     KÄLLPIXLAR PER SKÄRMPIXEL: 82 procent av 720 px över 390 CSS-px
+     är 1,5, alltså halva vägen till en telefon med tredubbel
+     pixeltäthet. Den liggande videon gav 0,85 (28 procent). Mer finns
+     inte i källan.
 
-     Klisteravståndet är noll igen, och mat() i main.js läser det ur
-     stilmallen, så mappningen behöver ingen egen ändring.
+     Ett band på 70vw provades 2026-09-21 och togs bort 2026-09-28.
+     Det behövs inte heller nu: bilden har redan telefonens form.
+
+     Klisteravståndet är noll, och mat() i main.js läser det ur
+     stilmallen, så mappningen behöver ingen egen ändring. Rutantalet
+     och spåret är desamma, så takten är det också.
 
      SPÅRET ÄR 218svh. Klistringen blir 118svh, alltså 996 px på en
      844 px hög vy, för 59 rutor — 18,5 px per ruta, samma takt som
@@ -1987,6 +1993,53 @@ input:focus-visible {
      hade, hade gett bara 422 px klistring och 7,7 px per ruta.    */
   .sekvens[data-rorlig='true'] .sekvens__spar {
     height: 218svh;
+  }
+
+  /* Stillbildsläget (reducerad rörelse, Save-Data, ingen JS): scenen
+     får stillens stående form, högst en skärm. Förut var den 16:9 efter
+     den liggande stillen. */
+  .sekvens__scen {
+    height: min(calc(100vw * 16 / 9), 100svh);
+  }
+
+  /* KORTARE BOTTENTONING. Den stående bilden går längre ned: i sista
+     rutan slutar burgaren vid 86 procent av höjden, mot 78 i den
+     liggande. Desktopens toning är 0,34 redan vid 88 procent och hade
+     mörkat underbullen. Här börjar den vid 88 och är tät först i
+     själva kanten. Sidor och vinjett är som på desktop. */
+  .sekvens__scen::after {
+    background:
+      linear-gradient(
+        to right,
+        var(--svart) 0,
+        rgb(14 14 14 / 0.62) 2%,
+        rgb(14 14 14 / 0.26) 5.5%,
+        rgb(14 14 14 / 0.08) 9.5%,
+        rgb(14 14 14 / 0) 15%,
+        rgb(14 14 14 / 0) 85%,
+        rgb(14 14 14 / 0.08) 90.5%,
+        rgb(14 14 14 / 0.26) 94.5%,
+        rgb(14 14 14 / 0.62) 98%,
+        var(--svart) 100%
+      ),
+      linear-gradient(
+        to bottom,
+        var(--svart) 0,
+        rgb(14 14 14 / 0.58) 2.5%,
+        rgb(14 14 14 / 0.22) 6%,
+        rgb(14 14 14 / 0.06) 10%,
+        rgb(14 14 14 / 0) 16%,
+        rgb(14 14 14 / 0) 88%,
+        rgb(14 14 14 / 0.12) 92%,
+        rgb(14 14 14 / 0.4) 96%,
+        rgb(14 14 14 / 0.8) 98.5%,
+        var(--svart) 100%
+      ),
+      radial-gradient(
+        116% 116% at 50% 48%,
+        rgb(14 14 14 / 0) 44%,
+        var(--svart) 100%
+      );
   }
 }
 

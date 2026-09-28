@@ -2065,6 +2065,12 @@ const SEKV = {
      är en sekvens som slutar innan spåret gör det. */
   rutor: { desktop: 80, mobil: 59 },
 
+  /* Rutornas mått i pixlar, bredd × höjd. Duken sätts till dem, för
+     rita() skalar ingenting — se RITNINGEN. Mobilen har en egen,
+     stående video sedan 2026-09-28 och är 720 × 1280, källans fulla
+     bredd. Duken i index.html står på desktopens mått. */
+  matt: { desktop: [1280, 720], mobil: [720, 1280] },
+
   /* Det rullande fönstret av AVKODADE rutor, i scrollriktningen och
      mot den. Asymmetriskt med flit: man scrollar nästan alltid vidare
      åt samma håll, och de få rutorna bakåt räcker för att vända utan
@@ -2139,6 +2145,10 @@ function riggaSekvens() {
   const mobil = window.innerWidth <= SEKV.brytMobil;
   const utgava = mobil ? 'mobil' : 'desktop';
   const antal = SEKV.rutor[utgava];
+
+  // Duken får uppsättningens mått innan något ritas. Att sätta width
+  // tömmer duken, och här finns ännu ingenting att tömma.
+  [duk.width, duk.height] = SEKV.matt[utgava];
 
   const adress = (i) =>
     `/bilder/sekvens/${utgava}/r${String(i + 1).padStart(3, '0')}.webp`;

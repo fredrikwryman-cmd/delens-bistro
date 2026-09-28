@@ -17,11 +17,23 @@
  * inte finns, i stället för att låta ffmpeg falla på ett kryptiskt
  * fel — en tyst miss här ger en hel sekvens av fel bilder.
  *
- * TVÅ UPPSÄTTNINGAR OCH EN STILL, ALLA I KÄLLANS FULLA BREDD.
+ * TVÅ VIDEOR, TVÅ UPPSÄTTNINGAR, TVÅ STILLAR.
  *
- *   desktop   80 rutor, 1280 px bredd
- *   mobil     59 rutor, 1280 px bredd
- *   still      1 ruta, 1280 px bredd
+ *   desktop   80 rutor, 1280 × 720   ur delens-scroll-animation.mp4
+ *   mobil     59 rutor,  720 × 1280  ur delens-scroll-mobil.mp4
+ *
+ * Varje uppsättning har sin still ur sista rutan: still.webp och
+ * still-mobil.webp.
+ *
+ * MOBILEN HAR EN EGEN, STÅENDE VIDEO sedan 2026-09-28, 9:16 i
+ * 720 × 1280. Förut beskar telefonen den liggande videon hårt i sidled
+ * och visade omkring 26 procent av bredden. Nu visar den 82 procent.
+ * 720 är källans fulla bredd och alltså taket, av samma skäl som 1280
+ * är det för desktop.
+ *
+ * Mobilvideon börjar med svarta fält över och under bilden, som växer
+ * bort mot slutet. Fälten är 0,0,0 och sektionen #0E0E0E, så allt
+ * under 14 lyfts till 14 i samma pass (svart i UTGAVOR).
  *
  * ANTALET SÄTTS AV SCROLLEN, INTE AV KÄLLAN. Rutorna ska räcka till
  * omkring 18 px scroll per ruta i det klistrade läget — väl under
@@ -41,26 +53,16 @@
  * finns inte; att skala över det hade gett större filer utan en enda
  * ny pixel.
  *
- * MOBILEN FÅR SAMMA BREDD SOM DESKTOP, och det är inte ett slarv.
- * Förut var det 800 och 640, uträknat när sekvensen låg i en ruta som
- * var smalare än vyn. Nu täcker den hela vyn med object-fit: cover,
- * och då gäller motsatt räkning: en stående telefon beskär bort
- * sidorna och visar bara omkring 26 procent av rutans bredd, utsträckt
- * över hela skärmen. Telefonen behöver alltså MER källbredd än
- * desktop, inte mindre. Uppmätt behov för en pixel per pixel:
+ * DEN LIGGANDE VIDEON PÅ TELEFON gav omkring 0,85 källpixlar per
+ * CSS-pixel, 28 procent av vad en telefon med tredubbel täthet behöver
+ * för en pixel per pixel. Det var det som syntes som gryn. Den stående
+ * videon ger 1,5, alltså halva vägen. Mer finns inte i källan.
  *
- *   laptop 1490×867           1541 px   —  800 gav 52 procent
- *   telefon 390×844 vid 3x    4501 px   —  640 gav 14 procent
- *
- * Det är de 52 och 14 procenten som syntes som grynighet: en bild
- * förstorad nära dubbelt respektive sju gånger. Vid 1280 blir samma
- * tal 83 och 28 procent. Telefonen når aldrig ett mot ett — det
- * kräver en källa på 4500 px som inte finns — men steget från sju
- * gångers förstoring till tre och en halv är det som går att ta.
- *
- * VÄGEN ÄR VIDEO → PNG → WEBP. ffmpeg plockar och skalar, lossless
- * PNG som mellanled, och sharp gör WebP. Ett enda förstörande steg,
- * sist.
+ * VÄGEN ÄR VIDEO → WEBP, i ett enda ffmpeg-pass. ffmpeg plockar
+ * rutorna, skalar och kodar med libwebp. Inget mellanled på disk och
+ * bara ett förstörande steg. Förut gick vägen över lossless PNG och
+ * sharp. Desktopens rutor från 2026-09-27 är gjorda så och har inte
+ * kodats om; de kodas om med den här vägen nästa gång desktop körs.
  *
  * RUTORNA VÄLJS PÅ NUMMER, INTE MED fps-FILTRET. Källan har exakt 192
  * rutor, så ruta i av n hämtas som källruta round(i × 191 / (n−1)).
@@ -69,10 +71,9 @@
  * börjar filtret om sin fas vid varje sökning — en ruta glider, och
  * en glidning mitt i en scrubbad sekvens syns som ett hack.
  *
- * PASSET GÅR I OMGÅNGAR om 20 rutor. En omgång i taget plockas ut,
- * kodas och städas bort innan nästa börjar. Hela uppsättningen som
- * PNG samtidigt vore 80 × 2,7 MB ≈ 216 MB på disk i ett svep; med
- * omgångar ligger toppen på omkring 54 MB.
+ * Kör en uppsättning i taget genom att namnge den:
+ *
+ *   node verktyg/sekvens.mjs mobil
  *
  * WEBP OCH INTE AVIF, trots att AVIF mätte 34 procent lättare på just
  * det här materialet. Två skäl. AVIF avkodas två till tre gånger
@@ -91,7 +92,6 @@
  * den blir sektionen en tom duk för den som valt bort rörelse.
  */
 
-import sharp from 'sharp';
 import ffmpeg from 'ffmpeg-static';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -100,144 +100,142 @@ import path from 'node:path';
 
 const korProgram = promisify(execFile);
 
-const VIDEO =
-  'C:/Users/fredr/OneDrive/Desktop/Delens Bistro/delens-scroll-animation.mp4';
+const KALLMAPP = 'C:/Users/fredr/OneDrive/Desktop/Delens Bistro';
 const MAL = 'public/bilder/sekvens';
-const TILLFALLIG = 'public/bilder/sekvens/.rapng';
 
-/** Källans antal bildrutor. 24 FPS × 8,00 s. */
+/** Källornas antal bildrutor. Båda videorna är 24 FPS × 8,00 s. */
 const KALLRUTOR = 192;
 
-/** Rutor per omgång. Håller toppen på disk nere, se huvudtexten. */
-const OMGANG = 20;
-
+/**
+ * En uppsättning per video. Mobilen har en egen, stående video sedan
+ * 2026-09-28; se huvudtexten.
+ *
+ * svart: det lägsta värde en färgkanal får ha. Mobilvideon börjar med
+ * svarta fält över och under bilden, 0,0,0, mot sektionens #0E0E0E.
+ * Allt under 14 lyfts till 14, så fälten blir sektionens egen svarta
+ * och smälter in i kanttoningarna. Bildens mörkaste partier ligger
+ * kring 4–12 och flyttas alltså högst några steg.
+ */
 const UTGAVOR = [
-  { id: 'desktop', rutor: 80, bredd: 1280, kvalitet: 66 },
-  { id: 'mobil', rutor: 59, bredd: 1280, kvalitet: 66 }
+  {
+    id: 'desktop',
+    video: 'delens-scroll-animation.mp4',
+    rutor: 80,
+    bredd: 1280,
+    kvalitet: 66,
+    still: 'still.webp'
+  },
+  {
+    id: 'mobil',
+    video: 'delens-scroll-mobil.mp4',
+    rutor: 59,
+    bredd: 720,
+    kvalitet: 66,
+    still: 'still-mobil.webp',
+    svart: 14
+  }
 ];
 
-/** Stillen: sista bilden, alltså den färdiga burgaren. */
-const STILL = { bredd: 1280, kvalitet: 80 };
+/** Stillens kvalitet. Stillen är sista bilden, den färdiga burgaren. */
+const STILL_KVALITET = 80;
 
 /** Källrutans nummer för ruta i av totalt n, jämnt spritt över klippet. */
 const kallruta = (i, n) =>
   n <= 1 ? 0 : Math.round((i * (KALLRUTOR - 1)) / (n - 1));
 
-/**
- * Plockar ut en omgång källrutor med select-filtret och skalar dem.
- * Filnamnen blir löpande inom omgången; anroparen sätter rätt namn.
- */
-async function plockaOmgang(nummer, bredd, mapp) {
+/** Filterkedjan: exakta rutnummer, skalning och ev. lyft svart. */
+function filter(nummer, u) {
   // select='eq(n,3)+eq(n,5)+…' — exakta rutnummer, ingen tidsräkning.
   const villkor = nummer.map((n) => 'eq(n\\,' + n + ')').join('+');
+  const delar = [`select='${villkor}'`, `scale=${u.bredd}:-2:flags=lanczos`];
+  if (u.svart) {
+    const lyft = `'if(lt(val\\,${u.svart})\\,${u.svart}\\,val)'`;
+    delar.push(`lutrgb=r=${lyft}:g=${lyft}:b=${lyft}`);
+  }
+  return delar.join(',');
+}
+
+/**
+ * Plockar rutorna ur videon och skriver WebP direkt, i ett enda pass.
+ * Ingen PNG emellan: ffmpeg avkodar, filtrerar och kodar med libwebp.
+ */
+async function extrahera(u, nummer, mal, { kvalitet = u.kvalitet, enstaka = false } = {}) {
   await korProgram(ffmpeg, [
     '-hide_banner',
     '-loglevel', 'error',
-    '-i', VIDEO,
-    '-vf', `select='${villkor}',scale=${bredd}:-2:flags=lanczos`,
+    '-y',
+    '-i', path.join(KALLMAPP, u.video),
+    '-vf', filter(nummer, u),
     // vsync 0 låter varje vald ruta komma ut som den är, utan att
     // ffmpeg fyller på eller släpper rutor för att träffa en fps.
     '-vsync', '0',
-    path.join(mapp, 'o%04d.png')
+    '-an',
+    '-c:v', 'libwebp',
+    '-lossless', '0',
+    '-quality', String(kvalitet),
+    '-compression_level', '6',
+    '-preset', 'picture',
+    // En enstaka bild skrivs till ett fast namn; en serie numreras
+    // från r001, som main.js hämtar dem.
+    ...(enstaka ? ['-frames:v', '1', '-update', '1'] : ['-start_number', '1']),
+    mal
   ]);
-  return (await readdir(mapp)).filter((f) => f.endsWith('.png')).sort();
 }
 
 async function kor() {
-  try {
-    await access(VIDEO);
-  } catch {
-    throw new Error(
-      `Hittar inte videon:\n  ${VIDEO}\n` +
-        'Mappen heter Desktop på disk även om Utforskaren visar Skrivbord.'
-    );
+  // Vilka uppsättningar som körs: alla, eller de som namnges.
+  //   node verktyg/sekvens.mjs mobil
+  const valda = process.argv.slice(2);
+  const korda = valda.length ? UTGAVOR.filter((u) => valda.includes(u.id)) : UTGAVOR;
+  if (!korda.length) throw new Error(`Okänd uppsättning: ${valda.join(', ')}`);
+
+  for (const u of korda) {
+    const video = path.join(KALLMAPP, u.video);
+    try {
+      await access(video);
+    } catch {
+      throw new Error(
+        `Hittar inte videon:\n  ${video}\n` +
+          'Mappen heter Desktop på disk även om Utforskaren visar Skrivbord.'
+      );
+    }
   }
 
   await mkdir(MAL, { recursive: true });
   const rader = [];
 
-  for (const u of UTGAVOR) {
+  for (const u of korda) {
     const utmapp = path.join(MAL, u.id);
     await rm(utmapp, { recursive: true, force: true });
     await mkdir(utmapp, { recursive: true });
 
-    let summa = 0;
-    let minsta = Infinity;
-    let storsta = 0;
-    let bredd = 0;
-    let hojd = 0;
+    const nummer = Array.from({ length: u.rutor }, (_, i) => kallruta(i, u.rutor));
+    await extrahera(u, nummer, path.join(utmapp, 'r%03d.webp'));
 
-    for (let start = 0; start < u.rutor; start += OMGANG) {
-      const slut = Math.min(start + OMGANG, u.rutor);
-      const nummer = [];
-      for (let i = start; i < slut; i++) nummer.push(kallruta(i, u.rutor));
-
-      const mapp = path.join(TILLFALLIG, u.id);
-      await rm(mapp, { recursive: true, force: true });
-      await mkdir(mapp, { recursive: true });
-
-      const filer = await plockaOmgang(nummer, u.bredd, mapp);
-      if (filer.length !== nummer.length) {
-        throw new Error(
-          `${u.id}: bad om ${nummer.length} rutor, fick ${filer.length}`
-        );
-      }
-
-      for (let j = 0; j < filer.length; j++) {
-        const i = start + j;
-        const ut = path.join(utmapp, `r${String(i + 1).padStart(3, '0')}.webp`);
-        const info = await sharp(path.join(mapp, filer[j]))
-          .webp({ quality: u.kvalitet, effort: 6 })
-          .toFile(ut);
-        bredd = info.width;
-        hojd = info.height;
-        const b = (await stat(ut)).size;
-        summa += b;
-        minsta = Math.min(minsta, b);
-        storsta = Math.max(storsta, b);
-      }
-
-      await rm(mapp, { recursive: true, force: true });
-      process.stdout.write(`  ${u.id}: ${slut}/${u.rutor}\r`);
+    const filer = (await readdir(utmapp)).filter((f) => f.endsWith('.webp')).sort();
+    if (filer.length !== u.rutor) {
+      throw new Error(`${u.id}: bad om ${u.rutor} rutor, fick ${filer.length}`);
     }
-    process.stdout.write('\n');
+
+    const storlekar = await Promise.all(filer.map(async (f) => (await stat(path.join(utmapp, f))).size));
+    const summa = storlekar.reduce((s, b) => s + b, 0);
+
+    const stillUt = path.join(MAL, u.still);
+    await extrahera(u, [KALLRUTOR - 1], stillUt, { kvalitet: STILL_KVALITET, enstaka: true });
 
     rader.push({
       utgava: u.id,
       rutor: u.rutor,
-      matt: `${bredd}×${hojd}`,
+      bredd: u.bredd,
       totaltKB: Math.round(summa / 1024),
       snittKB: +(summa / u.rutor / 1024).toFixed(1),
-      minstaKB: +(minsta / 1024).toFixed(1),
-      storstaKB: +(storsta / 1024).toFixed(1),
-      // Avkodat i minnet: bredd × höjd × 4 byte per ruta.
-      avkodadRutaMB: +((bredd * hojd * 4) / 1048576).toFixed(2)
+      minstaKB: +(Math.min(...storlekar) / 1024).toFixed(1),
+      storstaKB: +(Math.max(...storlekar) / 1024).toFixed(1),
+      stillKB: Math.round((await stat(stillUt)).size / 1024)
     });
   }
 
-  // Stillen ur sista bildrutan.
-  const stillmapp = path.join(TILLFALLIG, 'still');
-  await rm(stillmapp, { recursive: true, force: true });
-  await mkdir(stillmapp, { recursive: true });
-  await plockaOmgang([KALLRUTOR - 1], STILL.bredd, stillmapp);
-  const stillUt = path.join(MAL, 'still.webp');
-  const si = await sharp(path.join(stillmapp, 'o0001.png'))
-    .webp({ quality: STILL.kvalitet, effort: 6 })
-    .toFile(stillUt);
-  const sb = (await stat(stillUt)).size;
-  await rm(stillmapp, { recursive: true, force: true });
-  await rm(TILLFALLIG, { recursive: true, force: true });
-
   console.table(rader);
-  console.log(
-    `still  ${si.width}×${si.height}  ${(sb / 1024).toFixed(0)} kB`
-  );
-  const allt = rader.reduce((s, r) => s + r.totaltKB, 0) + sb / 1024;
-  console.log(`\nHELA SEKVENSEN: ${Math.round(allt)} kB`);
-  console.log(
-    `en besökare hämtar EN uppsättning: ` +
-      rader.map((r) => `${r.utgava} ${r.totaltKB} kB`).join(', ')
-  );
 }
 
 kor();
