@@ -2,7 +2,10 @@
  * Menyassistenten — serverless-funktion på Vercel.
  *
  *   POST /api/assistent   { meddelanden: [{ roll, text }, …] }
- *   →                     { message, qopla_url, button_text }
+ *   →                     { message, qopla_url, button_text, lista }
+ *
+ * lista är null, eller { text, varor, summa } när assistenten
+ * föreslagit något att beställa — se byggLista().
  *
  * Sajten ligger på GitHub Pages, som inte kör kod. Den här filen är
  * det enda som körs på Vercel; se vercel.json. Nyckeln läses ur
@@ -44,6 +47,54 @@ const PER_INSTANS_DAG = 600;
 const MAX_MEDDELANDEN = 12;
 const MAX_TECKEN = 600;
 
+/* ── Det som går att beställa i Qopla ───────────────────────────── */
+
+/* Qopla tar inte emot en förifylld varukorg, så assistenten avslutar
+   i stället med en lista över vad kunden ska leta upp där. Namnen är
+   Qoplas egna, ordagrant, ur fältet qopla i menu.js. Priserna är
+   menydatans. Modellen väljer bara ur listan nedan, via en enum i
+   schemat, och kan därför varken hitta på ett namn eller ett pris.
+   Summan räknas här.
+
+   En rätt med två priser (singel / dubbel) ger två poster. Den första
+   storleken är Qoplas grundval och får inget tillägg i namnet. */
+
+function etikett(r) {
+  return r.qoplaKategori ? `${r.qopla} (${r.qoplaKategori})` : r.qopla;
+}
+
+const KATALOG = new Map();
+for (const k of kategorier) {
+  const storlekar = k.underrubrik ? k.underrubrik.toLowerCase().split(' / ') : [];
+  for (const r of k.ratter) {
+    if (!r.qopla) continue;
+    const priser = r.pris.split(' / ').map(Number);
+    priser.forEach((pris, i) => {
+      const namn = i === 0 ? etikett(r) : `${etikett(r)}, ${storlekar[i] ?? 'stor'}`;
+      KATALOG.set(namn, pris);
+    });
+  }
+}
+
+const MAX_VAROR = 8;
+
+/** Modellens val → listan som visas, eller null. Okända namn kastas;
+    enumen ska redan ha stoppat dem. */
+function byggLista(val) {
+  if (!Array.isArray(val)) return null;
+  const antal = new Map();
+  for (const namn of val.slice(0, MAX_VAROR)) {
+    if (KATALOG.has(namn)) antal.set(namn, (antal.get(namn) ?? 0) + 1);
+  }
+  if (!antal.size) return null;
+
+  const varor = [...antal].map(([namn, n]) => ({ namn, antal: n, pris: KATALOG.get(namn) * n }));
+  const summa = varor.reduce((s, v) => s + v.pris, 0);
+  const text =
+    varor.map((v) => (v.antal > 1 ? `${v.antal} × ${v.namn}` : v.namn)).join(' + ') + `, ${summa} kr`;
+  return { text, varor, summa };
+}
+
 /* ── Systemprompten ─────────────────────────────────────────────── */
 
 function menyText() {
@@ -59,6 +110,10 @@ function menyText() {
       return [rubrik, ...rader].join('\n');
     })
     .join('\n\n');
+}
+
+function katalogText() {
+  return [...KATALOG].map(([namn, pris]) => `- ${namn}: ${pris} kr`).join('\n');
 }
 
 function tiderText() {
@@ -77,7 +132,7 @@ Vänlig, saklig och kunnig om maten. Högst tre meningar per svar. Svara på sam
 # Regler
 - Allt du vet om restaurangen står nedan. Hitta aldrig på rätter, priser, ingredienser, öppettider eller erbjudanden. Står svaret inte här, säg att du inte vet och hänvisa till restaurangen på telefon ${kontakt.telefon}.
 - Priser skrivs exakt som i menyn. Två priser betyder två storlekar, enligt kategorins rubrik (till exempel singel / dubbel).
-- Ber kunden om tips får du föreslå en burgare och ett tillbehör ur menyn.
+- Ber kunden om tips får du föreslå en rätt ur menyn, gärna med en dipp.
 - Allergier och specialkost: svara ALDRIG utifrån ingredienslistan, inte ens när svaret verkar uppenbart — listan är inte komplett och kan inte ersätta personalen. Hänvisa alltid till personalen i restaurangen eller telefon ${kontakt.telefon}.
 - Du kan inte ta emot beställningar eller bokningar. Beställning sker online via restaurangens beställningssida.
 - Frågor som inte handlar om restaurangen svarar du vänligt att du bara kan hjälpa till med Delens Bistro.
@@ -86,6 +141,12 @@ Vänlig, saklig och kunnig om maten. Högst tre meningar per svar. Svara på sam
 Svara med JSON enligt schemat.
 - message: ditt svar till kunden, vanlig text utan markdown.
 - button_text: en kort knapptext, högst fyra ord, till exempel "Beställ online", när kunden vill beställa eller när du föreslagit en rätt. Annars en tom sträng.
+- varor: när du föreslår något att beställa, eller kunden säger vad hen vill ha, listar du precis det här, en post per portion. Välj bara ur "Beställningsbart i Qopla" nedan; det är de namn kunden söker på där. Allt du föreslår att beställa ska stå i varor, så föreslå bara sådant som finns i den listan. Annars en tom lista.
+- Skriv inte summan i message. Den räknas ut och visas under ditt svar.
+
+# Beställningsbart i Qopla
+Namn och pris, exakt som de ska väljas i varor.
+${katalogText()}
 
 # Adress
 ${kontakt.adress}. Telefon ${kontakt.telefon}.
@@ -100,9 +161,10 @@ const SCHEMA = {
   type: 'object',
   properties: {
     message: { type: 'string' },
-    button_text: { type: 'string' }
+    button_text: { type: 'string' },
+    varor: { type: 'array', items: { type: 'string', enum: [...KATALOG.keys()] } }
   },
-  required: ['message', 'button_text'],
+  required: ['message', 'button_text', 'varor'],
   additionalProperties: false
 };
 
@@ -190,7 +252,8 @@ const klient = new Anthropic();
 const SVAR_FEL = {
   message: 'Jag kan tyvärr inte svara just nu. Ring oss gärna på ' + kontakt.telefon + '.',
   qopla_url: QOPLA_URL,
-  button_text: ''
+  button_text: '',
+  lista: null
 };
 
 export default async function handler(req, res) {
@@ -217,7 +280,8 @@ export default async function handler(req, res) {
     return res.status(429).json({
       message: 'Du har ställt många frågor på kort tid. Vänta en stund, eller ring oss på ' + kontakt.telefon + '.',
       qopla_url: QOPLA_URL,
-      button_text: ''
+      button_text: '',
+      lista: null
     });
   }
 
@@ -253,7 +317,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       message,
       qopla_url: QOPLA_URL,
-      button_text: typeof tolkat.button_text === 'string' ? tolkat.button_text.trim().slice(0, 40) : ''
+      button_text: typeof tolkat.button_text === 'string' ? tolkat.button_text.trim().slice(0, 40) : '',
+      lista: byggLista(tolkat.varor)
     });
   } catch (fel) {
     if (fel instanceof Anthropic.RateLimitError) {

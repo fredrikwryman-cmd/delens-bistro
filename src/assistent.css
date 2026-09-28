@@ -206,6 +206,53 @@
   padding: 0.55rem 1.2rem;
 }
 
+/* Listan att leta upp i Qopla. Ett kort under svaret, och hela kortet
+   är länken. Det rör sig inte själv: det kommer in med raden det står
+   i, och hover byter bara kantfärg. Knappen i kortet är ett span som
+   ser ut som sajtens knapp, eftersom en länk inte får innehålla en
+   annan länk. */
+.assistent__lista {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.7rem 0.9rem 0.8rem;
+  border: 1px solid rgb(232 163 61 / 0.45);
+  border-radius: 0.9rem;
+  color: var(--offwhite);
+  text-decoration: none;
+  transition: border-color 160ms var(--ut);
+}
+
+/* Knappen i kortet svarar när pekaren står var som helst på kortet,
+   inte bara på knappen. Hela kortet är länken, och svarar bara en del
+   av det ser resten ut att inte gå att klicka på. Samma lyft som
+   .knapp:hover i style.css. */
+@media (hover: hover) and (pointer: fine) {
+  .assistent__lista:hover {
+    border-color: var(--amber);
+  }
+
+  .assistent__lista:hover .assistent__bestall {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+  }
+}
+
+.assistent__lista-rubrik {
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.assistent__lista-text {
+  font-size: var(--t-s);
+  line-height: 1.35;
+  margin-block-end: 0.3rem;
+}
+
 @keyframes assistent-rad {
   from {
     opacity: 0;

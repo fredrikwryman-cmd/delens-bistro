@@ -119,6 +119,25 @@ function rad(vem, text, knapp) {
   return li;
 }
 
+/* LISTAN ATT LETA UPP I QOPLA. Qopla tar inte emot en förifylld
+   varukorg; beställningssidan öppnas alltid tom. Kortet säger därför
+   vad kunden ska söka på där: Qoplas egna namn, ordagrant, och summan.
+   Båda kommer färdiga från backend, ur menydatan — se byggLista() i
+   api/assistent.js. Hela kortet är länken, knappen i det är bara
+   dess synliga uppmaning. */
+function listkort(text, uppmaning, url) {
+  const a = el('a', 'assistent__lista');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.append(
+    el('span', 'assistent__lista-rubrik', 'Leta upp i Qopla'),
+    el('span', 'assistent__lista-text', text),
+    el('span', 'knapp assistent__bestall', uppmaning)
+  );
+  return a;
+}
+
 function visa(li) {
   logg.append(li);
   // Nya rader längst ned; loggen rullas dit direkt, utan animering —
@@ -230,7 +249,11 @@ async function fraga() {
     if (!message) throw new Error(`svar ${svar.status}`);
 
     let knapp = null;
-    if (svar.ok && data.button_text && QOPLA.test(data.qopla_url ?? '')) {
+    const tillQopla = svar.ok && QOPLA.test(data.qopla_url ?? '');
+    const lista = typeof data.lista?.text === 'string' ? data.lista.text : '';
+    if (tillQopla && lista) {
+      knapp = listkort(lista, data.button_text || 'Beställ online', data.qopla_url);
+    } else if (tillQopla && data.button_text) {
       knapp = el('a', 'knapp assistent__bestall', data.button_text);
       knapp.href = data.qopla_url;
       knapp.target = '_blank';
