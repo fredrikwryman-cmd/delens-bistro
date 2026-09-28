@@ -1,23 +1,28 @@
 /**
- * Hela menyn. Priser i kronor, hämtade från delensbistro.se 2026-09-17.
+ * Hela menyn. Priser i kronor, enligt Qopla 2026-09-28 (först hämtade
+ * från delensbistro.se 2026-09-17).
  *
  * `pris` är en sträng eftersom flera rätter har två priser
  * (singel/dubbel, 3st/5st, glas/flaska). Den formateras aldrig om —
  * den skrivs ut som den står på menyn.
  *
- * `qopla` är rättens namn exakt som det står i Qoplas beställnings-
- * sida, inklusive Qoplas egna stavningar (Bearnasie, Hamburgedressing).
- * Menyassistenten sätter ihop sin lista "leta upp i Qopla" ur det
- * fältet, så kunden måste kunna söka på det ordagrant.
- * `qoplaKategori` står bara där samma namn finns två gånger i Qopla.
+ * QOPLA GÄLLER. Priserna följer Qoplas beställningssida, för det är
+ * där kunden betalar. Genomgångna mot Qoplas menydata 2026-09-28; se
+ * PLAN.md avsnitt 15 för vad som ändrades.
  *
- * FÄLTET STÅR BARA DÄR NAMN OCH PRIS ÄR KONTROLLERADE MOT QOPLA
- * (2026-09-28). Qopla visar "Från"-priset, alltså första priset här.
- * Saknas fältet finns rätten inte som egen produkt i Qopla (pommes-
- * uppgraderingarna, extra-tillbehören, Chili bearnaise, allt i baren),
- * eller så har Qopla ett annat pris (tillbehören, efterrätterna). Då
- * kan assistenten inte lägga den i listan. Ändras ett pris här måste
- * det kontrolleras mot Qopla igen.
+ * `qopla` är rättens namn exakt som i Qopla, Qoplas stavningar
+ * inräknade (Bearnasie, Hamburgedressing). Menyassistenten bygger sin
+ * lista "leta upp i Qopla" ur det, så kunden måste kunna söka på det.
+ * `qoplaVal` är Qoplas namn på storlekarna, i samma ordning som
+ * priserna (Singel / Dubbel, 3st / 5st).
+ * `qoplaVar` säger var man hittar den, när det inte är en egen
+ * produkt med unikt namn: en kategori där namnet finns två gånger
+ * (Barnens Favoriter), "val i burgaren" för pommesuppgraderingarna och
+ * "tillval i rätten" för extra-tillbehören.
+ *
+ * Utan `qopla` finns rätten inte att beställa i Qopla: det gäller
+ * baren, som bara serveras i restaurangen. Ändras ett pris här ska det
+ * stämma med Qopla.
  */
 
 export const kategorier = [
@@ -31,14 +36,14 @@ export const kategorier = [
         bild: 'C5',
         namn: 'Cheeseburger',
         pris: '129 / 164',
-        qopla: 'Cheeseburger',
+        qopla: 'Cheeseburger', qoplaVal: ['Singel', 'Dubbel'],
         innehall: '100 g kött, sallad, rödlök, hamburgerdressing, cheddar'
       },
       {
         bild: 'C1',
         namn: 'Delens Sign.',
         pris: '144 / 179',
-        qopla: 'Delens Signature',
+        qopla: 'Delens Signature', qoplaVal: ['Singel', 'Dubbel'],
         innehall: '100 g kött, tryffelmajo, parmesan, cheddar, champinjoner, rostad lök',
         signatur: true
       },
@@ -46,7 +51,7 @@ export const kategorier = [
         bild: 'C2',
         namn: 'Emils Ch. Dlx.',
         pris: '149 / 184',
-        qopla: 'Emils Cheese Deluxe',
+        qopla: 'Emils Cheese Deluxe', qoplaVal: ['Singel', 'Dubbel'],
         innehall: '100 g kött, sallad, picklad rödlök, bacon, 2 st chilicheese, dubbel cheddar, smält cheddar, chilimajo',
         signatur: true
       },
@@ -54,14 +59,14 @@ export const kategorier = [
         bild: 'M01',
         namn: 'Bacon & BBQ',
         pris: '139 / 174',
-        qopla: 'Bacon & BBQ-Burger',
+        qopla: 'Bacon & BBQ-Burger', qoplaVal: ['Singel', 'Dubbel'],
         innehall: '100 g kött, bacon, cheddar, picklad rödlök, sallad, majo, BBQ-sås'
       },
       {
         bild: 'C4',
         namn: 'Hot One',
         pris: '139 / 174',
-        qopla: 'Hot One',
+        qopla: 'Hot One', qoplaVal: ['Singel', 'Dubbel'],
         innehall: '100 g kött, sallad, picklad rödlök, picklad chili, jalapeños, chilimajo, pepper jack-ost',
         signatur: true
       },
@@ -148,7 +153,7 @@ export const kategorier = [
         bild: 'M09',
         namn: 'Kebabtallrik',
         pris: '135',
-        qopla: 'Kebabtallrik', qoplaKategori: 'Kebab',
+        qopla: 'Kebabtallrik', qoplaVar: 'Kebab',
         innehall: 'Kebabkött eller kyckling, rostad lök, isbergssallad, rödkål, inlagd gurka, rödlök, feferoni, röd- och vitsås. Välj pommes eller ris'
       }
     ]
@@ -202,16 +207,16 @@ export const kategorier = [
     namn: 'Barnens favoriter',
     bild: 'D4',
     ratter: [
-      { bild: 'M15', namn: 'Kebabtallrik', pris: '69', qopla: 'Kebabtallrik', qoplaKategori: 'Barnens Favoriter', innehall: 'Serveras med pommes eller ris' },
+      { bild: 'M15', namn: 'Kebabtallrik', pris: '69', qopla: 'Kebabtallrik', qoplaVar: 'Barnens Favoriter', innehall: 'Serveras med pommes eller ris' },
       {
         bild: 'M16',
         namn: 'Hamburgare',
         pris: '69',
-        qopla: 'Hamburgare', qoplaKategori: 'Barnens Favoriter',
+        qopla: 'Hamburgare', qoplaVar: 'Barnens Favoriter',
         innehall: '60 g kött, ost, sallad, hamburgerdressing. Serveras med pommes, inkl. fruktdryck'
       },
-      { bild: 'M17', namn: 'Chicken popcorn', pris: '69', qopla: 'Chicken Popcorn', qoplaKategori: 'Barnens Favoriter', innehall: 'Serveras med pommes' },
-      { bild: 'M18', namn: 'Pannkakor', pris: '69', qopla: 'Pannkakor', qoplaKategori: 'Barnens Favoriter', innehall: 'Serveras med sylt och vaniljglass' }
+      { bild: 'M17', namn: 'Chicken popcorn', pris: '69', qopla: 'Chicken Popcorn', qoplaVar: 'Barnens Favoriter', innehall: 'Serveras med pommes' },
+      { bild: 'M18', namn: 'Pannkakor', pris: '69', qopla: 'Pannkakor', qoplaVar: 'Barnens Favoriter', innehall: 'Serveras med sylt och vaniljglass' }
     ]
   },
 
@@ -220,17 +225,17 @@ export const kategorier = [
     namn: 'Tillbehör',
     bild: 'D5',
     ratter: [
-      { bild: 'M20', namn: 'Mozzarellasticks', pris: '39 / 49', innehall: '3 st / 5 st' },
-      { bild: 'M21', namn: 'Chilicheese', pris: '39 / 49', innehall: '3 st / 5 st' },
-      { bild: 'M22', namn: 'Lökringar', pris: '39 / 49', innehall: '3 st / 5 st' },
-      { bild: 'M19', namn: 'Chicken popcorn', pris: '49' },
-      { namn: 'Extra bacon', pris: '15' },
-      { namn: 'Extra ost', pris: '12' },
-      { namn: 'Extra kött', pris: '35' },
-      { namn: 'Side sallad', pris: '40' },
-      { bild: 'M23', namn: 'Sötpotatispommes', pris: '35', innehall: 'Uppgradera till' },
-      { bild: 'M24', namn: 'Loaded fries', pris: '45', innehall: 'Uppgradera till' },
-      { bild: 'M25', namn: 'Tryffel fries', pris: '45', innehall: 'Uppgradera till' }
+      { bild: 'M20', namn: 'Mozzarellasticks', pris: '45 / 56', innehall: '3 st / 5 st', qopla: 'Mozzarella sticks', qoplaVal: ['3st', '5st'] },
+      { bild: 'M21', namn: 'Chilicheese', pris: '45 / 56', innehall: '3 st / 5 st', qopla: 'Chilicheese', qoplaVal: ['3st', '5st'] },
+      { bild: 'M22', namn: 'Lökringar', pris: '45 / 56', innehall: '3 st / 5 st', qopla: 'Lökringar', qoplaVal: ['3st', '5st'] },
+      { bild: 'M19', namn: 'Chicken popcorn', pris: '56', qopla: 'Chicken Popcorn', qoplaVar: 'Tillbehör' },
+      { namn: 'Extra bacon', pris: '15', innehall: 'Tillval i rätten', qopla: 'Extra Bacon', qoplaVar: 'tillval i rätten' },
+      { namn: 'Extra ost', pris: '12', innehall: 'Tillval i rätten', qopla: 'Extra Ost', qoplaVar: 'tillval i rätten' },
+      { namn: 'Extra kött', pris: '35', innehall: 'Tillval i rätten', qopla: 'Extra Kött', qoplaVar: 'tillval i rätten' },
+      { namn: 'Side sallad', pris: '46', qopla: 'Side Sallad' },
+      { bild: 'M23', namn: 'Sötpotatispommes', pris: '35', innehall: 'Uppgradera till', qopla: 'Sötpotatispommes', qoplaVar: 'val i burgaren' },
+      { bild: 'M24', namn: 'Loaded fries', pris: '45', innehall: 'Uppgradera till', qopla: 'Loaded Fries', qoplaVar: 'val i burgaren' },
+      { bild: 'M25', namn: 'Tryffel fries', pris: '45', innehall: 'Uppgradera till', qopla: 'Tryffel Fries', qoplaVar: 'val i burgaren' }
     ]
   },
 
@@ -242,7 +247,6 @@ export const kategorier = [
       { namn: 'Aioli', pris: '19', qopla: 'Aioli' },
       { namn: 'BBQ', pris: '19', qopla: 'BBQ' },
       { namn: 'Bearnaise', pris: '19', qopla: 'Bearnasie' },
-      { namn: 'Chili bearnaise', pris: '19' },
       { namn: 'Smält cheddar', pris: '19', qopla: 'Smällt Cheddar' },
       { namn: 'Chilimajonnäs', pris: '19', qopla: 'Chilimajonäs' },
       { namn: 'Tryffelmajonnäs', pris: '19', qopla: 'Tryffelmajonäs' },
@@ -258,11 +262,12 @@ export const kategorier = [
       {
         bild: 'M26',
         namn: 'Milkshake m. grädde',
-        pris: '79',
+        pris: '91',
+        qopla: 'Milkshake Med Grädde',
         innehall: 'Vanilj, choklad, hallon, jordgubb, saltlakrits eller hallon/saltlakrits'
       },
-      { bild: 'M27', namn: 'Churros', pris: '59', innehall: 'Med kanelsocker och nougatsås' },
-      { bild: 'M28', namn: 'Kladdkaka', pris: '59', innehall: 'Vaniljglass och chokladsås' }
+      { bild: 'M27', namn: 'Churros', pris: '68', qopla: 'Churros', innehall: 'Med kanelsocker och nougatsås' },
+      { bild: 'M28', namn: 'Kladdkaka', pris: '68', qopla: 'Kladdkaka', innehall: 'Vaniljglass och chokladsås' }
     ]
   },
 

@@ -662,3 +662,40 @@ instanser. Det hårda kostnadstaket är månadsgränsen i Anthropics konsol.
 `https://delens-assistent.vercel.app/api/assistent`. Heter Vercel-
 projektet något annat ska den ändras där, och `TILLATNA_URSPRUNG` i
 `api/assistent.js` ska innehålla sajtens domän.
+
+### Menyn följer Qopla — sedan 2026-09-28
+
+Qopla är där kunden betalar, så sajtens priser följer Qoplas. Genomgånget
+mot Qoplas menydata för Delens Bistro. Priser som ändrades i
+`src/data/menu.js`:
+
+| Rätt | Förut (delensbistro.se) | Nu (Qopla) |
+|---|---|---|
+| Mozzarellasticks, 3 st / 5 st | 39 / 49 | 45 / 56 |
+| Chilicheese, 3 st / 5 st | 39 / 49 | 45 / 56 |
+| Lökringar, 3 st / 5 st | 39 / 49 | 45 / 56 |
+| Chicken popcorn (tillbehör) | 49 | 56 |
+| Side sallad | 40 | 46 |
+| Milkshake m. grädde | 79 | 91 |
+| Churros | 59 | 68 |
+| Kladdkaka | 59 | 68 |
+
+Allt annat stämde redan, inklusive burgarnas dubbel (+35 i Qopla).
+
+**Chili bearnaise är borttagen.** Den finns inte i Qopla, varken som
+dipp eller tillval. Övriga dippar finns där. Står den kvar på Hakans
+meny i restaurangen läggs den tillbaka.
+
+**Pommesuppgraderingarna och extra-tillbehören står kvar.** De finns i
+Qopla, men som val inne i rätterna, inte som egna produkter:
+Sötpotatispommes +35, Loaded Fries +45 och Tryffel Fries +45 väljs i
+burgaren i stället för pommesen som ingår. Extra Bacon 15, Extra Ost 12
+och Extra Kött 35 är tillval. Priserna stämmer. Extra-tillbehören visar
+nu "Tillval i rätten" på sajten.
+
+**Baren står kvar** och finns inte i Qopla. Den serveras bara i
+restaurangen.
+
+**I Qopla men inte på sajten:** läsken (Coca-Cola, Fanta, Sprite 32 kr,
+Festis 15 kr, Red Bull). Den ingår också som val till burgarna för
++32 kr.

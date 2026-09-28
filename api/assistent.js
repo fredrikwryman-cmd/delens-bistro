@@ -56,11 +56,14 @@ const MAX_TECKEN = 600;
    schemat, och kan därför varken hitta på ett namn eller ett pris.
    Summan räknas här.
 
-   En rätt med två priser (singel / dubbel) ger två poster. Den första
-   storleken är Qoplas grundval och får inget tillägg i namnet. */
+   En rätt med två priser ger två poster, med Qoplas egna namn på
+   storlekarna ur qoplaVal: "Cheeseburger, Dubbel", "Lökringar, 5st".
+   qoplaVar säger var kunden hittar rätten när den inte är en egen
+   produkt med unikt namn, till exempel "Tryffel Fries (val i
+   burgaren)". */
 
 function etikett(r) {
-  return r.qoplaKategori ? `${r.qopla} (${r.qoplaKategori})` : r.qopla;
+  return r.qoplaVar ? `${r.qopla} (${r.qoplaVar})` : r.qopla;
 }
 
 const KATALOG = new Map();
@@ -70,7 +73,12 @@ for (const k of kategorier) {
     if (!r.qopla) continue;
     const priser = r.pris.split(' / ').map(Number);
     priser.forEach((pris, i) => {
-      const namn = i === 0 ? etikett(r) : `${etikett(r)}, ${storlekar[i] ?? 'stor'}`;
+      const val = r.qoplaVal?.[i];
+      const namn = val
+        ? `${etikett(r)}, ${val}`
+        : i === 0
+          ? etikett(r)
+          : `${etikett(r)}, ${storlekar[i] ?? 'stor'}`;
       KATALOG.set(namn, pris);
     });
   }
@@ -132,7 +140,8 @@ Vänlig, saklig och kunnig om maten. Högst tre meningar per svar. Svara på sam
 # Regler
 - Allt du vet om restaurangen står nedan. Hitta aldrig på rätter, priser, ingredienser, öppettider eller erbjudanden. Står svaret inte här, säg att du inte vet och hänvisa till restaurangen på telefon ${kontakt.telefon}.
 - Priser skrivs exakt som i menyn. Två priser betyder två storlekar, enligt kategorins rubrik (till exempel singel / dubbel).
-- Ber kunden om tips får du föreslå en rätt ur menyn, gärna med en dipp.
+- Ber kunden om tips får du föreslå en burgare och ett tillbehör ur menyn, till exempel en pommesuppgradering eller en dipp.
+- I burgarna (hamburgare, kyckling och vego) ingår pommes. Sötpotatispommes, Loaded Fries och Tryffel Fries är uppgraderingar som väljs inne i burgaren och ersätter pommesen, till priset i listan.
 - Allergier och specialkost: svara ALDRIG utifrån ingredienslistan, inte ens när svaret verkar uppenbart — listan är inte komplett och kan inte ersätta personalen. Hänvisa alltid till personalen i restaurangen eller telefon ${kontakt.telefon}.
 - Du kan inte ta emot beställningar eller bokningar. Beställning sker online via restaurangens beställningssida.
 - Frågor som inte handlar om restaurangen svarar du vänligt att du bara kan hjälpa till med Delens Bistro.
@@ -141,7 +150,7 @@ Vänlig, saklig och kunnig om maten. Högst tre meningar per svar. Svara på sam
 Svara med JSON enligt schemat.
 - message: ditt svar till kunden, vanlig text utan markdown.
 - button_text: en kort knapptext, högst fyra ord, till exempel "Beställ online", när kunden vill beställa eller när du föreslagit en rätt. Annars en tom sträng.
-- varor: när du föreslår något att beställa, eller kunden säger vad hen vill ha, listar du precis det här, en post per portion. Välj bara ur "Beställningsbart i Qopla" nedan; det är de namn kunden söker på där. Allt du föreslår att beställa ska stå i varor, så föreslå bara sådant som finns i den listan. Annars en tom lista.
+- varor: när du föreslår något att beställa, eller kunden säger vad hen vill ha, listar du precis det här, en post per portion. Välj bara ur "Beställningsbart i Qopla" nedan; det är de namn kunden söker på där. Allt du föreslår att beställa ska stå i varor, så föreslå bara sådant som finns i den listan. Poster märkta "(val i burgaren)" tar du bara med tillsammans med en burgare, och "(tillval i rätten)" bara tillsammans med en rätt. Annars en tom lista.
 - Skriv inte summan i message. Den räknas ut och visas under ditt svar.
 
 # Beställningsbart i Qopla
