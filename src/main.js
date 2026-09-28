@@ -2071,6 +2071,19 @@ const SEKV = {
      bredd. Duken i index.html står på desktopens mått. */
   matt: { desktop: [1280, 720], mobil: [720, 1280] },
 
+  /* RUTORNAS VERSION, som ?v= på varje adress. HÖJS VARJE GÅNG EN
+     UPPSÄTTNING KODAS OM, och stillens ?v= i index.html med den.
+
+     Rutorna heter r001, r002 … oavsett vilken video de kommer ur.
+     GitHub Pages svarar med max-age=600, så en telefon som sett sidan
+     de senaste tio minuterna får använda sina gamla filer utan att
+     fråga. 2026-09-28 byttes mobilvideon tre gånger, och en telefon
+     kunde då blanda nya rutor i 720 × 1280 med gamla i 360 × 640. De
+     gamla ritades i dukens övre vänstra fjärdedel, och det syntes som
+     ett fönster med en bit av en annan bild. Med en ny version är varje
+     uppsättning nya adresser, och gamla filer kan inte blandas in. */
+  version: { desktop: '1', mobil: '4' },
+
   /* Det rullande fönstret av AVKODADE rutor, i scrollriktningen och
      mot den. Asymmetriskt med flit: man scrollar nästan alltid vidare
      åt samma håll, och de få rutorna bakåt räcker för att vända utan
@@ -2151,7 +2164,7 @@ function riggaSekvens() {
   [duk.width, duk.height] = SEKV.matt[utgava];
 
   const adress = (i) =>
-    `/bilder/sekvens/${utgava}/r${String(i + 1).padStart(3, '0')}.webp`;
+    `/bilder/sekvens/${utgava}/r${String(i + 1).padStart(3, '0')}.webp?v=${SEKV.version[utgava]}`;
 
   /* Komprimerade byte, en post per ruta. 22,5 kB styck på desktop. */
   const blobbar = new Array(antal);
@@ -2175,18 +2188,21 @@ function riggaSekvens() {
   const ifonster = (i) => i >= fonsterMin && i <= fonsterMax;
 
   /* ── RITNINGEN ─────────────────────────────────────────────────
-     Duken är exakt en bildrutas storlek, så drawImage skalar
-     ingenting. CSS sköter storleken på skärmen.
+     Duken är exakt en bildrutas storlek (SEKV.matt), så i det vanliga
+     fallet skalar drawImage ingenting. CSS sköter storleken på
+     skärmen.
 
-     DET ÄR ETT KRAV, INTE EN IAKTTAGELSE. drawImage(bild, 0, 0) ritar
-     i bildens egen storlek, så duken i index.html måste ha samma mått
-     som UTGAVOR i verktyg/sekvens.mjs. En mindre duk visar rutans
-     övre vänstra hörn och inget annat. */
+     RUTAN RITAS ÄNDÅ I DUKENS FULLA STORLEK, med bredd och höjd
+     utskrivna. Med drawImage(bild, 0, 0) ritades en ruta med andra
+     mått i sin egen storlek: en mindre ruta hamnade i dukens övre
+     vänstra hörn, och resten av duken visade förra rutan. Det är
+     felet som syntes som ett fönster 2026-09-28, se SEKV.version.
+     Stämmer måtten kostar det ingenting. */
 
   const rita = (i) => {
     const bild = rutor[i];
     if (!bild) return false;
-    ctx.drawImage(bild, 0, 0);
+    ctx.drawImage(bild, 0, 0, duk.width, duk.height);
     ritad = i;
     if (!tand) {
       tand = true;

@@ -364,18 +364,17 @@
             <!-- Telefonen får en stående still ur sin egen video, samma
                  brytpunkt som rutorna (760 px, SEKV.brytMobil). -->
             <picture>
-              <source media="(max-width: 760px)" srcset="/bilder/sekvens/still-mobil.webp"
+              <source media="(max-width: 760px)" srcset="/bilder/sekvens/still-mobil.webp?v=4"
                       width="720" height="1280" />
-              <img class="sekvens__still" src="/bilder/sekvens/still.webp"
+              <img class="sekvens__still" src="/bilder/sekvens/still.webp?v=1"
                    alt="En dubbel smashburgare med smält cheddar, jalapeño, rödlök och friterade lökringar, svävande framför restaurangens neonskylt."
                    width="1280" height="720" loading="lazy" decoding="async" />
             </picture>
             <!-- Duken är exakt en bildrutas storlek i pixlar och skalas
-                 av CSS. MÅTTEN MÅSTE FÖLJA UTGAVOR i verktyg/sekvens.mjs:
-                 rita() ritar med drawImage(bild, 0, 0), alltså i bildens
-                 EGEN storlek utan skalning, så en duk som är mindre än
-                 rutan visar bara rutans övre vänstra hörn. Den stod kvar
-                 på 800×450 när rutorna höjdes till 1280.
+                 av CSS. Måtten här är desktopens. riggaSekvens sätter
+                 uppsättningens mått (SEKV.matt i main.js), och rita()
+                 ritar varje ruta i dukens fulla storlek, så en ruta med
+                 fel mått blir aldrig ett fönster i ett hörn.
                  Att blåsa upp bufferten HÖGRE än rutan, till skärmens
                  pixeltäthet, vore däremot slöseri: källan är 1280 px
                  bred och mer detalj finns inte. -->

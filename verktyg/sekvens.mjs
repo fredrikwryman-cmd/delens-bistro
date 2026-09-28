@@ -90,6 +90,10 @@
  *
  *   node verktyg/sekvens.mjs mobil
  *
+ * HÖJ SEKV.version I main.js EFTER VARJE KÖRNING, och stillens ?v= i
+ * index.html. Filnamnen är desamma för varje video, och utan en ny
+ * version kan en telefon blanda in gamla rutor ur sin cache.
+ *
  * WEBP OCH INTE AVIF, trots att AVIF mätte 34 procent lättare på just
  * det här materialet. Två skäl. AVIF avkodas två till tre gånger
  * långsammare, och det som avkodas här ska hinna fram mellan två
