@@ -1945,15 +1945,15 @@ input:focus-visible {
    Spåret blir en scrollsträcka och scenen klistras fast. Talen:
    på desktop är spåret 250svh och scenen 100svh, så klistringen blir
    1350 px på en 900 px hög vy. 92,5 procent av 80 rutor ligger i
-   den — 18,5 px scroll per ruta. På telefon är spåret 218svh och
-   scenen 100svh, så klistringen blir omkring 996 px för 59 rutor
-   — också 18,5 px per ruta, på en 844 px hög vy. Under ungefär 25 px per ruta
+   den — 18,5 px scroll per ruta. På telefon är spåret 450svh och
+   scenen 100svh, så klistringen blir omkring 2 954 px för 150 rutor
+   — 21,4 px per ruta, på en 844 px hög vy. Under ungefär 25 px per ruta
    går rörelsen inte att skilja från film. Räkningen står i
    verktyg/sekvens.mjs.
 
    BRYTPUNKTEN 760 px STÅR OCKSÅ I main.js (SEKV.brytMobil). Ändras
    den på ett ställe måste den ändras på det andra, annars hämtas
-   mobilens 59 rutor till ett spår byggt för 80.                  */
+   mobilens 150 rutor till ett spår byggt för 80.                  */
 
 .sekvens[data-rorlig='true'] .sekvens__spar {
   height: 250svh;
@@ -1987,12 +1987,20 @@ input:focus-visible {
      stilmallen, så mappningen behöver ingen egen ändring. Rutantalet
      och spåret är desamma, så takten är det också.
 
-     SPÅRET ÄR 218svh. Klistringen blir 118svh, alltså 996 px på en
-     844 px hög vy, för 59 rutor — 18,5 px per ruta, samma takt som
-     bandet hade och som rutantalet är räknat för. 150svh, som bandet
-     hade, hade gett bara 422 px klistring och 7,7 px per ruta.    */
+     SPÅRET ÄR 450svh sedan 2026-09-28, mot 218. Sekvensen gick för
+     fort: man hann inte se burgaren byggas. Klistringen är nu 350svh,
+     alltså 2 954 px på en 844 px hög vy, tre gånger så lång som förut.
+
+     FLER RUTOR, INTE BARA LÄNGRE SPÅR. Med 59 rutor hade den längre
+     sträckan gett omkring 55 px scroll per ruta. Varje ruta hade då
+     stått kvar och bytts i ryck, och över ungefär 25 px läser det inte
+     som film. Därför är rutorna 150, och takten blir
+     2 954 / (0,925 × 149) = 21,4 px per ruta, och 23,7 på en 932 px
+     hög telefon. Med 134 rutor blev den 26,4 där. Sekvensen tar tre gånger
+     så lång tid och är lika mjuk. Rutantalet står också i main.js
+     (SEKV.rutor) och i verktyg/sekvens.mjs.                         */
   .sekvens[data-rorlig='true'] .sekvens__spar {
-    height: 218svh;
+    height: 450svh;
   }
 
   /* Stillbildsläget (reducerad rörelse, Save-Data, ingen JS): scenen

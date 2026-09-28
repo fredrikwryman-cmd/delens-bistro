@@ -20,7 +20,7 @@
  * TVÅ VIDEOR, TVÅ UPPSÄTTNINGAR, TVÅ STILLAR.
  *
  *   desktop   80 rutor, 1280 × 720   ur delens-scroll-animation.mp4
- *   mobil     59 rutor,  360 × 640   ur ny-scroll-mobil.mp4
+ *   mobil    150 rutor,  360 × 640   ur ny-scroll-mobil.mp4
  *
  * Varje uppsättning har sin still ur sista rutan: still.webp och
  * still-mobil.webp.
@@ -52,7 +52,14 @@
  * den (se SEKV.klistratSlut i main.js):
  *
  *   desktop  900 px vy:  1350 px / (0,925 × 79) = 18,5 px per ruta
- *   mobil    844 px vy:   996 px / (0,925 × 58) = 18,6 px per ruta
+ *   mobil    844 px vy:  2954 px / (0,925 × 149) = 21,4 px per ruta
+ *   mobil    932 px vy:  3262 px / (0,925 × 149) = 23,7 px per ruta
+ *
+ * Mobilens spår förlängdes 2026-09-28 från 218svh till 450svh, så att
+ * sekvensen tar tre gånger så lång tid att scrolla igenom. Rutorna
+ * ökades samtidigt från 59 till 150, så att takten stannar under 25 px
+ * även på den högsta vanliga telefonen, 932 px. Med 134 blev den 26,4.
+ * Källan har 240 rutor, så det finns utrymme.
  *
  * Förut var det 120 och 80 rutor, alltså 11,9 och 13,2 px. Steget
  * tog sekvensen från 4,94 till 3,29 MB på desktop och från 3,29 till
@@ -138,7 +145,7 @@ const UTGAVOR = [
     id: 'mobil',
     video: 'ny-scroll-mobil.mp4',
     kallrutor: 240, // 24 FPS × 10,01 s
-    rutor: 59,
+    rutor: 150,
     bredd: 360,
     kvalitet: 66,
     still: 'still-mobil.webp'

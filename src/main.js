@@ -2063,7 +2063,7 @@ const SEKV = {
   /* Rutor per uppsättning. Måste stämma med UTGAVOR i
      verktyg/sekvens.mjs — en ruta för mycket är en 404, en för lite
      är en sekvens som slutar innan spåret gör det. */
-  rutor: { desktop: 80, mobil: 59 },
+  rutor: { desktop: 80, mobil: 150 },
 
   /* Rutornas mått i pixlar, bredd × höjd. Duken sätts till dem, för
      rita() skalar ingenting — se RITNINGEN. Mobilen har en egen,
