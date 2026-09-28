@@ -1343,9 +1343,26 @@ input:focus-visible {
      hade: 256 × 120 px mot textens 340 × 111. */
   .hero__enjoy { width: min(16rem, 100%); }
 
-  /* Ingen utflyttning i smal vy: spalten börjar vid gutter, 16 px in,
-     och 1,5 rem hade tagit märket utanför skärmen. Lutningen står kvar. */
-  .hero__copy--bild { translate: none; }
+  /* MADE TO ENJOY ÖVERST I SMAL VY, centrerat ovanför DELEN'S. Det är
+     det första man möter på sidan. Märket står efter rubriken i HTML:en,
+     och där får det stå: på desktop är det absolut placerat, så
+     platsen i koden syns inte där. Här gör flexkolumnen och order: -1
+     att det kommer först. Intåget följer med: riggaAvslojning() låter
+     ett element med negativ order börja förskjutningen.
+
+     Ingen utflyttning: 1,5 rem åt vänster hade inte gått ihop med
+     centreringen. Lutningen står kvar. */
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero__copy--bild {
+    order: -1;
+    align-self: center;
+    translate: none;
+    margin-block: 1rem 1.25rem;
+  }
 
   /* Maskotarna skalas ned med två tredjedelar, och de behåller sina
      inbördes storlekar. Bredden sätts som width och inte som

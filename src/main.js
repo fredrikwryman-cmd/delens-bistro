@@ -694,14 +694,22 @@ function riggaAvslojning() {
      syns i samma ögonblick; räknades de var för sig började båda från
      noll och DELENS och BISTRO kom in som ett block. Nu kommer BISTRO
      55 ms efter DELENS — läsordning. En ensam sektionsrubrik
-     påverkas inte. */
+     påverkas inte.
+
+     CSS:ENS ORDER GÅR FÖRE DOKUMENTORDNINGEN. Made To Enjoy står
+     efter rubriken i HTML:en men flyttas överst i smal vy med
+     order: -1. Där ska det också komma in först, inte efter BISTRO.
+     På desktop är order 0 och ordningen som förut. */
+  const ordning = (el) => parseInt(getComputedStyle(el).order, 10) || 0;
   const io = new IntersectionObserver(
     (poster) => {
       const inne = poster
         .filter((p) => p.isIntersecting)
         .map((p) => p.target)
-        .sort((a, b) =>
-          a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+        .sort(
+          (a, b) =>
+            ordning(a) - ordning(b) ||
+            (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1)
         );
 
       let i = 0;
