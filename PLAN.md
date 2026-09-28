@@ -409,6 +409,16 @@ indexeras skadar bådas synlighet.
 | 2 | robots.txt | `public/robots.txt` | `User-agent: *` + `Disallow: /` |
 | 3 | HTTP-header | endast om värden tillåter det | `X-Robots-Tag: noindex, nofollow` |
 
+**Undantag i lager 2, sedan 2026-09-28: delningskortet.** Sajten har
+og- och Twitter-taggar med en bild, så att en delad länk visar ett kort.
+Delningstjänsternas botar (facebookexternalhit, Twitterbot, LinkedInBot,
+Slackbot-LinkExpanding, Discordbot, TelegramBot, WhatsApp,
+SkypeUriPreview) får en egen grupp med `Allow: /` i `robots.txt`.
+Annars hade de inte fått läsa taggarna. De bygger inget sökindex, och
+metataggen i lager 1 gäller fortfarande på varje sida. Sökmotorernas
+botar ligger kvar under `User-agent: *` med `Disallow: /`. Det här är
+inte att släppa spärren.
+
 Lager 3 går **inte** att sätta på GitHub Pages. Där är lager 1 och 2 det
 som gäller, och lager 1 är det som faktiskt håller — `robots.txt` hindrar
 crawlning men garanterar inte att en känd URL hålls ur indexet.

@@ -19,6 +19,30 @@
       content="Så behandlar Delens Bistro personuppgifter. Sajten sätter inga kakor och har inget kontaktformulär."
     />
 
+    <!-- DELNINGSKORTET. Open Graph och Twitter, samma bild på alla
+         sidor. Bildens adress MÅSTE vara absolut: flera tjänster
+         hämtar den utan att känna till sidans domän. ?v= höjs om bilden
+         byts, annars visar tjänsterna sin cachade kopia.
+         noindex ovan gäller sökmotorer, inte förhandsvisning, och
+         robots.txt släpper igenom delningstjänsternas botar. Se PLAN.md
+         avsnitt 12. -->
+    <meta property="og:site_name" content="Delens Bistro" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="sv_SE" />
+    <meta property="og:url" content="https://delens.aimstudios.se/integritetspolicy.html" />
+    <meta property="og:title" content="Integritetspolicy — Delens Bistro" />
+    <meta property="og:description" content="Så behandlar Delens Bistro personuppgifter. Inga kakor och inget kontaktformulär." />
+    <meta property="og:image" content="https://delens.aimstudios.se/bilder/og/delens-og.jpg?v=1" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="541" />
+    <meta property="og:image:alt" content="En dubbel smashburgare med cheddar, jalapeño och rödlök på ett träbräde, med pommes och dipp. Texten Delens Bistro, Fast Food &amp; Bar, Upplands Väsby." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Integritetspolicy — Delens Bistro" />
+    <meta name="twitter:description" content="Så behandlar Delens Bistro personuppgifter. Inga kakor och inget kontaktformulär." />
+    <meta name="twitter:image" content="https://delens.aimstudios.se/bilder/og/delens-og.jpg?v=1" />
+    <meta name="twitter:image:alt" content="En dubbel smashburgare med cheddar, jalapeño och rödlök på ett träbräde, med pommes och dipp. Texten Delens Bistro, Fast Food &amp; Bar, Upplands Väsby." />
+
     <!-- IKONER. favicon.ico är kundens egen fil och bär 16, 32 och 48 px
          i samma fil — ritad för de graderna. De större är den runda
          logotypen på djuprött; se verktyg/ikoner.mjs. Innan låg här

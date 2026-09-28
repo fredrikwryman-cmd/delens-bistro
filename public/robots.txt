@@ -1,4 +1,23 @@
 # Sajten är under uppbyggnad och ska inte indexeras.
 # Spärren släpps först på uttrycklig order. Se PLAN.md avsnitt 12.
+
+# UNDANTAG: delningstjänsternas förhandsvisning. Botarna nedan hämtar
+# sidan bara för att rita ett kort när en länk delas i en chatt eller
+# ett flöde. De flesta respekterar robots.txt, och med Disallow: / fick
+# de inte läsa og-taggarna, så kortet blev tomt. De bygger inget
+# sökindex, och varje sida bär ändå <meta name="robots" content="noindex">.
+# Sökmotorernas botar (Googlebot, Bingbot, Applebot med flera) omfattas
+# inte och faller under User-agent: * längst ned.
+User-agent: facebookexternalhit
+User-agent: Facebot
+User-agent: Twitterbot
+User-agent: LinkedInBot
+User-agent: Slackbot-LinkExpanding
+User-agent: Discordbot
+User-agent: TelegramBot
+User-agent: WhatsApp
+User-agent: SkypeUriPreview
+Allow: /
+
 User-agent: *
 Disallow: /
