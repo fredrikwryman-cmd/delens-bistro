@@ -53,13 +53,17 @@ const ORD = [
     fil: 'bistro',
     bredder: [640, 1400],
     /* Konturens radie som andel av bredden, eller 0 för ingen.
+       BORTTAGEN 2026-09-28, på beställning, trots skälet nedan. Var
+       0,0075. Läggs den tillbaka måste .hero__bistro .hero__ord i
+       stilmallen räknas om till 3,81 × 0,851 em och 1,1 / 4,479.
+
        VIT KONTUR PÅ BISTRO, INTE PÅ DELEN'S — beslutat 2026-09-28.
        BISTRO:s röda står på 3,00:1 mot svart men 2,3–2,7:1 mot
        burgarens kött, som det ligger framför, och S-T-R flöt ihop med
        det. DELEN'S beige står på 9,96:1 och ligger bakom burgaren.
        0,0075 är samma andel som rebrandnamnen: omkring 3 px i största
        visningsstorlek. */
-    kontur: 0.0075
+    kontur: 0
   }
 ];
 
