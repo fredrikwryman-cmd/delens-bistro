@@ -1263,6 +1263,17 @@ input:focus-visible {
    följer med. */
 .hero__copy--bild {
   line-height: 0;
+  /* VILOLÄGE, INTE ANIMERING. Märket står lutat 4° moturs, med
+     vänsterkanten nedåt, och flyttat 1,5 rem ut åt vänster, bort från
+     BISTRO. Rakt och på spaltens plats var det 17 px från ordet vid
+     1024. rotate och translate är egna egenskaper och sätts på
+     omslaget, inte på bilden: intåget animerar bildens transform, och
+     bilden landar i det här läget i stället för att rätas ut.
+
+     1,5 rem ger minst 13 px till skärmkanten vid 1024, där spalten
+     börjar 41 px in. Lutningen gör märket 4 px bredare åt båda hållen. */
+  rotate: -4deg;
+  translate: -1.5rem 0;
 }
 
 .hero__enjoy {
@@ -1331,6 +1342,10 @@ input:focus-visible {
      ett märke i full bredd. 16 rem ger ungefär samma yta som texten
      hade: 256 × 120 px mot textens 340 × 111. */
   .hero__enjoy { width: min(16rem, 100%); }
+
+  /* Ingen utflyttning i smal vy: spalten börjar vid gutter, 16 px in,
+     och 1,5 rem hade tagit märket utanför skärmen. Lutningen står kvar. */
+  .hero__copy--bild { translate: none; }
 
   /* Maskotarna skalas ned med två tredjedelar, och de behåller sina
      inbördes storlekar. Bredden sätts som width och inte som
