@@ -630,8 +630,12 @@ slutar här.
 
 ## 15. Menyassistenten — sedan 2026-09-28
 
-Kockmärket i Beställ öppnar en chatt, "Fråga kocken". Den svarar på
-frågor om menyn, priserna, öppettiderna och adressen.
+En pratbubbla, "Fråga kocken", står fast i nedre högra hörnet på
+startsidan och öppnar en chatt. Den svarar på frågor om menyn,
+priserna, öppettiderna och adressen. Bubblan står ovanför
+beställningsfältets plats och rör sig inte när fältet viker undan.
+Bilden är `kalla/marken/fraga-kocken.png`, som görs om av
+`verktyg/marken.mjs`.
 
 | Del | Var |
 |---|---|

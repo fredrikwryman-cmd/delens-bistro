@@ -730,12 +730,44 @@ function riggaOrderbar() {
   const bar = $('#orderbar');
   const mal = $('#bestall');
   if (!bar || !mal) return;
+
+  // Två skäl att vika undan, och ett räcker. Se style.css.
+  let iBestall = false;
+  let nedat = false;
+  const satt = () => bar.setAttribute('data-undan', String(iBestall || nedat));
+
   new IntersectionObserver(
-    ([post]) => bar.setAttribute('data-undan', String(post.isIntersecting)),
+    ([post]) => {
+      iBestall = post.isIntersecting;
+      satt();
+    },
     // Först när en rejäl del av sektionen syns — annars blinkar fältet
     // förbi vid varje passage.
     { threshold: 0.35 }
   ).observe(mal);
+
+  // Samma steg som riggaNav: 6 px tröskel mot tröghetsscrollens
+  // studs, och de översta 40 px räknas som sidhuvud.
+  let sist = window.scrollY;
+  varvSteg.push(() => {
+    const y = window.scrollY;
+    const delta = y - sist;
+    if (Math.abs(delta) < 6) return;
+    sist = y;
+    const ny = delta > 0 && y > 40;
+    if (ny === nedat) return;
+    nedat = ny;
+    satt();
+  });
+
+  // Frågeknappen står ovanför fältet och behöver dess höjd. Den
+  // varierar med typsnitt, radbrytning och iPhones hemlinje, så den
+  // mäts i stället för att gissas. Mätningen sker bara när höjden
+  // ändras, aldrig per bildruta.
+  new ResizeObserver(([post]) => {
+    const h = post.borderBoxSize?.[0]?.blockSize ?? bar.offsetHeight;
+    document.documentElement.style.setProperty('--orderbar-h', h + 'px');
+  }).observe(bar);
 }
 
 /* Utgångsläget sätts härifrån och inte i CSS. Ett märke som ligger på
@@ -2743,7 +2775,7 @@ function riggaLenis() {
 }
 
 /* ═══ MENYASSISTENTEN ════════════════════════════════════════════
-   Kockmärket i Beställ öppnar en chatt. Här står BARA avtryckaren:
+   Bubblan i nedre högra hörnet öppnar en chatt. Här står BARA avtryckaren:
    panelen, dess stilar och all kod för samtalet ligger i
    assistent.js och hämtas med import() först vid klick. Vite gör en
    egen bit av den, och startpaketet vet inte att den finns.

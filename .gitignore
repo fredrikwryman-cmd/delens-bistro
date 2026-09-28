@@ -3,3 +3,5 @@ dist
 .DS_Store
 
 # Referensbild — får inte hamna på sajten. Ligger utanför public/.
+
+.vercel

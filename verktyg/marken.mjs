@@ -62,6 +62,10 @@ const I_BRUK = new Set([
   'delens-smash',
   'delens-not',
   'delens-kock',
+  // Inget märke på en sektion utan menyassistentens knapp, fast i
+  // nedre högra hörnet. Källan hette fråga-kocken; ASCII av samma
+  // skäl som ovan.
+  'fraga-kocken',
 ]);
 
 /** Tröskeln är låg med flit. Den vita stanskanten tonar ut i en mjuk

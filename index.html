@@ -495,19 +495,14 @@
         <!-- Kocken räcker fram brickan, och står därför bredvid knappen som
              gör samma sak. Uppe i vänstra hörnet låg han över rubriken och
              BESTÄLL klipptes — samma fel som redan rättats en gång här. -->
-        <!-- KOCKEN ÄR OCKSÅ MENYASSISTENTENS KNAPP. Pratbubblan är
-             knappens namn; bilden är dekor med tom alt, annars läses
-             bildbeskrivningen upp mitt i knappen. Chatten laddas först
-             vid klick — se riggaAssistent() i main.js. -->
-        <button type="button" class="sticker sticker--bestall sticker--knapp" id="assistent-knapp"
-                aria-haspopup="dialog" aria-expanded="false" aria-controls="assistent"
-                style="--r: 7deg; --s-top: 60%; --s-left: 27%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-kock.webp')">
+        <span class="sticker sticker--bestall"
+              style="--r: 7deg; --s-top: 60%; --s-left: 27%; --mk-bredd: 12rem; --mk-bild: url('/bilder/marken/delens-kock.webp')">
           <img class="sticker__blad" src="/bilder/marken/delens-kock.webp"
-               alt="" width="400" height="429" loading="lazy" decoding="async" />
+               alt="Klistermärke: en kock håller upp en bricka med burgare och pommes"
+               width="400" height="429" loading="lazy" decoding="async" />
           <span class="sticker__flarp" aria-hidden="true"></span>
           <span class="sticker__glans" aria-hidden="true"></span>
-          <span class="sticker__bubbla">Fråga kocken<span class="visuellt-dold"> om menyn och öppettiderna</span></span>
-        </button>
+        </span>
         <div class="wrap bestall__inner">
           <div class="bestall__text">
             <h2 class="rubrik rubrik--stor" data-reveal>Beställ online</h2>
@@ -747,6 +742,19 @@
         Beställ online
       </a>
     </div>
+
+    <!-- ═══ FRÅGA KOCKEN ═══════════════════════════════════════════
+         Menyassistentens knapp, fast i nedre högra hörnet, ovanför
+         beställningsfältets plats. Den står still när fältet viker
+         undan — se .fraga i style.css. Texten i bubblan är en bild,
+         så namnet står i aria-label. Chatten laddas först vid klick
+         — se riggaAssistent() i main.js. -->
+    <button type="button" class="fraga" id="assistent-knapp"
+            aria-label="Fråga kocken om menyn och öppettiderna"
+            aria-haspopup="dialog" aria-expanded="false" aria-controls="assistent">
+      <img class="fraga__bild" src="/bilder/marken/fraga-kocken.webp"
+           alt="" width="400" height="277" decoding="async" />
+    </button>
 
     <script type="module" src="/src/main.js"></script>
   </body>

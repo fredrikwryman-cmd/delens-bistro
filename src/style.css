@@ -637,68 +637,6 @@ a {
   }
 }
 
-/* ── Kocken som knapp ──────────────────────────────────────────
-   Kockmärket i Beställ öppnar menyassistenten. Det är fortfarande
-   ett märke — samma ankomst, avskalning, blick och glans — men det
-   ENDA märket som tar emot pekaren. Resten är dekor och släpper
-   igenom klick till det som ligger under.
-
-   Pratbubblan gör märket läsbart som knapp. En kock på en bild säger
-   ingenting om att man kan fråga honom något; bubblan säger det,
-   och den är också knappens tillgängliga namn.
-
-   Tryckkänslan är scale på bilden, inte på knappen: knappens rotate
-   och scale ägs redan av ankomsten. */
-.sticker--knapp {
-  pointer-events: auto;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.sticker--knapp .sticker__blad {
-  transition: scale 160ms var(--ut);
-}
-
-.sticker--knapp:active .sticker__blad {
-  scale: 0.96;
-}
-
-/* PÅ DESKTOP TILL HÖGER OM KOCKEN. Till vänster låg den över
-   ingressens sista ord, Qopla; till höger finns luften mellan kocken
-   och fotot. Under 900 px står kocken i högerkanten, och där får
-   bubblan gå åt vänster i stället — se längre ned. */
-.sticker__bubbla {
-  position: absolute;
-  inset-block-start: 0.4rem;
-  inset-inline-end: -5.5rem;
-  padding: 0.4rem 0.85rem 0.3rem;
-  background: var(--offwhite);
-  color: var(--rod);
-  font-size: var(--t-xs);
-  line-height: 1;
-  letter-spacing: var(--ls-xs);
-  text-transform: uppercase;
-  white-space: nowrap;
-  border-radius: 1rem 1rem 1rem 0.25rem;
-  rotate: -4deg;
-  box-shadow: 0 0.4rem 0.9rem rgb(0 0 0 / 0.45);
-}
-
-@media (max-width: 900px) {
-  .sticker__bubbla {
-    inset-block-start: -0.6rem;
-    inset-inline-start: -2.4rem;
-    inset-inline-end: auto;
-    rotate: -12deg;
-  }
-}
-
 /* ── Knappar ───────────────────────────────────────────────────── */
 
 .knapp {
@@ -3643,28 +3581,35 @@ input:focus-visible {
 
 /* ═══ FAST BESTÄLLNINGSFÄLT ═══════════════════════════════════ */
 
-/* Det fasta fältet är en genväg till beställningen. När målet
-   självt är på skärmen finns två köpknappar samtidigt — genvägen
-   viker undan för destinationen. */
-/* visibility och pointer-events måste följa med. Enbart translate
-   flyttar fältet ur bild men lämnar det i tabbordningen — en
-   tangentbordsanvändare hamnade på en osynlig knapp nedanför vyn och
-   tappade fokus ur sikte. visibility tas ur flödet först när
-   förflyttningen är klar, så uttåget syns. */
-/* Uttåg och intåg är olika långa med flit. Att fältet viker undan är
-   ett systemsvar på att man nått målet — det ska snäppa bort, 180 ms.
-   Att det kommer tillbaka är svaret på att man lämnat målet och kan
-   behöva genvägen igen — det får ta 280 ms och glida in. Lika lång
-   tid åt båda hållen läser som en skjutdörr. */
+/* Det fasta fältet är en genväg till beställningen. Det viker undan
+   i två lägen, och riggaOrderbar() i main.js slår ihop dem:
+
+   - VID NEDSCROLL, som navbaren. Då är fältet i vägen för det man
+     läser. Vid uppscroll är man på väg tillbaka, och där behövs
+     genvägen igen. Samma steg i rAF-varvet, samma tröskel på 6 px,
+     samma 40 px överst och samma 300 ms var(--ut) som navbaren, fast
+     nedåt.
+   - I BESTÄLL. När målet självt är på skärmen finns annars två
+     köpknappar samtidigt, och då viker genvägen undan för
+     destinationen.
+
+   Förut var uttåget 180 ms och intåget 280 ms. Nu åker fältet vid
+   varje byte av scrollriktning, och då ska det röra sig exakt som
+   navbaren. Två fasta lister med olika tider läser som två system.
+
+   visibility och pointer-events måste följa med. Enbart translate
+   flyttar fältet ur bild men lämnar det i tabbordningen, och då
+   hamnade en tangentbordsanvändare på en osynlig knapp nedanför vyn.
+   visibility byter till hidden först när förflyttningen är klar, så
+   att uttåget syns, och till visible direkt vid intåget. */
 .orderbar[data-undan='true'] {
   translate: 0 100%;
   visibility: hidden;
   pointer-events: none;
-  transition: translate 180ms var(--ut), visibility 180ms;
 }
 
 .orderbar {
-  transition: translate 280ms var(--ut), visibility 280ms;
+  transition: translate 300ms var(--ut), visibility 300ms;
   position: fixed;
   inset-block-end: 0;
   inset-inline: 0;
@@ -3697,6 +3642,73 @@ input:focus-visible {
 
 @media (hover: hover) and (pointer: fine) {
   .orderbar__knapp:hover { filter: brightness(1.35); }
+}
+
+/* ═══ FRÅGA KOCKEN ════════════════════════════════════════════
+
+   Menyassistentens knapp, fast i nedre högra hörnet på hela
+   startsidan. Den låg förut som pratbubbla på kockmärket i Beställ
+   och syntes bara där.
+
+   DEN STÅR OVANFÖR FÄLTETS PLATS OCH FLYTTAR SIG ALDRIG.
+   --orderbar-h är fältets uppmätta höjd, satt av riggaOrderbar() i
+   main.js. 4 rem är bara läget innan första mätningen. Fältet viker
+   undan vid varje nedscroll och kommer tillbaka vid varje uppscroll.
+   En bubbla som följde med skulle gunga upp och ned hela tiden
+   medan man läser. Därför står den kvar på samma höjd, och fältet
+   glider in och ut under den utan att de överlappar.
+
+   z-index 950 är samma lager som fältet. Muspekarkedjan läggs sist i
+   body med samma värde och ligger alltså ovanpå, och panelen (1000)
+   täcker bubblan när den är öppen. */
+.fraga {
+  position: fixed;
+  inset-block-end: calc(var(--orderbar-h, 4rem) + 0.5rem);
+  inset-inline-end: var(--gutter);
+  z-index: 950;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Bredden räknas från bilden. 6 rem på telefon är tillräckligt för
+   att FRÅGA KOCKEN ska gå att läsa utan att bubblan tar över hörnet.
+   Svansen pekar nedåt åt höger, mot hörnet, och därför skalas
+   bubblan från svansen när man trycker. */
+.fraga__bild {
+  display: block;
+  width: clamp(6rem, 8vw, 8rem);
+  height: auto;
+  transform-origin: 86% 95%;
+  filter: drop-shadow(0 0.35rem 0.6rem rgb(0 0 0 / 0.4));
+  transition: scale 160ms var(--ut);
+}
+
+.fraga:active .fraga__bild {
+  scale: 0.95;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fraga:hover .fraga__bild {
+    scale: 1.05;
+    transition-duration: 200ms;
+  }
+
+  .fraga:hover:active .fraga__bild {
+    scale: 0.95;
+  }
+}
+
+.fraga:focus-visible {
+  outline: none;
+}
+
+.fraga:focus-visible .fraga__bild {
+  outline: 2px solid var(--amber);
+  outline-offset: 4px;
+  border-radius: 1.5rem;
 }
 
 /* ═══ REDUCERAD RÖRELSE ═══════════════════════════════════════

@@ -1,6 +1,6 @@
 /* ═══ MENYASSISTENTEN ═══════════════════════════════════════════
    Laddas bara tillsammans med assistent.js, alltså först när någon
-   tryckt på kocken. Tokens, typsnitt och .knapp kommer från
+   tryckt på Fråga kocken. Tokens, typsnitt och .knapp kommer från
    style.css, som redan ligger på sidan.
 
    RÖRELSEN: panelen glider in från höger, 220 ms på var(--ut). Bara
