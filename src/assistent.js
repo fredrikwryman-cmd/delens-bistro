@@ -140,6 +140,44 @@ function listkort(text, uppmaning, url) {
   return a;
 }
 
+/* ── När assistenten inte svarar ─────────────────────────────────
+
+   NYCKELN HAR ETT LITET SALDO UTAN PÅFYLLNING. Assistenten kan alltså
+   sluta svara utan förvarning, och då ska kunden inte stå med en
+   tom panel eller ett tekniskt fel. Varje fel blir ett kort besked
+   med vägen vidare: telefon och mejl, samma uppgifter som står på
+   sidan, ur samma datafil.
+
+   BESKEDET VÄLJS HÄR, INTE AV SERVERN. Servern skickar med ett eget
+   meddelande vid de flesta fel, men inte alla: Vercels egna felsidor
+   (tidsgräns, krasch) och ursprungskontrollen svarar utan det, och ett
+   nätverksfel svarar inte alls. Tre lägen täcker alla:
+
+     for-manga   429, takbegränsningen: vänta en stund
+     ur-drift    allt annat från servern, även 5xx och slut på kvot
+                 (Anthropic svarar då med fel, servern med 502/503)
+     inget-svar  nätverksfel eller tidsgränsen på 30 s              */
+
+const FELBESKED = {
+  'for-manga': 'Du har ställt många frågor på kort tid. Vänta en stund och försök igen.',
+  'ur-drift': 'Kocken kan inte svara just nu.',
+  'inget-svar': 'Jag kommer inte fram just nu. Kontrollera uppkopplingen och försök igen.'
+};
+
+/** Beskedet, sedan samma väg vidare i alla tre lägen. */
+function felrad(lage) {
+  const li = el('li', 'assistent__rad assistent__rad--assistent assistent__rad--fel');
+  const p = el('p', 'assistent__bubbla', FELBESKED[lage] + ' Ring ');
+  const tel = el('a', 'lank', kontakt.telefon);
+  tel.href = kontakt.telefonLank;
+  const epost = el('a', 'lank', kontakt.epost);
+  epost.href = 'mailto:' + kontakt.epost;
+  p.append(tel, ' eller mejla ', epost, ', så hjälper vi dig.');
+  li.append(p);
+  li.dataset.fel = lage;
+  return li;
+}
+
 function visa(li) {
   logg.append(li);
   // Nya rader längst ned; loggen rullas dit direkt, utan animering —
@@ -315,9 +353,22 @@ async function fraga() {
       body: JSON.stringify({ meddelanden: samtal }),
       signal: avbryt.signal
     });
+    if (!svar.ok) {
+      vantar.remove();
+      samtal.pop();
+      visa(felrad(svar.status === 429 ? 'for-manga' : 'ur-drift'));
+      return;
+    }
+
     const data = await svar.json().catch(() => null);
     const message = typeof data?.message === 'string' ? data.message : '';
-    if (!message) throw new Error(`svar ${svar.status}`);
+    // Ett svar utan meddelande är lika trasigt som ett felsvar.
+    if (!message) {
+      vantar.remove();
+      samtal.pop();
+      visa(felrad('ur-drift'));
+      return;
+    }
 
     let knapp = null;
     const tillQopla = svar.ok && QOPLA.test(data.qopla_url ?? '');
@@ -334,20 +385,15 @@ async function fraga() {
     vantar.remove();
     visa(rad('assistent', message, knapp));
 
-    // Bara riktiga svar går in i historiken. Ett felmeddelande som
-    // skickades tillbaka som modellens eget svar vore en lögn i
-    // nästa fråga.
-    if (svar.ok) samtal.push({ roll: 'assistent', text: message });
-    else samtal.pop();
+    // Bara riktiga svar går in i historiken; felvägarna ovan tar bort
+    // frågan igen. Ett felmeddelande som skickades tillbaka som
+    // modellens eget svar vore en lögn i nästa fråga.
+    samtal.push({ roll: 'assistent', text: message });
   } catch {
+    // Nätverksfel, eller tidsgränsen som avbröt anropet.
     samtal.pop();
     vantar.remove();
-    const fel = rad(
-      'assistent',
-      `Jag kommer inte fram just nu. Försök igen om en stund, eller ring oss på ${kontakt.telefon}.`
-    );
-    fel.classList.add('assistent__rad--fel');
-    visa(fel);
+    visa(felrad('inget-svar'));
   } finally {
     clearTimeout(timer);
     upptagen = false;
