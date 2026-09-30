@@ -4889,3 +4889,243 @@ main:focus {
   text-transform: uppercase;
   color: var(--dampad);
 }
+
+/* 404-sidans väg vidare: tre fristående länkar i sajtens brödtextgrad,
+   var och en med 44 px träffyta (samma grepp som sidfotens länkar). */
+.vag-vidare {
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+}
+
+.vag-vidare li {
+  margin-block: 0 0.6rem;
+}
+
+.vag-vidare .lank {
+  padding-block: 0.4rem;
+}
+
+/* ═══ UTSKRIFT ═══════════════════════════════════════════════════
+   Den som skriver ut startsidan vill ha menyn, till exempel till en
+   beställning på jobbet — inte hero, klistermärken och skrollscener.
+   Utskriften blir därför menyn och Hitta hit: alla tio kategorier
+   under varandra, adress, telefon och öppettider. Svart på vitt, inga
+   fasta element, ingen dekor.
+
+   Rörelsens utgångslägen nollställs: ett stycke som ännu inte
+   avslöjats på skärmen står med opacity 0 och en mask, och det ska
+   ändå komma med på papperet. Övriga sidor skrivs ut som text med
+   samma regler; bara startsidans sektioner väljs bort. */
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  *,
+  *::before,
+  *::after {
+    opacity: 1 !important;
+    transform: none !important;
+    translate: none !important;
+    clip-path: none !important;
+    mask: none !important;
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html,
+  body,
+  .sec {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .sec {
+    padding-block: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Allt som hör till skärmen. */
+  .hopplank,
+  .loader,
+  .nav,
+  .orderbar,
+  .fraga,
+  .assistent,
+  .kedja,
+  .wave,
+  .sticker,
+  .jongl,
+  .foot__jongl,
+  .byggd,
+  .sociala {
+    display: none !important;
+  }
+
+  /* Startsidan: menyn och Hitta hit, inget annat. */
+  #hero,
+  #status,
+  #rebrand,
+  #sekvens,
+  #signatur,
+  #bestall,
+  #final,
+  #foot {
+    display: none !important;
+  }
+
+  /* Namnet överst, eftersom hero inte kommer med. */
+  #meny::before {
+    content: 'Delens Bistro';
+    display: block;
+    margin-block-end: 0.3rem;
+    font-size: 16pt;
+    text-transform: uppercase;
+  }
+
+  #meny .rubrik,
+  #hitta .rubrik {
+    color: #000 !important;
+    font-size: 26pt;
+    line-height: 1.1;
+    margin-block: 0 0.6rem;
+  }
+
+  /* Alla kategorier, med rubrik, i stället för flikarna. */
+  .meny__flikar {
+    display: none !important;
+  }
+
+  .meny__panel,
+  .meny__panel[hidden],
+  .meny__kategori,
+  .meny__kategori[hidden] {
+    display: block !important;
+  }
+
+  .meny__kategori {
+    margin: 1.2rem 0 0.3rem;
+    font-size: 17pt;
+    line-height: 1.15;
+    break-after: avoid;
+  }
+
+  .meny__underrubrik,
+  .ratt__innehall,
+  .ratt__namn,
+  .ratt__pris,
+  .ratt__signatur,
+  .ratt__knapp {
+    color: #000 !important;
+    background: none !important;
+  }
+
+  .ratter,
+  .meny__underrubrik {
+    max-width: none;
+  }
+
+  /* Skärmens grader är gjorda för en telefon på armlängds avstånd.
+     På papper blir de elva sidor; i läsgrad ryms menyn på fyra. */
+  .ratt {
+    break-inside: avoid;
+  }
+
+  .ratt > .ratt__rad,
+  .ratt > .ratt__innehall,
+  .ratt__knapp {
+    padding-block: 0.15rem !important;
+  }
+
+  .tider {
+    max-width: 22rem;
+  }
+
+  .ratt__namn,
+  .ratt__pris {
+    font-size: 13pt !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  .ratt__innehall,
+  .meny__underrubrik {
+    font-size: 10pt !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+  }
+
+  .ratt__signatur {
+    font-size: 8pt !important;
+  }
+
+  .hitta__block,
+  .hitta__block p,
+  .tider li {
+    font-size: 12pt;
+    line-height: 1.35;
+  }
+
+  .hitta__block h3 {
+    font-size: 11pt;
+  }
+
+  /* Länkar som bara gör något på skärmen. */
+  #hitta-karta,
+  #hitta-fb,
+  #hitta-ig {
+    display: none !important;
+  }
+
+  .ratt__knapp {
+    padding: 0;
+    border: 0;
+  }
+
+  .ratt__signatur {
+    border: 1px solid #000;
+  }
+
+  /* Fotona i menyn och markörerna som öppnar dem. */
+  .ratt__lucka,
+  .ratt__markor {
+    display: none !important;
+  }
+
+  /* Hitta hit: adress, öppettider och kontakt, utan karta och foto. */
+  #hitta {
+    break-before: page;
+  }
+
+  .hitta__karta,
+  .hitta__block--bild {
+    display: none !important;
+  }
+
+  .hitta__grid {
+    display: block;
+  }
+
+  .hitta__block {
+    margin-block: 0 1rem;
+    break-inside: avoid;
+  }
+
+  .hitta__block h3,
+  .tider li[data-idag='true'] {
+    color: #000 !important;
+  }
+
+  .lank,
+  .sec--ljus .lank {
+    color: #000 !important;
+    text-decoration: none;
+  }
+
+  .foot__not {
+    color: #000 !important;
+  }
+}

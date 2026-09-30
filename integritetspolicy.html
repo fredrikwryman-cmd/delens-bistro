@@ -32,15 +32,15 @@
     <meta property="og:url" content="https://delens.aimstudios.se/integritetspolicy.html" />
     <meta property="og:title" content="Integritetspolicy — Delens Bistro" />
     <meta property="og:description" content="Så behandlar Delens Bistro personuppgifter. Inga kakor och inget kontaktformulär." />
-    <meta property="og:image" content="https://delens.aimstudios.se/bilder/og/delens-og.jpg?v=1" />
+    <meta property="og:image" content="https://delens.aimstudios.se/bilder/og/delens-og.jpg?v=2" />
     <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1024" />
-    <meta property="og:image:height" content="541" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="En dubbel smashburgare med cheddar, jalapeño och rödlök på ett träbräde, med pommes och dipp. Texten Delens Bistro, Fast Food &amp; Bar, Upplands Väsby." />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Integritetspolicy — Delens Bistro" />
     <meta name="twitter:description" content="Så behandlar Delens Bistro personuppgifter. Inga kakor och inget kontaktformulär." />
-    <meta name="twitter:image" content="https://delens.aimstudios.se/bilder/og/delens-og.jpg?v=1" />
+    <meta name="twitter:image" content="https://delens.aimstudios.se/bilder/og/delens-og.jpg?v=2" />
     <meta name="twitter:image:alt" content="En dubbel smashburgare med cheddar, jalapeño och rödlök på ett träbräde, med pommes och dipp. Texten Delens Bistro, Fast Food &amp; Bar, Upplands Väsby." />
 
     <!-- IKONER. favicon.ico är kundens egen fil och bär 16, 32 och 48 px
@@ -93,11 +93,16 @@
 
           <!-- Texten utgår från restaurangens befintliga policy, som är
                korrekt i sak, men är omskriven så att den beskriver vad DEN
-               HÄR sajten faktiskt gör. Tre saker skiljer:
+               HÄR sajten faktiskt gör. Det här skiljer:
 
                · kartan är en statisk bild, inte en inbäddad Google-karta
                · det finns inget kontaktformulär
                · sajten sätter inga kakor, så det finns ingen kakruta
+               · sessionStorage minns att laddskärmen visats (main.js)
+               · Fråga kocken skickar frågan till Vercel och Anthropic
+                 (src/assistent.js, api/assistent.js). IP-adressen hålls
+                 i funktionens minne för takbegränsningen, frågan loggas
+                 inte, och samtalet sparas bara i flikens minne.
 
                Ändras något av det måste den här texten ändras samtidigt.
                En policy som beskriver fel sajt är värre än ingen alls. -->
@@ -107,6 +112,13 @@
             Sajten sätter inga kakor och använder ingen besöksmätning. Det
             finns därför ingen ruta att klicka bort, och ingenting att
             samtycka till.
+          </p>
+          <p data-rader>
+            Sajten sparar en enda sak i din webbläsare: en markering i
+            sessionStorage om att du redan sett laddskärmen, så att den
+            inte visas igen när du går mellan sidorna. Markeringen säger
+            ingenting om vem du är. Den skickas aldrig till oss och
+            försvinner när du stänger fliken.
           </p>
           <p data-rader>
             Kartan på sidan Hitta hit är en vanlig bild. Den laddar
@@ -122,6 +134,34 @@
             Typsnitten ligger på sajtens egen server. Din webbläsare
             kontaktar ingen annan när sidan laddas, och sidan hämtar
             ingenting från Google.
+          </p>
+
+          <h2 class="rubrik">Fråga kocken</h2>
+          <p data-rader>
+            Fråga kocken är en AI-assistent som svarar på frågor om menyn,
+            priserna och öppettiderna. Ingenting skickas förrän du själv
+            skickar en fråga.
+          </p>
+          <p data-rader>
+            Då skickas samtalet till en serverlös funktion hos Vercel. Den
+            skickar det vidare till Anthropic, vars AI-modell skriver
+            svaret. Båda är amerikanska bolag, och uppgifterna kan därför
+            behandlas utanför EU. Anthropic använder inte frågorna för att
+            träna sina modeller och sparar dem bara så länge deras villkor
+            för företagskunder anger.
+          </p>
+          <p data-rader>
+            Din IP-adress används för att begränsa hur många frågor som
+            kan ställas på kort tid. Den hålls i funktionens minne i högst
+            ett dygn och sparas inte någon annanstans. Vi sparar inte
+            frågorna. Samtalet finns bara i din flik och försvinner när du
+            stänger den.
+          </p>
+          <p data-rader>
+            Den rättsliga grunden är vårt berättigade intresse av att
+            kunna svara på frågor om restaurangen. Skriv inga
+            personuppgifter i frågan. Allergier och specialkost tar du med
+            personalen i restaurangen, inte med assistenten.
           </p>
 
           <h2 class="rubrik">Beställningar</h2>
@@ -146,8 +186,9 @@
           <p data-rader>
             Vi säljer aldrig personuppgifter vidare. De delas bara med dem
             som behöver dem för att vi ska kunna driva verksamheten:
-            beställningssystemet, betalningsförmedlaren, bokföringsbyrån och
-            de myndigheter vi är skyldiga att lämna uppgifter till.
+            beställningssystemet, betalningsförmedlaren, bokföringsbyrån,
+            Vercel och Anthropic för Fråga kocken, och de myndigheter vi är
+            skyldiga att lämna uppgifter till.
           </p>
 
           <h2 class="rubrik">Dina rättigheter</h2>
@@ -168,7 +209,7 @@
             Tycker du att vi behandlar dina personuppgifter fel har du rätt
             att klaga till Integritetsskyddsmyndigheten, IMY, som är
             tillsynsmyndighet. Du når dem på
-            <a class="lank" href="https://www.imy.se" target="_blank" rel="noopener">imy.se</a>.
+            <a class="lank" href="https://www.imy.se" target="_blank" rel="noopener noreferrer">imy.se</a>.
           </p>
 
           <h2 class="rubrik">Personuppgiftsansvarig</h2>

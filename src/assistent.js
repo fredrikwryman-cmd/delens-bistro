@@ -131,7 +131,7 @@ function listkort(text, uppmaning, url) {
   const a = el('a', 'assistent__lista');
   a.href = url;
   a.target = '_blank';
-  a.rel = 'noopener';
+  a.rel = 'noopener noreferrer';
   a.append(
     el('span', 'assistent__lista-rubrik', 'Leta upp i Qopla'),
     el('span', 'assistent__lista-text', text),
@@ -328,7 +328,7 @@ async function fraga() {
       knapp = el('a', 'knapp assistent__bestall', data.button_text);
       knapp.href = data.qopla_url;
       knapp.target = '_blank';
-      knapp.rel = 'noopener';
+      knapp.rel = 'noopener noreferrer';
     }
 
     vantar.remove();

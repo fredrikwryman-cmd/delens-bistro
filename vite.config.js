@@ -21,7 +21,9 @@ export default defineConfig({
       input: {
         start: resolve(__dirname, 'index.html'),
         integritetspolicy: resolve(__dirname, 'integritetspolicy.html'),
-        omOss: resolve(__dirname, 'om-oss.html')
+        omOss: resolve(__dirname, 'om-oss.html'),
+        // GitHub Pages svarar med 404.html på varje adress som inte finns.
+        saknas: resolve(__dirname, '404.html')
       }
     }
   },

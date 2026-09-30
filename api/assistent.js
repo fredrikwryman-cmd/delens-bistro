@@ -259,6 +259,43 @@ function klockan() {
 
 const klient = new Anthropic();
 
+/* ── Ursprungskontrollen ────────────────────────────────────────── */
+
+/* ORIGIN RÄCKER INTE. Den sätts av webbläsaren, men ett skript sätter
+   den själv: besiktningens curl med Origin: https://delens.aimstudios.se
+   gick rakt igenom (fynd 13). Här krävs dessutom det en webbläsare
+   alltid skickar med ett fetch() från sidan och som ett skript inte
+   skickar av sig självt:
+
+   · Sec-Fetch-Site, -Mode och -Dest, webbläsarens fetch-metadata. Från
+     sidan på delens.aimstudios.se till vercel.app är det cross-site,
+     cors och empty. Headrarna är förbjudna att sätta från sidans egen
+     JavaScript, så de kan inte ha kommit från en annan sajts skript i
+     en webbläsare heller.
+   · Saknas fetch-metadata helt (Safari före 16.4) räcker Referer från
+     sajten i stället. Webbläsare skickar den med förvald
+     Referrer-Policy; curl och de flesta HTTP-bibliotek gör det inte.
+   · Content-Type application/json, som sidan alltid skickar.
+
+   GRÄNSEN, UTTRYCKLIGT: det här stoppar skriptade anrop som inte
+   härmar en webbläsare. Den som medvetet förfalskar alla headrar
+   kommer fortfarande igenom — ingen kontroll på servern kan skilja
+   en sådan förfrågan från en webbläsares utan en utmaning på klienten
+   (Cloudflare Turnstile, Vercel BotID) eller inloggning. Kostnaden för
+   det fallet begränsas av takbegränsningen ovan och av månadsgränsen
+   i Anthropics konsol. */
+const FETCH_PLATS = new Set(['cross-site', 'same-site', 'same-origin']);
+
+function franWebblasaren(req, ursprung) {
+  const h = req.headers;
+  if (!String(h['content-type'] ?? '').toLowerCase().startsWith('application/json')) return false;
+  const plats = h['sec-fetch-site'];
+  if (plats !== undefined) {
+    return FETCH_PLATS.has(plats) && h['sec-fetch-mode'] === 'cors' && h['sec-fetch-dest'] === 'empty';
+  }
+  return String(h.referer ?? '').startsWith(ursprung + '/');
+}
+
 const SVAR_FEL = {
   message: 'Jag kan tyvärr inte svara just nu. Ring oss gärna på ' + kontakt.telefon + '.',
   qopla_url: QOPLA_URL,
@@ -281,6 +318,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ fel: 'Bara POST.' });
   if (!TILLATNA_URSPRUNG.has(ursprung)) return res.status(403).json({ fel: 'Okänt ursprung.' });
+  if (!franWebblasaren(req, ursprung)) return res.status(403).json({ fel: 'Okänt ursprung.' });
 
   const ip =
     String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim() ||
