@@ -14,10 +14,27 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 /* ═══ 0 · LADDSKÄRM ══════════════════════════════════════════════
-   Ger sig efter 1,8 s oavsett. Hoppas över vid återbesök i samma
-   session och vid reducerad rörelse. Se PLAN.md avsnitt 9.        */
+   Lyfts så fort hjältens bilder går att rita, och senast efter
+   900 ms. Hoppas över vid återbesök i samma session och vid
+   reducerad rörelse. Se PLAN.md avsnitt 9.
 
-const LADD_TAK_MS = 1800;
+   TAKET ÄR EN BORTRE GRÄNS, INTE EN VÄNTETID (direktiv 7). Förut
+   stod skärmen i 1,8 s oavsett, och hjältebilden, som är LCP, syntes
+   först därefter: 4,2 s till LCP på en strypt telefon, mot gränsen
+   2,5 s i GV-08. Nu släpps den när ordbilderna och burgaren är
+   avkodade. Är de det redan när skriptet startar tonar skärmen bort
+   direkt; på en långsam uppkoppling hinner burgaren byggas medan
+   bilderna kommer, men aldrig längre än taket.                   */
+
+const LADD_TAK_MS = 900;
+
+/* Hjältens bilder, de som kan bli LCP: DELENS, BISTRO och burgaren. */
+const heroKlar = () =>
+  Promise.all(
+    $$('.hero__ord, .hero__burger img').map((i) =>
+      i.decode ? i.decode().catch(() => {}) : Promise.resolve()
+    )
+  );
 
 /* SLUTSPELET: vad som fortfarande pågår efter att SISTA etappen
    startat. Lagret faller i 520 ms, och stapelns stuk sätts igång vid
@@ -126,6 +143,9 @@ function startaLaddskarm() {
     };
 
     tak = setTimeout(slapp, LADD_TAK_MS);
+
+    // Klart före taket: skärmen går direkt, taket rensas i slapp().
+    heroKlar().then(slapp);
 
     /* Lagret släpps när DESS EGEN bild går att rita, inte när
        klockan säger till. Delarna var ritade former förut och fanns i
@@ -684,7 +704,27 @@ function riggaOrderbar() {
    är ett fel som ingen skanner hittar. Det måste stå före första
    målningen — annars syns märket, släcks och tänds igen. */
 function forberedStickers() {
-  for (const m of $$('.sticker')) m.setAttribute('data-ankomst', '');
+  const marken = $$('.sticker');
+  for (const m of marken) m.setAttribute('data-ankomst', '');
+
+  /* VIK OCH GLANS HÄMTAR BILDEN SOM CSS, och en CSS-bakgrund hämtas så
+     fort elementet ritas, oavsett var på sidan det står. Tre märken om
+     omkring 50 kB gick därför ut samtidigt som hjältens bilder och
+     tävlade med dem om bandbredden. data-nara sätts när märket är 600
+     px från vyn; först då får lagren sin bild (se .sticker i
+     style.css). Båda lagren har opacitet 0 i vila, så ingenting syns
+     förrän bilden ändå är där. */
+  const nara = new IntersectionObserver(
+    (poster) => {
+      for (const p of poster) {
+        if (!p.isIntersecting) continue;
+        p.target.setAttribute('data-nara', '');
+        nara.unobserve(p.target);
+      }
+    },
+    { rootMargin: '600px 0px' }
+  );
+  marken.forEach((m) => nara.observe(m));
 }
 
 function riggaStickers() {
@@ -1881,7 +1921,7 @@ function riggaKedja() {
 
 /* ═══ 13 · LADDSKÄRMENS STUK ═════════════════════════════════════
    Varje lager faller in och stukas vid nedslaget; stapeln som
-   helhet stukas när sista lagret landat. Taket på 1,8 s och
+   helhet stukas när sista lagret landat. Taket på 900 ms och
    överhoppningen vid återbesök står kvar — fysiken får plats inuti
    den budgeten, den förlänger den inte.                            */
 
@@ -2795,7 +2835,7 @@ riggaBlick();
 riggaGlans();
 riggaJonglering();
 riggaNav();
-riggaKedja();
+// Pekarkedjans fem bilder hämtas först när hjälten är uppe; se START.
 riggaPuls();
 const slappHeroburgaren = riggaHeroburgare();
 
@@ -2821,4 +2861,10 @@ startaLaddskarm().then(() => {
   riggaStickers();
   // Hjälteburgarens entré hör till samma ögonblick som rubrikens ord.
   if (slappHeroburgaren) slappHeroburgaren();
+  /* Pekarkedjan är dekor som ingen ser förrän musen rör sig, och dess
+     fem bilder tävlade förut med hjältens om bandbredden. Den riggas
+     när sidan vilar efter lyftet. */
+  const vila = (fn) =>
+    'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 800);
+  vila(riggaKedja);
 });

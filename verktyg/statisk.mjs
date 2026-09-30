@@ -125,7 +125,7 @@ function menyPaneler() {
           const media = r.bild.startsWith('C')
             ? `<img class="lucka__bild" ${srcset}="${signaturSrcset(r.bild)}" sizes="${SIZES_LUCKA}"
                     ${kalla}="${bildvag(r.bild)}" alt="${esc(r.namn)}"
-                    width="1000" height="1339" decoding="async" />`
+                    width="1000" height="1339" loading="lazy" decoding="async" />`
             : `<span class="ph" data-id="${r.bild}" data-spec="1000 × 1339"></span>`;
 
           return `

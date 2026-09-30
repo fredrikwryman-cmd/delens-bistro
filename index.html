@@ -73,6 +73,15 @@
 
     <link rel="stylesheet" href="/src/style.css" />
 
+    <!-- LCP PÅ MOBIL ÄR BURGAREN, B2 (direktiv 7). På desktop är det
+         ordet DELENS, som har fetchpriority på sin <img>. En <source>
+         kan inte bära fetchpriority, så telefonens burgare förladdas
+         här med samma srcset och sizes som <source> i hjälten — annars
+         hämtas den två gånger. media gör att desktop inte hämtar den. -->
+    <link rel="preload" as="image" media="(max-width: 900px)" fetchpriority="high"
+          imagesrcset="/bilder/hero/B2-360.webp 360w, /bilder/hero/B2-560.webp 560w, /bilder/hero/B2.webp 700w"
+          imagesizes="(max-width: 485px) 70vw, 340px" />
+
     <!-- UTAN JAVASCRIPT. Laddskärmen lyfts av main.js; utan JS hade den
          legat kvar över hela sidan. Fråga kocken är en knapp som bara
          JS kan öppna, så den göms också. Menyns flikar är knappar utan JS
@@ -302,13 +311,13 @@
                  src="/bilder/rebrand/brutal-burgers.webp"
                  srcset="/bilder/rebrand/brutal-burgers-360.webp 360w, /bilder/rebrand/brutal-burgers-640.webp 640w, /bilder/rebrand/brutal-burgers.webp 900w"
                  sizes="(max-width: 600px) 73vw, (max-width: 800px) 200px, (max-width: 1512px) 25vw, 378px"
-                 alt="Brutal Burgers" width="900" height="324" style="aspect-ratio: 900 / 324" decoding="async" />
+                 alt="Brutal Burgers" width="900" height="324" style="aspect-ratio: 900 / 324" loading="lazy" fetchpriority="low" decoding="async" />
             <span class="rebrand__blev">blev</span>
             <img class="rebrand__namn rebrand__namn--delens"
                  src="/bilder/rebrand/delens-bistro.webp"
                  srcset="/bilder/rebrand/delens-bistro-360.webp 360w, /bilder/rebrand/delens-bistro-640.webp 640w, /bilder/rebrand/delens-bistro.webp 900w"
                  sizes="(max-width: 600px) 63vw, (max-width: 800px) 174px, (max-width: 1510px) 22vw, 328px"
-                 alt="Delen's Bistro" width="900" height="373" style="aspect-ratio: 900 / 373" decoding="async" />
+                 alt="Delen's Bistro" width="900" height="373" style="aspect-ratio: 900 / 373" loading="lazy" fetchpriority="low" decoding="async" />
           </h2>
           <div class="rebrand__grid">
             <!-- Sidans enda längre brödtext. Ord för ord vore fel här:

@@ -99,7 +99,7 @@ egen färg; sektionerna anpassar sig inte till den och tvärtom.
 
 | # | Sektion | Vad den gör |
 |---|---|---|
-| 0 | **Laddskärm** | vektorburgaren byggs i fem delar, svensk text per etapp, **max 1,8 s**, hoppas över vid återbesök och vid reducerad rörelse |
+| 0 | **Laddskärm** | vektorburgaren byggs i fem delar, svensk text per etapp, lyfts när hjältens bilder är klara och **senast efter 900 ms** (direktiv 7), hoppas över vid återbesök och vid reducerad rörelse |
 | 1 | **Hero** | "DELENS" i konturtyp, burgaren frilagd, "BISTRO" i fylld typ över. Klistermärken SMASHAD / SEDAN 2017. Fast toppnav + **fast beställningsfält i amber nederst** |
 | 2 | **Öppet nu** | levande status räknad ur öppettiderna: prick, "Öppet till 20:00" |
 | 3 | **Rebranden** | "FRÅN BRUTAL TILL DELENS" ord för ord. Samma ägare, ny partner, smash istället för tjocka puckar |
@@ -291,8 +291,8 @@ E är det som skiljer påkostad från mall.
 ## 9. Två saker som görs annorlunda än CRAV
 
 **Laddskärmen kapas.** CRAV:s kan ligga uppe i över trettio sekunder på
-en strypt uppkoppling. Vår ger sig efter **1,8 sekunder oavsett** vad som
-är klart, hoppas över vid återbesök i samma session, och hoppas över vid
+en strypt uppkoppling. Vår lyfts så fort hjältens bilder är avkodade och
+senast efter **900 ms** (förut 1,8 s oavsett), hoppas över vid återbesök i samma session, och hoppas över vid
 `prefers-reduced-motion`. Den som googlar öppettiderna ska inte behöva se
 en animerad bulle först.
 

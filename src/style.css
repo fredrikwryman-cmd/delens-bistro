@@ -852,7 +852,7 @@ input:focus-visible {
    laddskärmen kan visa något. Vid 230 px hade filerna behövt vara 380
    px breda för samma skärpa på en retinaskärm — drygt 20 kB styck och
    100 kB innan första lagret kan falla, på en skärm vars hela poäng är
-   att den ska vara över på 1,8 sekunder. Vid 160 px väger de fem 46 kB
+   att den ska vara över på högst 900 ms. Vid 160 px väger de fem 46 kB
    tillsammans och är fortfarande skarpa vid dubbel pixeltäthet.
 
    --fall är fallhöjden, satt på stapeln så delarna kan dela den.
@@ -4129,7 +4129,7 @@ main:focus {
                                                             byter färg men växer direkt
    Scroll-sekvensen             bildrutor följer scrollen   stillbild (JS sätter aldrig
                                                             data-rorlig)
-   Laddskärmen                  bitarna faller, 1,8 s       hoppas över (JS); tonar ut 200 ms
+   Laddskärmen                  bitarna faller, ≤ 900 ms    hoppas över (JS); tonar ut 200 ms
    Laddstapeln                  fylls i takt med bitarna    visas aldrig
    Rubrikernas ord (reveal)     faller och vrids in         tonas in, 260 ms linjärt (JS)
    Styckenas rader (rad-mask)   glider upp bakom mask       tonas in, 250 ms
@@ -4328,6 +4328,20 @@ main:focus {
 
 /* Glansen maskas med märkets egen alfa, annars lyser en rektangel
    utanför silhuetten. */
+/* Bilden i vik och glans hämtas först när märket är nära vyn
+   (data-nara, se forberedStickers i main.js). Lagren har opacitet 0
+   i vila, så det syns inte att bilden saknas innan dess. Utan JS
+   hämtas den aldrig — lagren används bara av JS. */
+.sticker:not([data-nara]) .sticker__flarp {
+  background-image: none;
+}
+
+.sticker:not([data-nara]) .sticker__glans {
+  mask-image: none;
+  -webkit-mask-image: none;
+  visibility: hidden;
+}
+
 .sticker__glans {
   position: absolute;
   inset: 0;
