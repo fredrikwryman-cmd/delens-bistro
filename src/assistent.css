@@ -56,26 +56,14 @@
   }
 }
 
-/* Utan rörelse: panelen tonar, den glider inte.
-
-   TONINGEN MÅSTE TVINGAS IGENOM. style.css sätter alla övergångar
-   till 0,01 ms med !important vid reducerad rörelse, och då slog
-   panelen upp och försvann i ett slag. Reducerad rörelse betyder
-   ingen förflyttning, inte inga övergångar. Klassväljaren väger mer
-   än *, så den här !important vinner; fördröjningarna ovan står
-   kvar, så visibility byter fortfarande först när toningen är klar. */
+/* Utan rörelse: panelen tonar, den glider inte. Tiderna och
+   visibility-fördröjningarna ovan gäller oförändrade, så visibility
+   byter fortfarande först när uttoningen är klar och direkt vid
+   öppning. Se lagen under REDUCERAD RÖRELSE i style.css. */
 @media (prefers-reduced-motion: reduce) {
   .assistent,
   .assistent[data-oppen='true'] {
     transform: none;
-  }
-
-  .assistent {
-    transition-duration: 160ms, 160ms, 0s !important;
-  }
-
-  .assistent[data-oppen='true'] {
-    transition-duration: 220ms, 220ms, 0s !important;
   }
 }
 

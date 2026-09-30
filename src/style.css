@@ -2569,21 +2569,22 @@ main:focus {
   }
 }
 
-/* Mildare, inte noll. Rörelse och rotation tas bort, men intoningen
-   av etikett och gråskala är kvar — den bär informationen om vilket
-   kort som är öppet och hjälper förståelsen. */
+/* Mildare, inte noll — se lagen under REDUCERAD RÖRELSE. Korten byter
+   bredd direkt och vrids inte; det är hela radens sidledsrörelse som
+   tas bort. Intoningen av etikett och gråskala är kvar: den bär
+   informationen om vilket kort som är öppet. På mobil växer kortets
+   höjd som förut, eftersom det är plats för innehåll och inte
+   förflyttning. transform: none !important slår den inline-satta
+   parallaxen (--skift) och vridningen. */
 @media (prefers-reduced-motion: reduce) {
   .dragspel__kort {
-    transition-duration: 0.01ms;
+    transition: none;
     transform: none !important;
     will-change: auto;
   }
 
-  /* !important behövs för att slå den globala regeln längre ned som
-     nollar alla övergångar. Utan den nollas även intoningen, och då
-     blir reducerad rörelse noll rörelse i stället för mildare. */
   .dragspel__media {
-    transition: filter 0.15s linear !important;
+    transition: filter 0.15s linear;
     transform: none !important;
     will-change: auto;
   }
@@ -2591,11 +2592,11 @@ main:focus {
   .dragspel__strec,
   .dragspel__text {
     translate: 0 0 !important;
-    transition: opacity 0.15s linear !important;
+    transition: opacity 0.15s linear;
   }
 
   .dragspel__sloja::after {
-    transition: opacity 0.15s linear !important;
+    transition: opacity 0.15s linear;
   }
 }
 
@@ -2945,16 +2946,15 @@ main:focus {
    inte den sortens rörelse som stör: inget parallaxlager, ingen
    förflyttning över skärmen, bara innehåll som får plats.
 
-   Markörens skalning är däremot ren dekor och nollställs. */
+   Markörens skalning är däremot ren dekor: den växer direkt, bara
+   färgen tonar. Fotot tonar in på 150 ms. */
 @media (prefers-reduced-motion: reduce) {
-  .ratt__markor,
-  .lucka__media img,
-  .lucka__media .ph {
-    transition-duration: 0.01ms !important;
+  .ratt__markor {
+    transition: background-color 220ms var(--ut);
   }
   .lucka__media img,
   .lucka__media .ph {
-    transition: opacity 0.15s linear !important;
+    transition: opacity 0.15s linear;
   }
 }
 
@@ -4066,24 +4066,75 @@ main:focus {
   outline: none;
 }
 
-/* ═══ REDUCERAD RÖRELSE ═══════════════════════════════════════
-   Parallaxen stängs av, avslöjningen blir ren opacity,
-   laddskärmen hoppas över helt (JS).                            */
+/* ═══ REDUCERAD RÖRELSE — LAGEN ═══════════════════════════════
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+   Det här är det enda stället som säger vad som gäller. Nästa element
+   som får en övergång eller animation ska ha ett beslut här i
+   tabellen, och regeln bredvid elementet eller i blocket
+   REDUCERAD RÖRELSE — REGLERNA.
 
-  /* SEKVENSEN BEHÖVER INGEN REGEL HÄR. Den är stillbild i grunden
-     och blir rörlig först när riggaSekvens sätter data-rorlig, och
-     det gör den aldrig vid reducerad rörelse. Att dessutom nolla
-     spåret härifrån hade varit två svar på samma fråga. */
-}
+   LAGEN: mildare variant, aldrig nollning.
+     · Opacitet och färg tonar som vanligt, eller kortare och linjärt.
+     · Förflyttning tas bort: transform, translate, scale, rotate,
+       klippmasker som sveper. Elementet står direkt i sitt slutläge.
+     · Höjd som öppnar plats för innehåll får behålla sin tid. Ett hopp
+       på flera hundra pixlar under handen är det hårdaste utfallet.
+     · Löpande rörelse (flyt, jonglering, parallax, vågor, sekvens,
+       pekarkedja, Lenis) stängs av helt; den bär ingen information.
+
+   INGEN GLOBAL REGEL. Här låg förut * { transition-duration: 0.01ms
+   !important; animation-duration: 0.01ms !important }. Den nollade
+   också det som skulle vara kvar, och den gav VARJE element en 0,01
+   ms-övergång på all. Ett barn ärvde då förälderns visibility: hidden
+   ett ögonblick efter att föräldern visats, och koden som räknade med
+   att elementet redan syntes gjorde fel: fokus hamnade aldrig i Fråga
+   kockens fält (0 av 10 i besiktningen). Utan en global regel har
+   barnen ingen övergång alls och visas i samma stund som föräldern.
+
+   REGEL FÖR DOLDA LÄGEN: det som döljs gör det med opacity OCH
+   visibility, där visibility byter först när toningen är klar och
+   direkt när elementet visas igen. Då är ett element aldrig synligt
+   men ofokuserbart, och aldrig osynligt men klickbart.
+
+   BESLUTEN, ELEMENT FÖR ELEMENT (regeln står vid elementet eller i
+   blocket REDUCERAD RÖRELSE — REGLERNA längre ned):
+
+   Element                      Normalt                     Reducerad rörelse
+   ---------------------------  --------------------------  ---------------------------------
+   Vågövergångarna (6 st)       sträcks och gungar i        står stilla (transform none);
+                                scrollvarvet                JS-steget körs inte
+   Hjälteburgaren, entré        faller in, studs 1,5 s      tonas in 250 ms, ingen förflyttning
+   Hjälteburgaren, flyt         två varv upp och ned        ingen animation (JS startar den inte)
+   Dragspelet, desktop          flex-grow + vridning 220ms  byter bredd direkt, ingen vridning;
+                                                            gråskala och text tonar 150 ms
+   Dragspelet, mobil            höjden växer 220 ms         höjden växer 220 ms (plats)
+   Menyradens lucka             höjden växer 220 ms         höjden växer 220 ms (plats);
+                                                            fotot tonar 150 ms, markören
+                                                            byter färg men växer direkt
+   Scroll-sekvensen             bildrutor följer scrollen   stillbild (JS sätter aldrig
+                                                            data-rorlig)
+   Laddskärmen                  bitarna faller, 1,8 s       hoppas över (JS); tonar ut 200 ms
+   Laddstapeln                  fylls i takt med bitarna    visas aldrig
+   Rubrikernas ord (reveal)     faller och vrids in         tonas in, 260 ms linjärt (JS)
+   Styckenas rader (rad-mask)   glider upp bakom mask       tonas in, 250 ms
+   Fotona (data-foto)           mask sveper upp             tonas in, 200 ms
+   Rebrandrubriken, finalen     skrivs fram, monteras       står färdiga; finalen tonas 200 ms
+   Klistermärkena               landar och vrids, skalas    tonas in; ingen avskalning
+   Assistentpanelen             glider in 220 / ut 160 ms   tonar in 220 / ut 160 ms (assistent.css)
+   Assistentens rader           glider upp                  tonas in (assistent.css)
+   Sidhuvudet vid nedscroll     glider upp ur bild          tonar ut 200 ms, visibility efter
+   Beställningsfältet           glider ned ur bild          tonar ut 200 ms, visibility efter
+   Fråga kocken-bubblan         följer fältet ned och upp   står kvar på sin plats
+   Hover- och tryckåterkoppling lyft, skala, rulle          bara färgbyte
+   Lenis mjuka scroll           på                          av (JS startar den inte)
+   Pekarkedjan, jongleringen    följer pekaren, kastar      av (JS + display: none)
+
+   Allt som styrs av JS läser samma media-fråga som konstanten
+   reducerad i main.js.                                            */
+
+/* Reglerna står i blocket REDUCERAD RÖRELSE — REGLERNA, sist bland
+   skärmreglerna, så att de kommer efter de vanliga reglerna med
+   samma specificitet och vinner på ordningen. */
 
 /* ═══════════════════════════════════════════════════════════════
    CRAV:S RÖRELSE
@@ -4692,7 +4743,7 @@ main:focus {
   }
 
   [data-foto='kommer'] {
-    animation: foto-tona 200ms linear both !important;
+    animation: foto-tona 200ms linear both;
   }
 
   [data-foto='kommer'] img {
@@ -4747,14 +4798,11 @@ main:focus {
     opacity: 0;
   }
 
-  /* !important behövs för att slå den globala regeln högre upp i den
-     här filen, som nollar animation-duration på ALLT vid reducerad
-     rörelse. Uppmätt utan den: toningen blev 0,00001 s, alltså ett
-     hopp — och ett hopp är inte en mildare version av en rörelse,
-     det är den hårdaste versionen. 200 ms är kort nog att inte
-     läsa som rörelse och lång nog att inte slå till. */
+  /* 200 ms är kort nog att inte läsa som rörelse och lång nog att
+     inte slå till. Ett hopp är inte en mildare version av en rörelse,
+     det är den hårdaste versionen. */
   .final[data-bygger='kor'] .final__inner {
-    animation: final-tona 200ms linear both !important;
+    animation: final-tona 200ms linear both;
   }
 
   @keyframes final-tona {
@@ -4784,6 +4832,96 @@ main:focus {
 
   .nav__links a:hover .rulle {
     transform: none;
+  }
+}
+
+/* ═══ REDUCERAD RÖRELSE — REGLERNA ═══════════════════════════
+   Besluten står i tabellen under REDUCERAD RÖRELSE — LAGEN. Blocket
+   ligger här, efter sidhuvudets, knapparnas och rullens vanliga
+   regler, eftersom en media-fråga inte väger mer än regeln den
+   skriver över: samma specificitet, och den som kommer sist vinner. */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Laddskärmen hoppas över av JS och tonar bara ut. */
+  .loader {
+    transition: opacity 200ms linear, visibility 0s linear 200ms;
+  }
+
+  /* SIDHUVUDET OCH BESTÄLLNINGSFÄLTET viker undan genom att tona, inte
+     glida. visibility följer toningen: byter till hidden först när
+     den är klar, och tillbaka direkt. */
+  .nav,
+  .orderbar {
+    transition:
+      background 260ms var(--ut),
+      opacity 200ms linear,
+      visibility 0s linear 0s;
+  }
+
+  .nav[data-undan='true'],
+  .orderbar[data-undan='true'] {
+    transform: none;
+    translate: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      background 260ms var(--ut),
+      opacity 200ms linear,
+      visibility 0s linear 200ms;
+  }
+
+  /* Bubblan står kvar när fältet tonar bort, i stället för att åka ned. */
+  .fraga {
+    transition: none;
+  }
+
+  .orderbar[data-undan='true'] ~ .fraga {
+    translate: none;
+  }
+
+  /* HOVER OCH TRYCK: färgen står kvar, lyft och skala tas bort. */
+  .knapp {
+    transition: filter 180ms var(--ut);
+  }
+
+  .knapp:hover,
+  .social:active,
+  .byggd:active {
+    transform: none;
+  }
+
+  .flik {
+    transition:
+      background 160ms var(--ut),
+      border-color 160ms var(--ut),
+      color 160ms var(--ut);
+  }
+
+  .nav__links a {
+    transition: color 160ms var(--ut);
+  }
+
+  .ratt__knapp,
+  .rulle,
+  .fraga__bild {
+    transition: none;
+  }
+
+  .fraga:active .fraga__bild,
+  .fraga:hover .fraga__bild,
+  .fraga:hover:active .fraga__bild {
+    scale: none;
+  }
+
+  .social {
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .byggd {
+    transition: color 200ms ease;
   }
 }
 

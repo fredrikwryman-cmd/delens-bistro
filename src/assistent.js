@@ -187,12 +187,15 @@ function visa(li) {
 
 /* ── Öppna och stänga ───────────────────────────────────────────── */
 
-/* FOKUS IN MED rAF, INTE MED ETT ENDA ANROP (BF-06). Vid reducerad
-   rörelse sätter style.css alla övergångar till 0,01 ms, och fältet
-   ärver då panelens visibility: hidden i just det ögonblick focus()
-   anropas. Anropet misslyckas tyst och fokus blir kvar på knappen
-   bakom panelen — 0 av 10 öppningar i besiktningen. Här försöker varje
-   bildruta igen tills fältet faktiskt har fokus, högst 800 ms. */
+/* FOKUS IN MED rAF, INTE MED ETT ENDA ANROP (BF-06). Orsaken till
+   att det behövdes var en global regel i style.css som gav varje
+   element en 0,01 ms-övergång vid reducerad rörelse: fältet ärvde
+   panelens visibility: hidden i det ögonblick focus() anropades, och
+   anropet misslyckades tyst (0 av 10 i besiktningen). Regeln är
+   borta sedan direktiv 5. Loopen står kvar som säkerhetsbälte: varje
+   bildruta försöker igen tills fältet faktiskt har fokus, högst
+   800 ms. Ett enda anrop förlitar sig på att ingen framtida stil
+   fördröjer synligheten. */
 const FOKUS_TAK_MS = 800;
 
 function fokusera(mal) {
