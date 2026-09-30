@@ -54,6 +54,20 @@ const VARDEN = {
 const bildvag = (id) =>
   id.startsWith('C') ? `/bilder/signatur/${id}.webp` : `/bilder/meny/${id}.webp`;
 
+/* SIGNATURBILDERNA I TRE STORLEKAR (verktyg/storlekar.mjs). sizes är
+   uppmätt, direktiv 6:
+   · dragspelet med mus, över 620 px: halva vyn, högst 642 px
+   · dragspelet på pekskärm eller under 621 px: korten står under
+     varandra i full spaltbredd, 92vw, högst 1184 px
+   · menyluckan: 92vw, högst 736 px (menyspalten är 46rem)
+   Villkoret för mus är ordagrant fingerlägets motsats i style.css. */
+const signaturSrcset = (id) =>
+  `/bilder/signatur/${id}-400.webp 400w, /bilder/signatur/${id}-760.webp 760w, /bilder/signatur/${id}.webp 1000w`;
+const SIZES_DRAGSPEL =
+  '(max-width: 620px) 92vw, (hover: hover) and (pointer: fine) and (max-width: 1290px) 50vw, ' +
+  '(hover: hover) and (pointer: fine) 642px, (max-width: 1290px) 92vw, 1184px';
+const SIZES_LUCKA = '(max-width: 800px) 92vw, 736px';
+
 function menyFlikar() {
   return kategorier
     .map(
@@ -107,8 +121,10 @@ function menyPaneler() {
              förut vid start. Övriga bär data-kalla och hämtas först
              när raden öppnas. */
           const kalla = oppen ? 'src' : 'data-kalla';
+          const srcset = oppen ? 'srcset' : 'data-srcset';
           const media = r.bild.startsWith('C')
-            ? `<img class="lucka__bild" ${kalla}="${bildvag(r.bild)}" alt="${esc(r.namn)}"
+            ? `<img class="lucka__bild" ${srcset}="${signaturSrcset(r.bild)}" sizes="${SIZES_LUCKA}"
+                    ${kalla}="${bildvag(r.bild)}" alt="${esc(r.namn)}"
                     width="1000" height="1339" decoding="async" />`
             : `<span class="ph" data-id="${r.bild}" data-spec="1000 × 1339"></span>`;
 
@@ -165,7 +181,8 @@ function signaturKort() {
       <div class="dragspel__kort" role="listitem" data-index="${i}" data-aktiv="${oppen}">
         <span class="dragspel__ram">
           <span class="dragspel__media">
-            <img src="/bilder/signatur/${b.id}.webp" alt=""
+            <img src="/bilder/signatur/${b.id}.webp" srcset="${signaturSrcset(b.id)}"
+                 sizes="${SIZES_DRAGSPEL}" alt=""
                  width="1000" height="1339" loading="lazy" decoding="async" />
           </span>
           <span class="dragspel__sloja" aria-hidden="true"></span>

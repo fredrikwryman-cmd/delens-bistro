@@ -181,17 +181,20 @@
             <span class="hero__delens" data-reveal data-fall="0.15em" data-vrid="-1.5deg"><img
                 class="hero__ord"
                 src="/bilder/hero/delens-1982.webp"
-                srcset="/bilder/hero/delens-960.webp 960w, /bilder/hero/delens-1982.webp 1982w"
+                srcset="/bilder/hero/delens-960.webp 960w, /bilder/hero/delens-1300.webp 1300w, /bilder/hero/delens-1982.webp 1982w"
                 sizes="(min-width: 1590px) 1413px, 90vw"
                 alt=""
                 width="1982"
-                height="554"
+                height="554" style="aspect-ratio: 1982 / 554"
+                fetchpriority="high"
                 decoding="async"
               /></span>
             <span class="hero__burger">
               <picture>
                 <!-- B2 är renderad i 700 px för mobilen, B1 i 1100 för desktop. -->
-                <source media="(max-width: 900px)" srcset="/bilder/hero/B2.webp" />
+                <source media="(max-width: 900px)"
+                        srcset="/bilder/hero/B2-360.webp 360w, /bilder/hero/B2-560.webp 560w, /bilder/hero/B2.webp 700w"
+                        sizes="(max-width: 485px) 70vw, 340px" />
                 <!-- Tom alt med flit. Bilden ligger inuti h1 mellan orden
                      DELENS och BISTRO. En beskrivande alt hade lästs mitt
                      i namnet och gjort rubrikens tillgängliga namn till
@@ -199,10 +202,11 @@
                      Namnet står redan i texten; bilden illustrerar det. -->
                 <img
                   src="/bilder/hero/B1.webp"
+                  srcset="/bilder/hero/B1-560.webp 560w, /bilder/hero/B1.webp 1100w"
+                  sizes="520px"
                   alt=""
                   width="1100"
                   height="1052"
-                  fetchpriority="high"
                   decoding="async"
                 />
               </picture>
@@ -211,10 +215,10 @@
                 class="hero__ord"
                 src="/bilder/hero/bistro-1400.webp"
                 srcset="/bilder/hero/bistro-640.webp 640w, /bilder/hero/bistro-1400.webp 1400w"
-                sizes="(min-width: 1590px) 702px, 45vw"
+                sizes="(max-width: 490px) 76vw, (max-width: 900px) 367px, (max-width: 1590px) 44vw, 689px"
                 alt=""
                 width="1400"
-                height="294"
+                height="294" style="aspect-ratio: 1400 / 294"
                 decoding="async"
               /></span>
           </h1>
@@ -236,7 +240,7 @@
               class="hero__enjoy"
               src="/bilder/hero/enjoy-800.webp"
               srcset="/bilder/hero/enjoy-480.webp 480w, /bilder/hero/enjoy-800.webp 800w"
-              sizes="(max-width: 900px) 16rem, 22vw"
+              sizes="(max-width: 900px) 16rem, 23vw"
               alt="Made To Enjoy — Fast Food &amp; Bar"
               width="800"
               height="376"
@@ -296,11 +300,15 @@
           <h2 class="rubrik rubrik--stor rebrand__rubrik" id="rebrand-rubrik">
             <img class="rebrand__namn rebrand__namn--brutal"
                  src="/bilder/rebrand/brutal-burgers.webp"
-                 alt="Brutal Burgers" width="900" height="324" decoding="async" />
+                 srcset="/bilder/rebrand/brutal-burgers-360.webp 360w, /bilder/rebrand/brutal-burgers-640.webp 640w, /bilder/rebrand/brutal-burgers.webp 900w"
+                 sizes="(max-width: 600px) 73vw, (max-width: 800px) 200px, (max-width: 1512px) 25vw, 378px"
+                 alt="Brutal Burgers" width="900" height="324" style="aspect-ratio: 900 / 324" decoding="async" />
             <span class="rebrand__blev">blev</span>
             <img class="rebrand__namn rebrand__namn--delens"
                  src="/bilder/rebrand/delens-bistro.webp"
-                 alt="Delen's Bistro" width="900" height="373" decoding="async" />
+                 srcset="/bilder/rebrand/delens-bistro-360.webp 360w, /bilder/rebrand/delens-bistro-640.webp 640w, /bilder/rebrand/delens-bistro.webp 900w"
+                 sizes="(max-width: 600px) 63vw, (max-width: 800px) 174px, (max-width: 1510px) 22vw, 328px"
+                 alt="Delen's Bistro" width="900" height="373" style="aspect-ratio: 900 / 373" decoding="async" />
           </h2>
           <div class="rebrand__grid">
             <!-- Sidans enda längre brödtext. Ord för ord vore fel här:
@@ -341,8 +349,10 @@
                      förskjutning. -->
                 <span class="foto foto--par" data-foto style="--i: 0; --lut: -3.5deg">
                   <img src="/bilder/lokal/E2.webp"
+                       srcset="/bilder/lokal/E2-400.webp 400w, /bilder/lokal/E2-800.webp 800w, /bilder/lokal/E2.webp 1200w"
+                       sizes="(max-width: 865px) 68vw, (max-width: 1300px) 23vw, 295px"
                        alt="En hand pressar smashpressen mot puckarna på den heta plåten."
-                       width="1200" height="800" loading="lazy" decoding="async" />
+                       width="1200" height="800" style="aspect-ratio: 1200 / 800" loading="lazy" decoding="async" />
                 </span>
                 <!-- Maskotens röda ligger på 1,47:1 mot sektionens djupröda
                      och ingen röd i paletten löser det — skälen står i
@@ -363,8 +373,10 @@
               <div class="kort kort--lut-b">
                 <span class="foto foto--par" data-foto style="--i: 1; --lut: 4.5deg">
                   <img src="/bilder/lokal/E3.webp"
+                       srcset="/bilder/lokal/E3-300.webp 300w, /bilder/lokal/E3-600.webp 600w, /bilder/lokal/E3.webp 900w"
+                       sizes="(max-width: 865px) 72vw, (max-width: 1300px) 21vw, 260px"
                        alt="Hakan med korsade armar framför baren, i svart t-shirt med restaurangens logotyp."
-                       width="900" height="1201" loading="lazy" decoding="async" />
+                       width="900" height="1201" style="aspect-ratio: 900 / 1201" loading="lazy" decoding="async" />
                 </span>
                 <span class="kort__etikett">Hakan Delen</span>
               </div>
@@ -493,9 +505,11 @@
             <a id="hitta-kartlank" href="{{karta}}" target="_blank" rel="noopener noreferrer">
               <img
                 src="/bilder/karta/hitta.webp"
+                srcset="/bilder/karta/hitta-760.webp 760w, /bilder/karta/hitta.webp 1200w"
+                sizes="(max-width: 1300px) 92vw, 1182px"
                 alt="Karta över Upplands Väsby centrum med Delens Bistro utmärkt på Centralvägen 3, ett kvarter öster om pendeltågsstationen."
                 width="1200"
-                height="675"
+                height="675" style="aspect-ratio: 1200 / 675"
                 loading="lazy"
                 decoding="async"
               />
@@ -530,8 +544,10 @@
             <div class="hitta__block hitta__block--bild">
               <span class="foto" data-foto style="--lut: -2.5deg">
                 <img src="/bilder/lokal/E4.webp"
+                     srcset="/bilder/lokal/E4-800.webp 800w, /bilder/lokal/E4-1200.webp 1200w, /bilder/lokal/E4.webp 1600w"
+                     sizes="(max-width: 495px) 92vw, (max-width: 725px) 44vw, (max-width: 765px) 92vw, (max-width: 1300px) 61vw, 792px"
                      alt="Delens Bistro på Centralvägen 3: mörk fasad med skylten Fast Food &amp; Bar, uteservering och en vimpel vid entrén."
-                     width="1600" height="900" loading="lazy" decoding="async" />
+                     width="1600" height="900" style="aspect-ratio: 1600 / 900" loading="lazy" decoding="async" />
               </span>
               <span class="kort__etikett">Centralvägen 3</span>
             </div>
@@ -577,8 +593,10 @@
                det håll den tidigare försvann åt. -->
           <span class="foto foto--hoger bestall__bild" data-foto style="--lut: -2deg">
             <img src="/bilder/lokal/E1.webp"
+                 srcset="/bilder/lokal/E1-600.webp 600w, /bilder/lokal/E1-900.webp 900w, /bilder/lokal/E1.webp 1400w"
+                 sizes="(max-width: 865px) 93vw, (max-width: 1300px) 46vw, 594px"
                  alt="Baren hos Delens Bistro: ölpelare, hängande glas och svartguldig marmor."
-                 width="1400" height="1051" loading="lazy" decoding="async" />
+                 width="1400" height="1051" style="aspect-ratio: 1400 / 1051" loading="lazy" decoding="async" />
           </span>
         </div>
       </section>
@@ -642,6 +660,8 @@
                platsen, så märket ovanför inte hoppar när hälsningen
                landar. -->
           <img class="final__halsning" src="/bilder/final/valkommen.webp"
+               srcset="/bilder/final/valkommen-540.webp 540w, /bilder/final/valkommen.webp 1080w"
+               sizes="(max-width: 535px) 90vw, 480px"
                alt="Välkommen till Delen's Bistro"
                width="1080" height="288" loading="lazy" decoding="async" />
         </div>

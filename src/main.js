@@ -385,6 +385,11 @@ function byggMeny() {
   const ladda = (li) => {
     const im = li.querySelector('.lucka__bild[data-kalla]');
     if (!im) return;
+    // srcset före src, annars hinner webbläsaren börja hämta den fulla filen.
+    if (im.dataset.srcset) {
+      im.srcset = im.dataset.srcset;
+      delete im.dataset.srcset;
+    }
     im.src = im.dataset.kalla;
     delete im.dataset.kalla;
   };
@@ -1717,7 +1722,16 @@ const KEDJA = {
      Andra varianten av varje motiv, eftersom första varianten
      jonglerar i footern. Samma bild ska inte stå på två ställen
      samtidigt. */
-  knutar: ['kott-2', 'ost-2', 'sallad-2', 'tomat-2']
+  knutar: ['kott-2', 'ost-2', 'sallad-2', 'tomat-2'],
+  /* Filernas mått, för width och height (BS-12). CSS sätter storleken,
+     men attributen ger bildens form innan den är avkodad. */
+  matt: {
+    muspekare: [160, 234],
+    'kott-2': [200, 121],
+    'ost-2': [200, 146],
+    'sallad-2': [200, 354],
+    'tomat-2': [200, 151]
+  }
 };
 
 function riggaKedja() {
@@ -1735,13 +1749,16 @@ function riggaKedja() {
       el.className = 'led led--huvud';
       hand = document.createElement('img');
       hand.src = '/bilder/granssnitt/muspekare.webp';
+      [hand.width, hand.height] = KEDJA.matt.muspekare;
       hand.alt = '';
       hand.decoding = 'async';
       el.append(hand);
     } else if (i % 2 === 1 && KEDJA.knutar[(i - 1) / 2]) {
       el.className = 'led led--knut';
       const bild = document.createElement('img');
-      bild.src = `/bilder/ingredienser/${KEDJA.knutar[(i - 1) / 2]}.webp`;
+      const knut = KEDJA.knutar[(i - 1) / 2];
+      bild.src = `/bilder/ingredienser/${knut}.webp`;
+      [bild.width, bild.height] = KEDJA.matt[knut];
       bild.alt = '';
       bild.decoding = 'async';
       el.append(bild);

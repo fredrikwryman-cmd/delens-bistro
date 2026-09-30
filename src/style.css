@@ -1299,6 +1299,22 @@ main:focus {
   height: auto;
 }
 
+/* FÖRHÅLLANDET ÄR LÅST TILL FULLSTORA FILENS. B1 och B2 finns i flera
+   bredder (srcset, direktiv 6), och en förminskad fil kan inte få
+   exakt samma förhållande som originalet: 560 × 536 mot 1100 × 1052.
+   Utan låset följer höjden den fil webbläsaren råkar välja, och allt
+   under burgaren flyttas en bråkdels pixel. B2 gäller upp till 900 px,
+   samma gräns som <source> i index.html. */
+.hero__burger img {
+  aspect-ratio: 1100 / 1052;
+}
+
+@media (max-width: 900px) {
+  .hero__burger img {
+    aspect-ratio: 700 / 669;
+  }
+}
+
 /* SPALTEN ÄR BUNDEN TILL LOCKUPEN, INTE TILL ETT ch-TAL.
 
    24ch räckte så länge brödtexten gick i 17 px: spalten blev 164 px
