@@ -28,13 +28,17 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 const LADD_TAK_MS = 900;
 
-/* Hjältens bilder, de som kan bli LCP: DELENS, BISTRO och burgaren. */
+/* Hjältens bilder, de som kan bli LCP: DELENS, BISTRO och burgaren.
+   Och typsnittet: texten under laddskärmen ska ha sitt riktiga snitt
+   när den visas. Kom snittet efter lyftet bröts hjältens ingress om
+   från systemsnittet, 270 → 180 px hög, och gav CLS 0,02 (uppmätt). */
 const heroKlar = () =>
-  Promise.all(
-    $$('.hero__ord, .hero__burger img').map((i) =>
+  Promise.all([
+    ...$$('.hero__ord, .hero__burger img').map((i) =>
       i.decode ? i.decode().catch(() => {}) : Promise.resolve()
-    )
-  );
+    ),
+    document.fonts?.load('1em "Mouse Memoirs"').catch(() => {})
+  ]);
 
 /* SLUTSPELET: vad som fortfarande pågår efter att SISTA etappen
    startat. Lagret faller i 520 ms, och stapelns stuk sätts igång vid
