@@ -651,7 +651,7 @@ Bilden är `kalla/marken/fraga-kocken.png`, som görs om av
 | Del | Var |
 |---|---|
 | Avtryckare | `riggaAssistent()` i `src/main.js`, bara en klicklyssnare och `import()` |
-| Panel och stilar | `src/assistent.js` + `src/assistent.css`, en egen bit som hämtas först vid klick |
+| Panel och stilar | `src/assistent.js` + `src/assistent.css`, en egen bit som hämtas när sidan vilar efter load (förvärmd, så att fokus hinner in vid första öppningen) |
 | Backend | `api/assistent.js`, serverless på **Vercel** — sajten själv ligger kvar på GitHub Pages |
 | Vercel-inställning | `vercel.json`; `vercel-rot/` är en tom, noindexad rot så att Vercel inte publicerar en andra kopia av sajten |
 

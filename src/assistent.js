@@ -1,9 +1,9 @@
 /**
  * Menyassistenten — panelen.
  *
- * Hämtas med import() från riggaAssistent() i main.js, först när
- * någon trycker på Fråga kocken. Ingenting härifrån ligger i startpaketet,
- * inte heller stilarna: assistent.css importeras här, och Vite lägger
+ * Hämtas med import() från riggaAssistent() i main.js, när sidan
+ * vilar efter load — se kommentaren där. Ingenting härifrån ligger i
+ * startpaketet, inte heller stilarna: assistent.css importeras här, och Vite lägger
  * den i samma utbrutna bit.
  *
  * RÖRELSEN RÖR INTE SIDANS VARV. Panelen glider in med en CSS-

@@ -2711,8 +2711,15 @@ function riggaLenis() {
 /* ═══ MENYASSISTENTEN ════════════════════════════════════════════
    Bubblan i nedre högra hörnet öppnar en chatt. Här står BARA avtryckaren:
    panelen, dess stilar och all kod för samtalet ligger i
-   assistent.js och hämtas med import() först vid klick. Vite gör en
-   egen bit av den, och startpaketet vet inte att den finns.
+   assistent.js och hämtas med import(). Vite gör en egen bit av den,
+   och startpaketet vet inte att den finns.
+
+   BITEN FÖRVÄRMS NÄR SIDAN VILAR, inte vid klick. Hämtades den först
+   vid klick fanns panelen inte ens när fokus skulle flyttas in: med
+   kall cache missade första öppningen fokus vid 60 ms, i 1 av 10.
+   Nu ligger den klar innan någon hunnit trycka. Den hämtas efter
+   load och i vila, så den tävlar inte med sidans egen laddning; ett
+   tryck innan dess hämtar den direkt, precis som förut.
 
    Laddningen misslyckas tyst om nätet går ned. Knappen står kvar och
    går att trycka igen; ett felmeddelande i en panel som inte laddats
@@ -2722,12 +2729,25 @@ function riggaAssistent() {
   const knapp = $('#assistent-knapp');
   if (!knapp) return;
 
-  let modul = null;
+  let laddning = null;
+  const ladda = () =>
+    (laddning ??= import('./assistent.js').catch((fel) => {
+      // Ett misslyckat försök ska inte fastna: nästa tryck försöker igen.
+      laddning = null;
+      throw fel;
+    }));
+
+  const forvarm = () => ladda().catch(() => {});
+  const vila = (fn) =>
+    'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 1500);
+  if (document.readyState === 'complete') vila(forvarm);
+  else window.addEventListener('load', () => vila(forvarm), { once: true });
+
   knapp.addEventListener('click', async () => {
     if (knapp.getAttribute('aria-busy') === 'true') return;
     knapp.setAttribute('aria-busy', 'true');
     try {
-      modul ??= await import('./assistent.js');
+      const modul = await ladda();
       modul.oppna(knapp);
     } catch (fel) {
       console.warn('Assistenten kunde inte laddas.', fel);
