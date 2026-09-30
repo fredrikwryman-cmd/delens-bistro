@@ -3,31 +3,16 @@
  *
  * Startsidans main.js bygger meny, dragspel, lagerscen, pekarkedja och
  * ett rAF-varv för alla tre löpande animationerna. Ingenting av det
- * finns på en textsida, och att ladda 87 kB för att fylla i ett
- * telefonnummer vore slöseri. Den här filen gör de två saker en
- * dokumentsida faktiskt behöver.
+ * finns på en textsida, och att ladda 87 kB för en navbar vore slöseri.
+ * Den här filen gör det lilla en dokumentsida faktiskt behöver.
  */
-
-import { kontakt } from './data/menu.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-/* Kontaktuppgifterna kommer från samma källa som startsidan. Skrivna
-   för hand på två ställen blir de olika vid första ändringen, och på
-   en integritetspolicy är fel telefonnummer ett riktigt fel — det är
-   den vägen man ska kunna utöva sina rättigheter. */
-const tel = $('#pol-tel');
-if (tel) {
-  tel.href = kontakt.telefonLank;
-  tel.textContent = kontakt.telefon;
-}
-
-const epost = $('#pol-epost');
-if (epost) {
-  epost.href = 'mailto:' + kontakt.epost;
-  epost.textContent = kontakt.epost;
-}
+/* Kontaktuppgifterna står i HTML:en. Vite skriver in dem ur menu.js vid
+   bygget (verktyg/statisk.mjs), så de har samma källa som startsidan
+   utan att sidan behöver hämta menydatan. */
 
 /* Navbaren viker undan vid nedscroll, precis som på startsidan. Här
    räcker en scroll-lyssnare: sidan har inget varv att haka i, och att

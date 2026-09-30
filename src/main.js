@@ -6,7 +6,7 @@
  */
 
 import Lenis from 'lenis';
-import { kategorier, signaturer, oppettider, kontakt } from './data/menu.js';
+import { signaturer, oppettider, stangning } from './data/menu.js';
 
 const reducerad = matchMedia('(prefers-reduced-motion: reduce)');
 const pekareMedHover = matchMedia('(hover: hover) and (pointer: fine)');
@@ -180,18 +180,40 @@ const tillMinuter = (t) => {
   return h * 60 + m;
 };
 
+/* SVENSK TID, inte besökarens. En besökare i New York klockan 14 ska
+   få veta att det är stängt i Upplands Väsby, inte att det är öppet.
+   Samma tidszon som api/assistent.js räknar med. */
+const stockholm = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Europe/Stockholm',
+  weekday: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23'
+});
+const VECKODAGAR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function iStockholm(nu = new Date()) {
+  const del = Object.fromEntries(stockholm.formatToParts(nu).map((p) => [p.type, p.value]));
+  return {
+    dag: VECKODAGAR.indexOf(del.weekday),
+    minuter: Number(del.hour) * 60 + Number(del.minute)
+  };
+}
+
+/* `till` är den senaste stängningstiden (21). Mellan 20 och 21 kan det
+   redan vara stängt om bistron är tom — därför säger etiketten båda. */
 function oppetLage(nu = new Date()) {
-  const idag = oppettider[nu.getDay()];
-  const minuter = nu.getHours() * 60 + nu.getMinutes();
+  const { dag, minuter } = iStockholm(nu);
+  const idag = oppettider[dag];
   const fran = tillMinuter(idag.fran);
   const till = tillMinuter(idag.till);
   const oppet = minuter >= fran && minuter < till;
 
-  if (oppet) return { oppet, etikett: `Öppet till ${idag.till}`, idag };
+  if (oppet) return { oppet, etikett: `Öppet till ${stangning}`, idag };
 
   if (minuter < fran) return { oppet, etikett: `Öppnar ${idag.fran}`, idag };
 
-  const imorgon = oppettider[(nu.getDay() + 1) % 7];
+  const imorgon = oppettider[(dag + 1) % 7];
   return { oppet, etikett: `Stängt — öppnar ${imorgon.fran} i morgon`, idag };
 }
 
@@ -201,67 +223,17 @@ function fyllStatus() {
   $('#status-dot').setAttribute('data-oppet', String(oppet));
   $('#status-label').textContent = etikett;
   $('#orderbar-status').textContent = etikett;
-
-  const tel = $('#status-tel');
-  tel.href = kontakt.telefonLank;
-  tel.textContent = kontakt.telefon;
+  markeraIdag();
 }
 
-function fyllTider(el) {
-  const idag = new Date().getDay();
-  // Måndag först i listan, söndag sist.
-  const ordning = [1, 2, 3, 4, 5, 6, 0];
-  el.innerHTML = ordning
-    .map((i) => {
-      const d = oppettider[i];
-      return `<li data-idag="${i === idag}"><span>${d.dag}</span><span>${d.fran}–${d.till}</span></li>`;
-    })
-    .join('');
-}
-
-/* ═══ KONTAKTUPPGIFTER ═══════════════════════════════════════════ */
-
-function fyllKontakt() {
-  const kartlank =
-    'https://www.google.com/maps/search/?api=1&query=' +
-    encodeURIComponent(kontakt.adress);
-
-  const satt = (sel, fn) => {
-    const el = $(sel);
-    if (el) fn(el);
-  };
-
-  satt('#hitta-adress', (el) => (el.textContent = kontakt.adress));
-  satt('#foot-adress', (el) => (el.textContent = kontakt.adress));
-  // Både textlänken och kartbilden pekar på samma sökning i Google Maps.
-  for (const sel of ['#hitta-karta', '#hitta-kartlank']) {
-    satt(sel, (el) => (el.href = kartlank));
+/* Tiderna, telefon, mejl och länkar står i HTML:en — Vite skriver in
+   dem ur menu.js vid bygget, se verktyg/statisk.mjs. Här markeras bara
+   dagens rad, efter svensk tid. */
+function markeraIdag() {
+  const { dag } = iStockholm();
+  for (const li of $$('#hitta-tider li')) {
+    li.dataset.idag = String(Number(li.dataset.dag) === dag);
   }
-
-  for (const sel of ['#hitta-tel', '#foot-tel']) {
-    satt(sel, (el) => {
-      el.href = kontakt.telefonLank;
-      el.textContent = kontakt.telefon;
-    });
-  }
-  for (const sel of ['#hitta-epost', '#foot-epost']) {
-    satt(sel, (el) => {
-      el.href = 'mailto:' + kontakt.epost;
-      el.textContent = kontakt.epost;
-    });
-  }
-  for (const sel of ['#hitta-fb', '#foot-fb']) {
-    satt(sel, (el) => (el.href = kontakt.facebook));
-  }
-  for (const sel of ['#hitta-ig', '#foot-ig']) {
-    satt(sel, (el) => (el.href = kontakt.instagram));
-  }
-  for (const sel of ['#bestall-lank', '#orderbar-lank']) {
-    satt(sel, (el) => (el.href = kontakt.bestall));
-  }
-
-  // Bara en gång. Listan stod ordagrant lika i foten också.
-  fyllTider($('#hitta-tider'));
 }
 
 /* ═══ 5 · SIGNATURBURGARNA — DRAGSPELSGALLERI ════════════════════
@@ -408,93 +380,12 @@ function byggSignaturer() {
    Bilderna hämtas först när raden öppnas. 33 rätter har foto; laddade
    de alla på en gång vore menyn tyngre än resten av sajten.         */
 
-/** Signaturburgarna delar filer med dragspelet, resten är egna. */
-const bildvag = (id) =>
-  id.startsWith('C') ? `/bilder/signatur/${id}.webp` : `/bilder/meny/${id}.webp`;
-
 function byggMeny() {
+  /* Markupen står i HTML:en, byggd ur menu.js av verktyg/statisk.mjs,
+     så att hela menyn syns utan JavaScript. Här läggs bara beteendet på:
+     flikarna och utfällningen. */
   const flikar = $('#meny-flikar');
   const paneler = $('#meny-paneler');
-
-  flikar.innerHTML = kategorier
-    .map(
-      (k, i) => `
-      <button class="flik" role="tab" id="flik-${k.id}"
-              aria-controls="panel-${k.id}"
-              aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">
-        ${k.namn}
-      </button>`
-    )
-    .join('');
-
-  paneler.innerHTML = kategorier
-    .map((k, ki) => {
-      // Första rätten med bild står öppen när kategorin visas.
-      const forstaMedBild = k.ratter.findIndex((r) => r.bild);
-
-      const rader = k.ratter
-        .map((r, ri) => {
-          /* PRISET OCH MARKÖREN LIGGER I EN EGEN ENHET, och det är inte
-             en extra div för sakens skull. Raden är en flexrad som
-             får brytas när namnet och priset inte får plats bredvid
-             varandra — och bryts de var för sig hamnar bara markören
-             på nästa rad, en ensam prick under priset. I en enhet
-             flyttar de tillsammans. */
-          const pris = `<span class="ratt__pris">${r.pris} kr</span>`;
-          const slut = (markor = '') =>
-            `<span class="ratt__slut">${pris}${markor}</span>`;
-          const namn = `<span class="ratt__namn">${r.namn}${
-            r.signatur ? '<span class="ratt__signatur">signatur</span>' : ''
-          }</span>`;
-          const innehall = r.innehall
-            ? `<span class="ratt__innehall">${r.innehall}</span>`
-            : '';
-
-          if (!r.bild) {
-            return `
-            <li class="ratt">
-              <span class="ratt__rad">
-                ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${slut()}
-              </span>
-              ${innehall}
-            </li>`;
-          }
-
-          const luckaId = `lucka-${k.id}-${ri}`;
-          const oppen = ri === forstaMedBild;
-          const media = r.bild.startsWith('C')
-            ? `<img class="lucka__bild" data-kalla="${bildvag(r.bild)}" alt="${r.namn}"
-                    width="1000" height="1339" decoding="async" />`
-            : `<span class="ph" data-id="${r.bild}" data-spec="1000 × 1339"></span>`;
-
-          return `
-            <li class="ratt ratt--bild" data-oppen="${oppen}">
-              <button class="ratt__knapp" type="button"
-                      aria-expanded="${oppen}" aria-controls="${luckaId}">
-                <span class="ratt__rad">
-                  ${namn}<span class="ratt__prickar" aria-hidden="true"></span>${slut(
-                    '<span class="ratt__markor" aria-hidden="true"></span>'
-                  )}
-                </span>
-                ${innehall}
-              </button>
-              <div class="ratt__lucka" id="${luckaId}">
-                <div class="lucka__inre">
-                  <span class="lucka__media">${media}</span>
-                </div>
-              </div>
-            </li>`;
-        })
-        .join('');
-
-      return `
-      <div class="meny__panel" role="tabpanel" id="panel-${k.id}"
-           aria-labelledby="flik-${k.id}" ${ki === 0 ? '' : 'hidden'}>
-        ${k.underrubrik ? `<p class="meny__underrubrik">${k.underrubrik}</p>` : ''}
-        <ul class="ratter">${rader}</ul>
-      </div>`;
-    })
-    .join('');
 
   /* ── Utfällningen ───────────────────────────────────────────── */
 
@@ -2844,7 +2735,6 @@ function riggaAssistent() {
 /* ═══ START ══════════════════════════════════════════════════════ */
 
 fyllStatus();
-fyllKontakt();
 byggSignaturer();
 byggMeny();
 forberedStickers();

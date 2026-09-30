@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { statiskHtml } from './verktyg/statisk.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -9,6 +10,9 @@ export default defineConfig({
   // uppåt till C:\Users\fredr\postcss.config.js, som kräver
   // @tailwindcss/postcss och får all CSS att svara 500.
   css: { postcss: { plugins: [] } },
+  // Meny, öppettider och kontaktuppgifter skrivs in i HTML:en ur
+  // menu.js, så att de syns utan JavaScript. Se verktyg/statisk.mjs.
+  plugins: [statiskHtml()],
   // Flersida. Utan input-listan bygger Vite bara index.html och
   // integritetspolicyn skulle saknas i utdatan — en död länk i footern
   // på varje sida.

@@ -171,9 +171,9 @@
           <h2 class="rubrik">Personuppgiftsansvarig</h2>
           <p class="dokument__kontakt">
             Delens Bistro<br />
-            Centralvägen 3, 194 76 Upplands Väsby<br />
-            <a class="lank" id="pol-tel" href="#">08-420 065 64</a><br />
-            <a class="lank" id="pol-epost" href="#">info@delensbistro.se</a>
+            {{adress}}<br />
+            <a class="lank" id="pol-tel" href="{{telLank}}">{{telefon}}</a><br />
+            <a class="lank" id="pol-epost" href="{{epostLank}}">{{epost}}</a>
           </p>
 
           <p class="dokument__datum">Senast ändrad: september 2026.</p>
@@ -188,7 +188,7 @@
       <div class="wrap foot__inner">
         <div class="foot__namnblock">
           <p class="foot__namn">Delens Bistro</p>
-          <p>Centralvägen 3, 194 76 Upplands Väsby</p>
+          <p>{{adress}}</p>
         </div>
         <div>
           <p><a class="lank" href="/#hitta">Öppettider</a></p>

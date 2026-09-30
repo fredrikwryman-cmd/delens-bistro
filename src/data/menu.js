@@ -317,16 +317,26 @@ export const signaturer = [
   { id: 'C5', namn: 'Cheeseburger', pris: '129 / 164', pitch: 'Sallad, rödlök, hamburgerdressing, cheddar. Ingenting att gömma sig bakom.' }
 ];
 
-/** Öppettider. Index 0 = söndag, enligt Date.getDay(). */
+/**
+ * Öppettider. Index 0 = söndag, enligt Date.getDay().
+ *
+ * STÄNGNINGEN ÄR RÖRLIG. Restaurangen stänger 20 eller 21 beroende på
+ * om det finns gäster kvar. `till` är den senaste tiden, och det är
+ * den öppetstatusen räknar med. Besökaren får se båda: `stangning`
+ * står i öppettiderna, i fästfältet och i Fråga kocken.
+ */
 export const oppettider = [
   { dag: 'Söndag', fran: '12:00', till: '21:00' },
-  { dag: 'Måndag', fran: '11:00', till: '20:00' },
-  { dag: 'Tisdag', fran: '11:00', till: '20:00' },
-  { dag: 'Onsdag', fran: '11:00', till: '20:00' },
-  { dag: 'Torsdag', fran: '11:00', till: '20:00' },
+  { dag: 'Måndag', fran: '11:00', till: '21:00' },
+  { dag: 'Tisdag', fran: '11:00', till: '21:00' },
+  { dag: 'Onsdag', fran: '11:00', till: '21:00' },
+  { dag: 'Torsdag', fran: '11:00', till: '21:00' },
   { dag: 'Fredag', fran: '11:00', till: '21:00' },
   { dag: 'Lördag', fran: '12:00', till: '21:00' }
 ];
+
+export const stangerKort = '20–21';
+export const stangning = stangerKort + ', beroende på gäster';
 
 export const kontakt = {
   adress: 'Centralvägen 3, 194 76 Upplands Väsby',

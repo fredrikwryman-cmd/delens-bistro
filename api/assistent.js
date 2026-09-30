@@ -19,7 +19,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { kategorier, oppettider, kontakt } from '../src/data/menu.js';
+import { kategorier, oppettider, kontakt, stangerKort } from '../src/data/menu.js';
 
 /* ── Konstanter ─────────────────────────────────────────────────── */
 
@@ -128,7 +128,7 @@ function tiderText() {
   // Datafilen börjar på söndag, som Date.getDay(). Här skrivs veckan
   // från måndag, som en människa läser den.
   return [1, 2, 3, 4, 5, 6, 0]
-    .map((i) => `- ${oppettider[i].dag}: ${oppettider[i].fran}–${oppettider[i].till}`)
+    .map((i) => `- ${oppettider[i].dag}: ${oppettider[i].fran} till ${stangerKort}`)
     .join('\n');
 }
 
@@ -162,6 +162,7 @@ ${kontakt.adress}. Telefon ${kontakt.telefon}.
 
 # Öppettider
 ${tiderText()}
+Stängningstiden är rörlig: restaurangen stänger klockan 20 eller 21 beroende på om det finns gäster kvar. Säg det när någon frågar när ni stänger, och räkna med 21 som senaste tid. Frågar någon om det är öppet mellan 20 och 21, säg att det troligen är öppet men kan ha stängt klockan 20 om bistron är tom, och hänvisa till telefon ${kontakt.telefon}.
 
 # Menyn
 ${menyText()}`;
