@@ -16,7 +16,15 @@
  * stopp här än en sida som visar {{telefon}} för besökaren.
  */
 
-import { kategorier, oppettider, kontakt, stangerKort, stangning } from '../src/data/menu.js';
+import {
+  kategorier,
+  signaturer,
+  oppettider,
+  kontakt,
+  stangerKort,
+  stangerVillkor,
+  stangning
+} from '../src/data/menu.js';
 
 const esc = (s) =>
   String(s)
@@ -36,7 +44,10 @@ const VARDEN = {
   facebook: kontakt.facebook,
   instagram: kontakt.instagram,
   bestall: kontakt.bestall,
-  stangning: 'Stänger ' + stangning
+  stangning: 'Stänger ' + stangning,
+  // Fästfältets två delar, se .orderbar__huvud i style.css.
+  stangerHuvud: 'Stänger ' + stangerKort,
+  stangerVillkor
 };
 
 /** Signaturburgarna delar filer med dragspelet, resten är egna. */
@@ -135,6 +146,44 @@ function menyPaneler() {
     .join('');
 }
 
+/* SIGNATURGALLERIET. Kortet är en listpost och knappen i den är det
+   man trycker på: en riktig button, utsträckt över hela kortet, med
+   aria-pressed för det kort som står öppet (BF-04). Knappens namn är
+   namnet och priset; etiketten ovanpå bilden är aria-hidden och läses
+   inte två gånger. Bilden har tom alt av samma skäl.
+
+   Kortet som står öppet från start är satt redan här, så att galleriet
+   har ett öppet kort även utan JS. DRAGSPEL.standardIndex i main.js
+   ska vara samma tal. */
+const SIGNATUR_OPPEN = 2;
+
+function signaturKort() {
+  return signaturer
+    .map((b, i) => {
+      const oppen = i === SIGNATUR_OPPEN;
+      return `
+      <div class="dragspel__kort" role="listitem" data-index="${i}" data-aktiv="${oppen}">
+        <span class="dragspel__ram">
+          <span class="dragspel__media">
+            <img src="/bilder/signatur/${b.id}.webp" alt=""
+                 width="1000" height="1339" loading="lazy" decoding="async" />
+          </span>
+          <span class="dragspel__sloja" aria-hidden="true"></span>
+        </span>
+        <span class="dragspel__etikett" aria-hidden="true">
+          <span class="dragspel__strec"></span>
+          <span class="dragspel__text">
+            <b class="dragspel__namn">${esc(b.namn)}</b>
+            <span class="dragspel__pris">${esc(b.pris)} kr</span>
+            <span class="dragspel__pitch">${esc(b.pitch)}</span>
+          </span>
+        </span>
+        <button class="dragspel__knapp" type="button" aria-pressed="${oppen}"><span class="visuellt-dold">${esc(b.namn)}, ${esc(b.pris)} kr</span></button>
+      </div>`;
+    })
+    .join('');
+}
+
 function hittaTider() {
   // Måndag först i listan, söndag sist. data-dag är index i
   // oppettider (0 = söndag); main.js markerar dagens rad med den.
@@ -149,7 +198,8 @@ function hittaTider() {
 const BLOCK = {
   'meny-flikar': menyFlikar,
   'meny-paneler': menyPaneler,
-  'hitta-tider': hittaTider
+  'hitta-tider': hittaTider,
+  signaturer: signaturKort
 };
 
 export function ersatt(html) {

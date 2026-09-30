@@ -90,6 +90,9 @@
   </head>
 
   <body>
+    <!-- Första tabbstoppet: förbi sidhuvudet, rakt till innehållet. -->
+    <a class="hopplank" href="#top">Till innehållet</a>
+
     <!-- ═══ 0 · LADDSKÄRM — djuprött ═══════════════════════════════ -->
     <div class="loader" id="loader" role="status" aria-live="polite">
       <!-- SAMMA FEM LAGER SOM LAGERSEKTIONEN, i laddskärmens storlek.
@@ -145,15 +148,15 @@
            tar den övres plats. Kopian är aria-hidden — skärmläsaren ska
            inte läsa varje länk två gånger. -->
       <nav class="nav__links" aria-label="Huvudmeny">
-        <a href="#meny"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></a>
-        <a href="#signatur"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></a>
-        <a href="#hitta"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></a>
+        <a href="#meny"><span class="rulle-ram"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></span></a>
+        <a href="#signatur"><span class="rulle-ram"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></span></a>
+        <a href="#hitta"><span class="rulle-ram"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></span></a>
         <!-- En egen sida, inte ett ankare. -->
-        <a href="/om-oss.html"><span class="rulle">Om oss</span><span class="rulle rulle--under" aria-hidden="true">Om oss</span></a>
+        <a href="/om-oss.html"><span class="rulle-ram"><span class="rulle">Om oss</span><span class="rulle rulle--under" aria-hidden="true">Om oss</span></span></a>
       </nav>
     </header>
 
-    <main id="top">
+    <main id="top" tabindex="-1">
       <!-- ═══ 1 · HERO — svart ═════════════════════════════════════ -->
       <section class="sec sec--svart hero" id="hero">
         <div class="hero__inner">
@@ -313,7 +316,7 @@
               </p>
               <p data-rader>
                 I januari 2026 tog Hakan Delen över. Han hade drivit Väsby
-                kolgrill på samma gata i nästan tio år, och köpte stället av
+                kolgrill på samma gata i nästan tio år. Han köpte stället av
                 Emil Haglund — en gammal kompanjon, från tiden då de drev
                 Runby krog ihop. Väggarna målades om, möblerna fräschades
                 upp, skylten byttes.
@@ -441,7 +444,7 @@
             </p>
           </div>
           <!-- Dragspelsgalleri. Byggs av JS ur signaturer i data/menu.js. -->
-          <div class="dragspel" id="signatur-galleri" role="list" aria-label="Signaturburgare"></div>
+          <div class="dragspel" id="signatur-galleri" role="list" aria-label="Signaturburgare"><!--bygg:signaturer--></div>
         </div>
       </section>
 
@@ -787,12 +790,15 @@
     </footer>
 
     <!-- ═══ FAST BESTÄLLNINGSFÄLT ══════════════════════════════════ -->
-    <div class="orderbar" id="orderbar">
-      <span class="orderbar__text" id="orderbar-status">{{stangning}}</span>
+    <aside class="orderbar" id="orderbar" aria-label="Beställ">
+      <!-- Beskedet i två delar: huvudbeskedet och villkoret. Under
+           600 px står villkoret på en egen, mindre rad, så att fältet
+           behåller en rads höjd. Se .orderbar__text i style.css. -->
+      <p class="orderbar__text" id="orderbar-status"><span class="orderbar__huvud">{{stangerHuvud}}</span><span class="orderbar__detalj">{{stangerVillkor}}</span></p>
       <a class="knapp orderbar__knapp" id="orderbar-lank" href="{{bestall}}" target="_blank" rel="noopener">
         Beställ online
       </a>
-    </div>
+    </aside>
 
     <!-- ═══ FRÅGA KOCKEN ═══════════════════════════════════════════
          Menyassistentens knapp, fast i nedre högra hörnet. Den står

@@ -43,6 +43,8 @@ let falt = null;
 let skicka = null;
 let utlosare = null;
 let upptagen = false;
+/** Element som panelen gjorde inert, och bara de. */
+let inerta = [];
 
 /** Samtalet, i den form backend tar emot. */
 const samtal = [];
@@ -147,10 +149,74 @@ function visa(li) {
 
 /* ── Öppna och stänga ───────────────────────────────────────────── */
 
+/* FOKUS IN MED rAF, INTE MED ETT ENDA ANROP (BF-06). Vid reducerad
+   rörelse sätter style.css alla övergångar till 0,01 ms, och fältet
+   ärver då panelens visibility: hidden i just det ögonblick focus()
+   anropas. Anropet misslyckas tyst och fokus blir kvar på knappen
+   bakom panelen — 0 av 10 öppningar i besiktningen. Här försöker varje
+   bildruta igen tills fältet faktiskt har fokus, högst 800 ms. */
+const FOKUS_TAK_MS = 800;
+
+function fokusera(mal) {
+  const start = performance.now();
+  const forsok = () => {
+    if (panel?.getAttribute('data-oppen') !== 'true') return;
+    if (document.activeElement !== mal) mal.focus({ preventScroll: true });
+    if (document.activeElement === mal) return;
+    if (performance.now() - start < FOKUS_TAK_MS) requestAnimationFrame(forsok);
+  };
+  forsok();
+}
+
+/* MODALT NÄR PANELEN TÄCKER SKÄRMEN. Den är min(30rem, 100vw) bred;
+   på en telefon är den hela skärmen, och då fanns det ingenting att
+   tabba till bakom den som gick att se. Då blir den modal: aria-modal,
+   inert på resten av sidan och Tab som cirkulerar inne i panelen. På
+   en bred skärm står sidan kvar synlig bredvid, och där är panelen
+   fortfarande ett fönster man kan lämna med Tab. */
+function tackerSkarmen() {
+  return panel.offsetWidth >= document.documentElement.clientWidth - 1;
+}
+
+function modal(pa) {
+  panel.setAttribute('aria-modal', String(pa));
+  if (pa && !inerta.length) {
+    inerta = [...document.body.children].filter((e) => e !== panel && !e.inert);
+    for (const e of inerta) e.inert = true;
+  } else if (!pa) {
+    for (const e of inerta) e.inert = false;
+    inerta = [];
+  }
+}
+
+function vidStorlek() {
+  if (panel?.getAttribute('data-oppen') === 'true') modal(tackerSkarmen());
+}
+
+/** Det som går att tabba till i panelen, i ordning. */
+function fokuserbara() {
+  return [...panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])')];
+}
+
 function vidTangent(e) {
-  if (e.key === 'Escape' && panel?.getAttribute('data-oppen') === 'true') {
+  if (panel?.getAttribute('data-oppen') !== 'true') return;
+  if (e.key === 'Escape') {
     e.preventDefault();
     stangPanel(false);
+    return;
+  }
+  if (e.key !== 'Tab' || panel.getAttribute('aria-modal') !== 'true') return;
+  const alla = fokuserbara();
+  if (!alla.length) return;
+  const forsta = alla[0];
+  const sista = alla[alla.length - 1];
+  const har = document.activeElement;
+  if (e.shiftKey && (har === forsta || !panel.contains(har))) {
+    e.preventDefault();
+    sista.focus();
+  } else if (!e.shiftKey && (har === sista || !panel.contains(har))) {
+    e.preventDefault();
+    forsta.focus();
   }
 }
 
@@ -159,7 +225,7 @@ export function oppna(knapp) {
   const forsta = !panel;
   if (forsta) bygg();
   if (panel.getAttribute('data-oppen') === 'true') {
-    falt.focus({ preventScroll: true });
+    fokusera(falt);
     return;
   }
 
@@ -175,7 +241,9 @@ export function oppna(knapp) {
   // style.css. Här skrivs, och där behövs systemets textmarkör.
   document.documentElement.setAttribute('data-chatt', 'oppen');
   document.addEventListener('keydown', vidTangent);
-  falt.focus({ preventScroll: true });
+  window.addEventListener('resize', vidStorlek);
+  modal(tackerSkarmen());
+  fokusera(falt);
 }
 
 /* FOKUSRINGEN VID STÄNGNING. Fokus går tillbaka till knappen som
@@ -204,6 +272,9 @@ function stangPanel(franPekare) {
     }
   }, 200);
   document.removeEventListener('keydown', vidTangent);
+  window.removeEventListener('resize', vidStorlek);
+  // Före fokusflytten: en inert knapp går inte att fokusera.
+  modal(false);
   if (utlosare && franPekare) {
     const knapp = utlosare;
     knapp.setAttribute('data-pekfokus', '');

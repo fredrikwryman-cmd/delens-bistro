@@ -64,20 +64,23 @@
   </head>
 
   <body>
+    <!-- Första tabbstoppet: förbi sidhuvudet, rakt till innehållet. -->
+    <a class="hopplank" href="#top">Till innehållet</a>
+
     <header class="nav" id="nav">
       <a class="nav__logo" href="/">
         <img class="nav__logotyp" src="/bilder/granssnitt/logotyp.webp"
              alt="Delens Bistro" width="180" height="193" decoding="async" />
       </a>
       <nav class="nav__links" aria-label="Huvudmeny">
-        <a href="/#meny"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></a>
-        <a href="/#signatur"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></a>
-        <a href="/#hitta"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></a>
-        <a href="/om-oss.html"><span class="rulle">Om oss</span><span class="rulle rulle--under" aria-hidden="true">Om oss</span></a>
+        <a href="/#meny"><span class="rulle-ram"><span class="rulle">Meny</span><span class="rulle rulle--under" aria-hidden="true">Meny</span></span></a>
+        <a href="/#signatur"><span class="rulle-ram"><span class="rulle">Signaturer</span><span class="rulle rulle--under" aria-hidden="true">Signaturer</span></span></a>
+        <a href="/#hitta"><span class="rulle-ram"><span class="rulle">Hitta hit</span><span class="rulle rulle--under" aria-hidden="true">Hitta hit</span></span></a>
+        <a href="/om-oss.html"><span class="rulle-ram"><span class="rulle">Om oss</span><span class="rulle rulle--under" aria-hidden="true">Om oss</span></span></a>
       </nav>
     </header>
 
-    <main>
+    <main id="top" tabindex="-1">
       <section class="sec sec--vid sec--svart dokument">
         <div class="wrap dokument__inner">
           <h1 class="rubrik">Integritetspolicy</h1>

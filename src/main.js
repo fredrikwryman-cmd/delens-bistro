@@ -6,7 +6,7 @@
  */
 
 import Lenis from 'lenis';
-import { signaturer, oppettider, stangning } from './data/menu.js';
+import { oppettider, stangerKort, stangerVillkor, stangning } from './data/menu.js';
 
 const reducerad = matchMedia('(prefers-reduced-motion: reduce)');
 const pekareMedHover = matchMedia('(hover: hover) and (pointer: fine)');
@@ -209,20 +209,33 @@ function oppetLage(nu = new Date()) {
   const till = tillMinuter(idag.till);
   const oppet = minuter >= fran && minuter < till;
 
-  if (oppet) return { oppet, etikett: `Öppet till ${stangning}`, idag };
+  /* etikett är hela beskedet, för statusraden. huvud och detalj är
+     samma besked i två delar, för fästfältet. */
+  if (oppet) {
+    return { oppet, etikett: `Öppet till ${stangning}`, huvud: `Öppet till ${stangerKort}`, detalj: stangerVillkor };
+  }
 
-  if (minuter < fran) return { oppet, etikett: `Öppnar ${idag.fran}`, idag };
+  if (minuter < fran) {
+    const etikett = `Öppnar ${idag.fran}`;
+    return { oppet, etikett, huvud: etikett, detalj: '' };
+  }
 
   const imorgon = oppettider[(dag + 1) % 7];
-  return { oppet, etikett: `Stängt — öppnar ${imorgon.fran} i morgon`, idag };
+  return {
+    oppet,
+    etikett: `Stängt — öppnar ${imorgon.fran} i morgon`,
+    huvud: 'Stängt',
+    detalj: `öppnar ${imorgon.fran} i morgon`
+  };
 }
 
 function fyllStatus() {
-  const { oppet, etikett } = oppetLage();
+  const { oppet, etikett, huvud, detalj } = oppetLage();
 
   $('#status-dot').setAttribute('data-oppet', String(oppet));
   $('#status-label').textContent = etikett;
-  $('#orderbar-status').textContent = etikett;
+  $('#orderbar-status .orderbar__huvud').textContent = huvud;
+  $('#orderbar-status .orderbar__detalj').textContent = detalj;
   markeraIdag();
 }
 
@@ -255,7 +268,7 @@ function markeraIdag() {
 
 const DRAGSPEL = {
   expandRatio: 0.52,
-  standardIndex: 2,
+  standardIndex: 2, // samma tal som SIGNATUR_OPPEN i verktyg/statisk.mjs
   parallax: 0.5,
   // Förlagan har 1.22. Nedskruvad eftersom mediarutan annars blir
   // bredare än den behöver och tvingar fram mer vertikal beskärning
@@ -277,32 +290,11 @@ function byggSignaturer() {
   const galleri = $('#signatur-galleri');
   if (!galleri) return;
 
-  galleri.innerHTML = signaturer
-    .map(
-      (b, i) => `
-      <div class="dragspel__kort" role="listitem" tabindex="0"
-           data-index="${i}" data-aktiv="false"
-           aria-label="${b.namn}, ${b.pris} kr">
-        <span class="dragspel__ram">
-          <span class="dragspel__media">
-            <img src="/bilder/signatur/${b.id}.webp" alt="${b.namn}"
-                 width="1000" height="1339" loading="lazy" decoding="async" />
-          </span>
-          <span class="dragspel__sloja" aria-hidden="true"></span>
-        </span>
-        <span class="dragspel__etikett" aria-hidden="true">
-          <span class="dragspel__strec"></span>
-          <span class="dragspel__text">
-            <b class="dragspel__namn">${b.namn}</b>
-            <span class="dragspel__pris">${b.pris} kr</span>
-            <span class="dragspel__pitch">${b.pitch}</span>
-          </span>
-        </span>
-      </div>`
-    )
-    .join('');
-
+  /* Korten står i HTML:en, byggda ur menu.js av verktyg/statisk.mjs,
+     så galleriet syns utan JavaScript. Här läggs bara beteendet på.
+     Det som trycks på är knappen i varje kort, inte kortet. */
   const kort = $$('.dragspel__kort', galleri);
+  const knappar = kort.map((k) => k.querySelector('.dragspel__knapp'));
   const antal = kort.length;
   let aktiv = Math.min(Math.max(DRAGSPEL.standardIndex, 0), antal - 1);
   let mediabredd = 480;
@@ -317,7 +309,7 @@ function byggSignaturer() {
     kort.forEach((k, i) => {
       const arAktiv = i === aktiv;
       k.dataset.aktiv = String(arAktiv);
-      k.setAttribute('aria-current', arAktiv ? 'true' : 'false');
+      knappar[i].setAttribute('aria-pressed', String(arAktiv));
       // Korten före det aktiva lutar åt ena hållet, de efter åt andra.
       k.style.setProperty('--vrid', arAktiv ? '0' : i < aktiv ? '1' : '-1');
       const drift = Math.max(-1.5, Math.min(1.5, aktiv - i));
@@ -342,20 +334,21 @@ function byggSignaturer() {
   };
 
   kort.forEach((k, i) => {
-    k.addEventListener('click', () => satt(i));
-    k.addEventListener('focus', () => satt(i));
+    const knapp = knappar[i];
+    knapp.addEventListener('click', () => satt(i));
+    knapp.addEventListener('focus', () => satt(i));
     k.addEventListener('mouseenter', () => {
       // I fingerläge är dragspelet lodrätt och styrs av tryck.
       if (!fingerlage.matches) satt(i);
     });
-    k.addEventListener('keydown', (e) => {
+    knapp.addEventListener('keydown', (e) => {
       const framat = e.key === 'ArrowRight' || e.key === 'ArrowDown';
       const bakat = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
       if (!framat && !bakat) return;
       e.preventDefault();
       const n = (i + (framat ? 1 : -1) + antal) % antal;
       satt(n);
-      kort[n].focus();
+      knappar[n].focus();
     });
   });
 
@@ -466,6 +459,18 @@ function byggMeny() {
   /* ── Flikarna ───────────────────────────────────────────────── */
 
   const knappar = $$('.flik', flikar);
+
+  /* Kanttoningen under 900 px: data-kant säger åt vilket håll det
+     finns fler flikar att svepa fram. Se .meny__flikar i style.css. */
+  const kant = () => {
+    const kvar = flikar.scrollWidth - flikar.clientWidth;
+    const x = flikar.scrollLeft;
+    const hoger = kvar > 1 && x < kvar - 1;
+    const vanster = kvar > 1 && x > 1;
+    flikar.dataset.kant = hoger && vanster ? 'bada' : hoger ? 'hoger' : vanster ? 'vanster' : 'ingen';
+  };
+  flikar.addEventListener('scroll', kant, { passive: true });
+  new ResizeObserver(kant).observe(flikar);
 
   const visa = (id) => {
     knappar.forEach((b) => {

@@ -336,7 +336,8 @@ export const oppettider = [
 ];
 
 export const stangerKort = '20–21';
-export const stangning = stangerKort + ', beroende på gäster';
+export const stangerVillkor = 'beroende på gäster';
+export const stangning = stangerKort + ', ' + stangerVillkor;
 
 export const kontakt = {
   adress: 'Centralvägen 3, 194 76 Upplands Väsby',

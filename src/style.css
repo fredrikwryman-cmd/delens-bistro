@@ -19,6 +19,10 @@
   --dampad: rgb(242 235 224 / 0.62);
   --linje: rgb(242 235 224 / 0.14);
 
+  /* Fokusringens färg. Amber som standard; ytorna där amber inte når
+     3:1 skriver över den i listan vid .sec--ljus nedan (BF-07). */
+  --fokus: var(--amber);
+
   --wrap: 1280px;
   --gutter: clamp(1rem, 4vw, 3rem);
 
@@ -126,6 +130,13 @@
 html {
   background: var(--svart);
   -webkit-text-size-adjust: 100%;
+  /* ANKARHOPP LANDAR UNDER SIDHUVUDET (BF-10). Sidhuvudets höjd är
+     dess padding, 2 × 0,85 rem, plus logotypens höjd. Logotypen är
+     clamp(38px, 4,5vw, 52px) bred med förhållandet 193:180, så höjden
+     följer bredden i varje brytpunkt: 68 px vid 390, 83 px från 1156
+     px och uppåt. +1 px är kantlinjen när sidhuvudet ligger fast. */
+  --nav-h: calc(1.7rem + clamp(38px, 4.5vw, 52px) * 193 / 180 + 1px);
+  scroll-padding-top: var(--nav-h);
 }
 
 body {
@@ -261,6 +272,17 @@ a {
 .sec--kol   { background: var(--kol); }
 .sec--rod   { background: var(--rod); }
 .sec--ljus  { background: var(--offwhite); color: var(--mork-text); }
+
+/* FOKUSRINGEN PER YTA. Den enda listan; varje fokusring på sajten
+   ritas med var(--fokus). Amber mot off-white är 1,82:1 och amber mot
+   beställningsfältets amber är 1:1, så de två ljusa ytorna får mörk
+   ring: #141414 ger 15,5:1 mot off-white och 7,8:1 mot amber. Alla
+   andra ytor är mörka, där amber ligger på 5,6–9,0:1. En ny ljus yta
+   läggs till här, ingen annanstans. */
+.sec--ljus,
+.orderbar {
+  --fokus: #141414;
+}
 
 .wave {
   position: absolute;
@@ -427,6 +449,16 @@ a {
 
 .sec--ljus .lank {
   color: var(--mork-text);
+}
+
+/* FRISTÅENDE LÄNKAR FÅR 44 PX TRÄFFYTA (GV-04). Länkarna är inline,
+   och vertikal padding på ett inline-element växer bara träffytan:
+   radboxen, texten och understrykningen står kvar där de stod. 32 →
+   45 px. Länkar i löpande text får ingen padding — där hade ytorna
+   lagt sig över raden ovanför. */
+.foot .lank,
+.hitta__block .lank {
+  padding-block: 0.4rem;
 }
 
 /* Ord-för-ord-avslöjning. Utgångsläget sätts av JS, så innehållet
@@ -675,7 +707,7 @@ a {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--fokus);
   outline-offset: 3px;
 }
 
@@ -876,6 +908,38 @@ input:focus-visible {
   transition: width 220ms linear;
 }
 
+/* ═══ HOPPLÄNKEN ══════════════════════════════════════════════
+   Första tabbstoppet på varje sida. Ovanför skärmen tills den får
+   fokus; då glider den in överst till vänster, över sidhuvudet och
+   laddskärmen. Målet är main, som har tabindex="-1" så att fokus
+   följer med och nästa Tab fortsätter därifrån.                   */
+
+.hopplank {
+  position: fixed;
+  inset-block-start: 0.75rem;
+  inset-inline-start: var(--gutter);
+  z-index: 10001;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  background: var(--amber);
+  color: var(--svart);
+  font-size: var(--t-xs);
+  line-height: var(--lh-xs);
+  letter-spacing: var(--ls-xs);
+  text-transform: uppercase;
+  text-decoration: none;
+  translate: 0 -200%;
+}
+
+.hopplank:focus {
+  translate: 0 0;
+}
+
+/* main tar emot fokus från hopplänken men är inget att ringa in. */
+main:focus {
+  outline: none;
+}
+
 /* ═══ FAST TOPPNAV ════════════════════════════════════════════ */
 
 .nav {
@@ -904,14 +968,21 @@ input:focus-visible {
   gap: 0.6rem;
   text-decoration: none;
   border-radius: 999px;
+  /* TRÄFFYTAN, inte utseendet. Logotypen är 38 × 41 px vid 390 och
+     ska gå att träffa på 44 × 44 (GV-04). Paddingen växer ytan och
+     den negativa marginalen tar tillbaka platsen, så bilden står
+     exakt där den stod och navbaren behåller sin höjd. */
+  padding: 3px;
+  margin: -3px;
 }
 
 /* Hemknappen är en bild och inget annat. Den behöver därför en egen
    synlig fokusring — utan text finns ingenting som visar var
    tangentbordet står. */
 .nav__logo:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 4px;
+  outline: 2px solid var(--fokus);
+  /* 1 px + de 3 px padding som träffytan fick = samma läge som förut. */
+  outline-offset: 1px;
 }
 
 .nav__logotyp {
@@ -1018,6 +1089,22 @@ input:focus-visible {
   grid-template-columns: minmax(0, 1fr);
   align-items: center;
   padding-block: clamp(6rem, 14vw, 10rem) clamp(4rem, 10vw, 8rem);
+}
+
+/* PLATS FÖR FRÅGA KOCKEN. Knappen står fast i nedre högra hörnet,
+   ovanför beställningsfältet, och vid 390 × 844 låg den över
+   ingressens sista rad. Hjältens nederkant håller därför fältets höjd
+   plus knappens (bildbredden gånger 277/400) plus en marginal fri.
+   Hjälten är minst en skärm hög och centrerar innehållet, så
+   ingressen flyttas upp i stället för att täckas. Över 900 px står
+   knappen i hörnet bredvid texten och inte över den. */
+@media (max-width: 900px) {
+  .hero {
+    padding-block-end: max(
+      clamp(4rem, 10vw, 8rem),
+      calc(var(--orderbar-h, 4rem) + clamp(6rem, 8vw, 8rem) * 277 / 400 + 1rem)
+    );
+  }
 }
 
 .hero__inner {
@@ -1467,7 +1554,10 @@ input:focus-visible {
 .status__dot[data-oppet='true']  { background: #5ec26a; box-shadow: 0 0 0 4px rgb(94 194 106 / 0.18); }
 .status__dot[data-oppet='false'] { background: #c2564e; box-shadow: 0 0 0 4px rgb(194 86 78 / 0.18); }
 
+/* Träffytan växer med en osynlig ::after, 4 px upp och ned: 38 → 46
+   px hög. Textens och understrykningens läge rörs inte (GV-04). */
 .status__tel {
+  position: relative;
   color: var(--amber);
   font-weight: 700;
   font-size: var(--t-s);
@@ -1476,6 +1566,12 @@ input:focus-visible {
   text-transform: uppercase;
   text-decoration: none;
   border-block-end: 1px solid currentColor;
+}
+
+.status__tel::after {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
 }
 
 /* ═══ 3 · REBRANDEN ═══════════════════════════════════════════ */
@@ -2146,8 +2242,6 @@ input:focus-visible {
   border-radius: var(--radie);
   background: var(--svart);
   box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.8);
-  cursor: pointer;
-  outline: none;
   transform-style: preserve-3d;
   transform-origin: center center;
   /* flex-grow är en layoutegenskap och normalt förbjuden att animera.
@@ -2169,10 +2263,26 @@ input:focus-visible {
   flex-grow: var(--vaxt);
 }
 
-.dragspel__kort:focus-visible {
-  box-shadow:
-    0 0 0 2px var(--amber),
-    0 10px 30px -18px rgb(0 0 0 / 0.8);
+/* KNAPPEN ÄR DET MAN TRYCKER PÅ, inte kortet (BF-04). Den ligger
+   utsträckt över hela kortet och överst, så varje punkt på kortet är
+   knappen. Den ritar ingenting själv. Kortet har overflow: hidden,
+   så en ring utanför knappen hade klippts; den ritas därför innanför
+   kortets kant, där den förut satt som box-shadow. */
+.dragspel__knapp {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dragspel__knapp:focus-visible {
+  outline: 2px solid var(--fokus);
+  outline-offset: -2px;
 }
 
 .dragspel__ram {
@@ -2276,6 +2386,34 @@ input:focus-visible {
 .dragspel__kort[data-aktiv='true'] .dragspel__text {
   opacity: 1;
   translate: 0 0;
+}
+
+/* SLÖJAN FÖLJER TEXTEN. Kortets egen nedtoning börjar vid 42 % av
+   höjden, men texten gör det inte: där beskrivningen bryts på tre
+   rader står priset mitt i osten, och amber mot ost var 2,2:1 i sämsta
+   pixel (fynd 7), nu 4,4:1 som sämst. Här ligger en mörk slöja bakom själva textblocket,
+   med en toning 3 rem ovanför namnet och full täckning från namnets
+   överkant och nedåt. Den hör till texten, så den tonar in och ut med
+   den och syns bara på det öppna kortet. z-index -1 lägger den under
+   texten men över bilden, inom etikettens lager. */
+.dragspel__text {
+  position: relative;
+}
+
+.dragspel__text::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  /* Vågrätt långt förbi kortets kanter: kortet klipper (overflow och
+     contain: paint), så slöjan går kant i kant utan synlig ände. */
+  inset: -3rem -100vw -40px;
+  background: linear-gradient(
+    180deg,
+    rgb(14 14 14 / 0) 0,
+    rgb(14 14 14 / 0.72) 3rem,
+    rgb(14 14 14 / 0.85) 100%
+  );
+  pointer-events: none;
 }
 
 .dragspel__namn {
@@ -2396,6 +2534,10 @@ input:focus-visible {
     flex-basis: 100%;
   }
 
+  .dragspel__text::before {
+    content: none;
+  }
+
   .dragspel__media {
     width: 100%;
     transform: none;
@@ -2481,10 +2623,39 @@ input:focus-visible {
   padding-block-end: 0.3rem;
   margin-inline: calc(var(--gutter) * -1);
   padding-inline: var(--gutter);
+  /* Snäppet räknar med marginalen. Utan den rullade raden 16 px vid
+     start så att första fliken stod mot skärmkanten, och kanttoningen
+     åt vänster lade sig över den. */
+  scroll-padding-inline: var(--gutter);
 }
 
 .meny__flikar::-webkit-scrollbar {
   display: none;
+}
+
+/* ALLA TIO SKA GÅ ATT NÅ MED MUS. Över 900 px bryts flikarna till två
+   rader i stället för att rulla: där syntes 8 av 10 och en mus utan
+   vågrät rullning kom aldrig till dryckerna. Under 900 px står rullen
+   kvar, men kanten tonar ut där det finns fler flikar att svepa fram.
+   data-kant sätts av main.js; utan JS tonar ingenting. */
+@media (min-width: 901px) {
+  .meny__flikar {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .meny__flikar[data-kant='hoger'] {
+    mask-image: linear-gradient(to right, #000 calc(100% - 3.5rem), transparent);
+  }
+  .meny__flikar[data-kant='vanster'] {
+    mask-image: linear-gradient(to left, #000 calc(100% - 3.5rem), transparent);
+  }
+  .meny__flikar[data-kant='bada'] {
+    mask-image: linear-gradient(to right, transparent, #000 3.5rem, #000 calc(100% - 3.5rem), transparent);
+  }
 }
 
 .flik {
@@ -2762,7 +2933,7 @@ input:focus-visible {
 }
 
 .ratt__knapp:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--fokus);
   outline-offset: 2px;
   border-radius: 0.4rem;
 }
@@ -3356,7 +3527,7 @@ input:focus-visible {
 }
 
 .social:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--fokus);
   outline-offset: 3px;
 }
 
@@ -3382,7 +3553,8 @@ input:focus-visible {
   font-size: var(--t-s);
   line-height: var(--lh-s);
   letter-spacing: var(--ls-s);
-  color: rgb(242 235 224 / 0.35);
+  /* 0,45: 4,0:1 mot #0e0e0e. 0,35 gav 2,87:1, under 3:1 för stor text. */
+  color: rgb(242 235 224 / 0.45);
 }
 
 /* ── Byggkrediten ──────────────────────────────────────────────── */
@@ -3742,6 +3914,7 @@ input:focus-visible {
 }
 
 .orderbar__text {
+  margin: 0;
   font-weight: 800;
   font-size: var(--t-s);
   line-height: var(--lh-s);
@@ -3749,7 +3922,48 @@ input:focus-visible {
   text-transform: uppercase;
 }
 
+/* EN RAD HÖG PÅ TELEFON. "Stänger 20–21, beroende på gäster" ryms inte
+   bredvid knappen vid 390 px; texten bröts på två rader, knappen med,
+   och fältet växte från 73 till 104 px. Nu står huvudbeskedet i sin
+   vanliga grad och villkoret på en mindre rad under, tätt satta så
+   att de två ryms inom knappens höjd. Från 600 px står de på samma
+   rad igen, med kommatecken emellan, som ett enda besked. */
+.orderbar__huvud,
+.orderbar__detalj {
+  display: block;
+}
+
+.orderbar__huvud {
+  line-height: 1;
+}
+
+.orderbar__detalj {
+  font-size: 1rem;
+  line-height: 1.2;
+  letter-spacing: var(--ls-xs);
+}
+
+.orderbar__detalj:empty {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .orderbar__huvud,
+  .orderbar__detalj {
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
+  .orderbar__detalj:not(:empty)::before {
+    content: ', ';
+  }
+}
+
 .orderbar__knapp {
+  flex: none;
+  white-space: nowrap;
   background: var(--svart);
   color: var(--amber);
   padding: 0.6rem 1.3rem;
@@ -3839,7 +4053,7 @@ input:focus-visible {
 }
 
 .fraga:focus-visible .fraga__bild {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--fokus);
   outline-offset: 4px;
   border-radius: 1.5rem;
 }
@@ -3910,8 +4124,11 @@ input:focus-visible {
 
 /* Flytet startar först när entrén landat, annars kämpar de om samma
    yta i slutet av inflygningen. */
+/* TVÅ VARV OCH SEDAN STILL. Med alternate är två varv upp och ned
+   igen, och burgaren landar där den började. Rörelse som pågår över
+   5 s kräver en pausknapp (BS-39); fem sekunder rörelse gör det inte. */
 .hero__burger[data-flyt='true'] picture {
-  animation: flyt 2500ms ease-in-out infinite alternate;
+  animation: flyt 2500ms ease-in-out 2 alternate;
 }
 
 @keyframes flyt {
@@ -4126,7 +4343,20 @@ input:focus-visible {
 
 /* ── 6 · TEXTRULLE PÅ NAVLÄNKARNA ──────────────────────────────── */
 
+/* TRÄFFYTAN LIGGER PÅ LÄNKEN, KLIPPNINGEN PÅ RAMEN. Länkarna var 29
+   px höga vid 390 och ska vara minst 44 (GV-04). Padding med lika stor
+   negativ marginal växer ytan utan att flytta texten. Klippningen
+   för rullen flyttade in i .rulle-ram: satt den kvar på länken hade
+   den klippt vid paddingens kant, och den övre raden hade synts i
+   paddingen på väg upp. */
 .nav__links a {
+  position: relative;
+  display: block;
+  padding: 0.5rem 0.25rem;
+  margin: -0.5rem -0.25rem;
+}
+
+.rulle-ram {
   position: relative;
   display: block;
   overflow: hidden;
